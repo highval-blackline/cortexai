@@ -52,7 +52,7 @@ async function connectDB() {
             globalFrauds = stats.globalFrauds;
         }
 
-        recentFeed = await feedCollection.find().sort({ time: -1 }).limit(6).toArray();
+        recentFeed = await feedCollection.find().sort({ time: -1 }).limit(10).toArray();
     } catch (err) {
         console.error("❌ MongoDB Bağlantı Hatası:", err);
     }
@@ -281,10 +281,10 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
 
         if (feedCollection) {
             await feedCollection.insertOne(newFeedItem);
-            recentFeed = await feedCollection.find().sort({ time: -1 }).limit(6).toArray();
+            recentFeed = await feedCollection.find().sort({ time: -1 }).limit(10).toArray();
         } else {
             recentFeed.unshift(newFeedItem);
-            if (recentFeed.length > 6) recentFeed.pop();
+            if (recentFeed.length > 10) recentFeed.pop();
         }
 
         res.json({
