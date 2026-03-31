@@ -96,6 +96,31 @@ app.post('/auth/google', async (req, res) => {
     }
 });
 
+// Yeni Alarm Kaydetme Çekmecesi (Route)
+app.post('/add-alarm', async (req, res) => {
+    // Paketin içinden adamın mailini, modeli ve fiyatı çıkarıyoruz
+    const { email, model, targetPrice } = req.body;
+
+    if (!db) return res.status(500).json({ success: false, error: "Veritabanı bağlantısı yok kanka." });
+    if (!email || !model || !targetPrice) return res.status(400).json({ success: false, error: "Eksik bilgi gönderdin!" });
+
+    try {
+        const alarmsCollection = db.collection("alarms"); // "alarms" diye yepyeni bir çekmece açıyoruz
+
+        // MongoDB'ye "Bu adamın bu model için alarmı varsa güncelle, yoksa yeni oluştur" diyoruz (Buna yazılımda Upsert denir)
+        await alarmsCollection.updateOne(
+            { email: email, model: model },
+            { $set: { targetPrice: targetPrice, createdAt: Date.now() } },
+            { upsert: true }
+        );
+
+        res.json({ success: true, message: "Alarm kusursuz bir şekilde kaydedildi!" });
+    } catch (error) {
+        console.error("Alarm kayıt hatası:", error);
+        res.status(500).json({ success: false, error: "Alarm MongoDB'ye kaydedilemedi." });
+    }
+});
+
 app.post('/analyze', upload.array('images', 3), async (req, res) => {
     console.log("\n--- GÖRSEL ANALİZ BAŞLADI ---");
 

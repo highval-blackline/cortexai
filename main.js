@@ -542,6 +542,8 @@ function handleCredentialResponse(response) {
     // Google'dan gelen şifreli paketi (JWT) parçalayıp kullanıcı bilgilerini alıyoruz
     const responsePayload = decodeJwtResponse(response.credential);
 
+    window.currentUserEmail = responsePayload.email; // Kanka bu kod senin mailini sitenin hafızasına yazar
+
     console.log("Giriş Başarılı kanka! Kullanıcı:", responsePayload.name);
 
     // Sidebar'daki giriş butonunu silip yerine profil resmini koyalım
@@ -590,17 +592,52 @@ function openAlarmModal(modelName) {
     document.getElementById('alarmModal').style.display = 'flex';
 }
 
-// Kaydet Butonuna Basılınca (Şimdilik sadece ekrana yazdıralım, backend'i sonra bağlarız)
-function saveAlarm() {
+// Gerçek Alarm Kaydetme Fonksiyonu (Postacı)
+async function saveAlarm() {
     const model = document.getElementById('alarmModelInput').value;
     const price = document.getElementById('alarmPriceInput').value;
 
+    // 1. Kontrol: Fiyat yazmış mı?
     if (!price) {
         alert("Kanka boş fiyat olmaz, bir rakam gir!");
         return;
     }
 
-    console.log("Alarm Kurgusu Hazır: ", model, price);
-    alert(`${model} cihazı ${price} TL altına düşünce sana haber vereceğiz (Arka planı bir sonraki adımda bağlayacağız)!`);
-    document.getElementById('alarmModal').style.display = 'none';
+    // 2. Kontrol: Giriş yapmış mı?
+    if (!window.currentUserEmail) {
+        alert("Alarm kurmak için önce sol menüden Google ile giriş yapmalısın kanka!");
+        return;
+    }
+
+    try {
+        // Butonun yazısını değiştirelim ki adam beklediğini anlasın
+        const btn = document.querySelector('#alarmModal button');
+        const eskiYazi = btn.innerText;
+        btn.innerText = "Kaydediliyor... ⏳";
+
+        // Paketi Render sunucusuna fırlatıyoruz!
+        const response = await fetch('https://piyasa-ai.onrender.com/add-alarm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: window.currentUserEmail,
+                model: model,
+                targetPrice: Number(price)
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert(`Helal! ${model} cihazı ${price} TL altına düşünce sana haber vereceğiz.`);
+            document.getElementById('alarmModal').style.display = 'none'; // Pencereyi kapat
+        } else {
+            alert("Hata oluştu kanka: " + data.error);
+        }
+
+        btn.innerText = eskiYazi; // Butonu eski haline getir
+
+    } catch (err) {
+        alert("Sunucuya ulaşılamadı, internetini kontrol et!");
+    }
 }
