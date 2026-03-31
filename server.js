@@ -15,9 +15,6 @@ const MONGO_URI = "mongodb+srv://highvalblackline:b7sqHIPMmvuzn96D@cluster0.wvur
 const client = new MongoClient(MONGO_URI);
 let db, statsCollection, feedCollection;
 
-// İstatistiklerin hazır olup olmadığını takip eden bayrak
-let isStatsReady = false;
-
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
     api_key: process.env.CLOUD_API_KEY,
@@ -49,22 +46,11 @@ async function connectDB() {
         }
 
         recentFeed = await feedCollection.find().sort({ time: -1 }).limit(6).toArray();
-
-        isStatsReady = true;
     } catch (err) {
         console.error("❌ MongoDB Bağlantı Hatası:", err);
-        isStatsReady = false;
     }
 }
-
-// /stats isteği geldiğinde, istatistiklerin hazır olmasını beklemek için küçük yardımcı
-async function waitForStatsReady(maxWaitMs = 3000, stepMs = 100) {
-    const start = Date.now();
-    while (!isStatsReady && Date.now() - start < maxWaitMs) {
-        await delay(stepMs);
-    }
-    return isStatsReady;
-}
+connectDB();
 
 const piyasaVeritabani = {
     // ==========================================
@@ -303,22 +289,8 @@ const piyasaVeritabani = {
     "POCO F3 / F2 Pro": { "TR_IkinciEl": "5.500 TL - 7.000 TL" }
 };
 
-app.get('/stats', async (req, res) => {
-    // Eğer istatistikler henüz yüklenmediyse kısa bir süre beklemeyi dene
-    const ready = await waitForStatsReady();
-
-    if (!ready) {
-        // Frontend'in eski verileri koruyabilmesi için initializing bayrağı gönder
-        return res.json({
-            initializing: true,
-            totalScans: globalScans || 0,
-            fraudCount: globalFrauds || 0,
-            recentFeed: recentFeed || []
-        });
-    }
-
+app.get('/stats', (req, res) => {
     res.json({
-        initializing: false,
         totalScans: globalScans,
         fraudCount: globalFrauds,
         recentFeed: recentFeed
@@ -469,14 +441,7 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
     }
 });
 
-// Sunucuyu başlatmadan önce MongoDB ve istatistiklerin tamamen yüklenmesini bekle
-async function startServer() {
-    await connectDB();
-
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-        console.log(`Piyasa.ai DEVASA (APPLE + SAMSUNG + XIAOMI) VERİTABANLI AKTİF! 🚀`);
-    });
-}
-
-startServer();
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Piyasa.ai DEVASA (APPLE + SAMSUNG + XIAOMI) VERİTABANLI AKTİF! 🚀`);
+});

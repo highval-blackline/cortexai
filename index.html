@@ -665,7 +665,8 @@
                         <i class="fa-solid fa-images"></i>
                         <h3>Çoklu Görsel Analizi</h3>
                         <p style="font-size: 12px; margin-bottom: 10px;">(Ekran görüntülerini kopyalayıp sırayla
-                            <b>Ctrl+V</b> yapabilirsiniz)</p>
+                            <b>Ctrl+V</b> yapabilirsiniz)
+                        </p>
 
                         <div class="input-group">
                             <div style="display: flex; gap: 10px; width: 80%;">
@@ -743,9 +744,6 @@
             // ... (Araya bütün DB listesi gelebilir, kalabalık etmesin diye atlıyorum, seninkinin aynısı)
         };
 
-        // Sunucudan gelen son anlamlı sayaç verilerini saklamak için
-        let lastStats = null;
-
         function showImage(url) {
             if (!url) return alert('Bu analizin resmi sisteme kaydedilmemiş veya gizli.');
             document.getElementById('modalImage').src = url;
@@ -807,38 +805,13 @@
             try {
                 const res = await fetch('https://piyasa-ai.onrender.com/stats');
                 const data = await res.json();
-
-                // Sunucu henüz uyanıyorsa veya istatistikler hazır değilse, mevcut UI'yı bozma
-                if (data.initializing) {
-                    // Eski verileri koru, sadece kısa aralıklarla tekrar dene
-                    setTimeout(fetchGlobalStats, 2000);
-                    return;
-                }
-
-                const hasMeaningfulData =
-                    (typeof data.totalScans === 'number' && data.totalScans > 0) ||
-                    (typeof data.fraudCount === 'number' && data.fraudCount > 0) ||
-                    (Array.isArray(data.recentFeed) && data.recentFeed.length > 0);
-
-                // Henüz anlamlı veri yoksa ama elimizde önceki bir snapshot varsa, onu koru
-                if (!hasMeaningfulData && lastStats) {
-                    return;
-                }
-
-                // Gelen verileri UI'a uygula ve snapshot olarak sakla
-                lastStats = {
-                    totalScans: data.totalScans || 0,
-                    fraudCount: data.fraudCount || 0,
-                    recentFeed: Array.isArray(data.recentFeed) ? data.recentFeed : []
-                };
-
-                document.getElementById('totalListings').innerText = lastStats.totalScans;
-                document.getElementById('fraudCount').innerText = lastStats.fraudCount;
+                document.getElementById('totalListings').innerText = data.totalScans;
+                document.getElementById('fraudCount').innerText = data.fraudCount;
 
                 const feedList = document.getElementById('liveFeedList');
-                if (lastStats.recentFeed && lastStats.recentFeed.length > 0) {
+                if (data.recentFeed && data.recentFeed.length > 0) {
                     feedList.innerHTML = '';
-                    lastStats.recentFeed.forEach(item => {
+                    data.recentFeed.forEach(item => {
                         const timeDiff = Math.floor((Date.now() - item.time) / 60000);
                         const timeText = timeDiff === 0 ? "Şimdi" : timeDiff + " dk önce";
                         const isHighRisk = item.riskScore >= 50;
@@ -853,9 +826,7 @@
                         `;
                     });
                 }
-            } catch (e) {
-                console.log("Sayaçlara ulaşılamadı.");
-            }
+            } catch (e) { console.log("Sayaçlara ulaşılamadı."); }
         }
 
         function switchTab(tabId, element) {
