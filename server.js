@@ -14,7 +14,8 @@ app.use(cors({ origin: '*' }));
 // YENİ: Tek resim yerine dizi (array) halinde en fazla 3 resim kabul eder.
 const upload = multer({ storage: multer.memoryStorage() });
 
-const MONGO_URI = "mongodb+srv://highvalblackline:b7sqHIPMmvuzn96D@cluster0.wvurezv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+// DOĞRU OLAN (Render'daki Environment Variable'ı okur):
+const MONGO_URI = process.env.MONGO_URI;
 const client = new MongoClient(MONGO_URI);
 let db, statsCollection, feedCollection;
 
