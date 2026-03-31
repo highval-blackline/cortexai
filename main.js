@@ -341,12 +341,16 @@ async function fetchGlobalStats() {
                 `;
 
                 // 2. CANLI RADAR İÇİN TABLO SATIRI
+                // 1. Temel Veri Çekme (Hatalara karşı korumalı)
                 let ilanFiyati = item.fiyat || "Bilinmiyor";
                 let piyasaDegeri = "Bulunamadı";
+                let durumEtiketi = `<span class="badge" style="background: #374151; color: white; padding: 4px 8px; border-radius: 4px;">İnceleniyor</span>`;
 
-                // Model veritabanında var mı kontrol et, yoksa hata verme
+                // 2. Veritabanı (frontEndDB) Kontrolü
                 if (item.model && frontEndDB[item.model]) {
                     const modelData = frontEndDB[item.model];
+
+                    // Durum bilgisi varsa onu, yoksa varsayılan olarak ikinci eli al
                     if (item.condition && modelData[item.condition]) {
                         piyasaDegeri = modelData[item.condition];
                     } else if (modelData["TR_IkinciEl"]) {
@@ -354,25 +358,20 @@ async function fetchGlobalStats() {
                     }
                 }
 
-                // Kâr/Zarar Durumu (Yüzdelik Mantık)
-                let durumEtiketi = `<span class="badge" style="background: #374151; color: white; padding: 4px 8px; border-radius: 4px;">İnceleniyor</span>`;
-
+                // 3. Matematiksel Yüzde Hesaplama (Kâr/Zarar)
                 let ilanSayi = parseInt(String(ilanFiyati).replace(/[^0-9]/g, '')) || 0;
-
-                // Piyasa değeri aralık ("10.000 - 14.000") veya tek sayı ("15.000") olabilir. Ortalamasını alalım.
                 let piyasaSayilari = String(piyasaDegeri).split('-').map(val => parseInt(val.replace(/[^0-9]/g, '')) || 0);
                 let piyasaOrtalama = 0;
+
                 if (piyasaSayilari.length === 2 && piyasaSayilari[0] > 0 && piyasaSayilari[1] > 0) {
                     piyasaOrtalama = (piyasaSayilari[0] + piyasaSayilari[1]) / 2;
                 } else if (piyasaSayilari.length > 0) {
                     piyasaOrtalama = piyasaSayilari[0];
                 }
 
-                if (isHighRisk) {
+                if (item.riskScore >= 75) {
                     durumEtiketi = `<span class="badge" style="background: var(--risk-high, #ef4444); color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">Dolandırıcı Riski!</span>`;
                 } else if (ilanSayi > 0 && piyasaOrtalama > 0) {
-                    // Yüzde hesaplama: ((Piyasa - İlan) / Piyasa) * 100
-                    // Pozitif çıkarsa ilan ucuzdur (Kârlı), Negatif çıkarsa ilan pahalıdır (Zarar)
                     let karYuzdesi = ((piyasaOrtalama - ilanSayi) / piyasaOrtalama) * 100;
 
                     if (karYuzdesi >= 15) {
@@ -386,22 +385,24 @@ async function fetchGlobalStats() {
                     } else if (karYuzdesi <= -15) {
                         durumEtiketi = `<span class="badge" style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">Çok Pahalı</span>`;
                     }
+                } else {
+                    durumEtiketi = `<span class="badge" style="background: #374151; color: white; padding: 4px 8px; border-radius: 4px;">Fiyat Analizi Yapılamadı</span>`;
                 }
 
+                // 4. Tabloya Yazdırma (Eğer tableBody varsa ve HTML elementiyse)
                 if (tableBody) {
-                    tableBody.innerHTML += `
-                        <tr onclick="showImage('${item.imageUrl}')" style="cursor:pointer;" class="feed-item">
-                            // Sadece durumu net olarak bilinenlerin yanına etiket ekle
-let durumMetni = "";
-if (item.condition === 'TR_Sifir') durumMetni = " (Sıfır)";
-else if (item.condition === 'TR_IkinciEl') durumMetni = " (İkinci El)";
+                    let durumMetni = "";
+                    if (item.condition === 'TR_Sifir') durumMetni = " (Sıfır)";
+                    else if (item.condition === 'TR_IkinciEl') durumMetni = " (İkinci El)";
 
-<td>${item.model}${durumMetni}</td>
-                            <td style="color: var(--brand-accent); font-weight: 600;">${ilanFiyati}</td>
-                            <td>${piyasaDegeri}</td>
-                            <td>${durumEtiketi}</td>
-                        </tr>
-                    `;
+                    tableBody.innerHTML += `
+        <tr onclick="showImage('${item.imageUrl}')" style="cursor:pointer;" class="feed-item">
+            <td>${item.model}${durumMetni}</td>
+            <td style="color: var(--brand-accent); font-weight: 600;">${ilanFiyati}</td>
+            <td>${piyasaDegeri}</td>
+            <td>${durumEtiketi}</td>
+        </tr>
+    `;
                 }
             });
         }
