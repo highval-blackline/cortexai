@@ -369,9 +369,15 @@ async function fetchGlobalStats() {
                     piyasaOrtalama = piyasaSayilari[0];
                 }
 
+                // Risk Kontrolü (Değişken çakışmasını önlemek için doğrudan skorları kontrol ediyoruz)
                 if (item.riskScore >= 75) {
+                    // 1. Öncelik: Kritik Risk (Fiyata bakmaz)
                     durumEtiketi = `<span class="badge" style="background: var(--risk-high, #ef4444); color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">Dolandırıcı Riski!</span>`;
+                } else if (item.riskScore >= 40 && item.riskScore < 75) {
+                    // 2. Öncelik: Orta/Yüksek Risk (Fiyata bakmaz)
+                    durumEtiketi = `<span class="badge" style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">Şüpheli İlan (%${item.riskScore} Risk)</span>`;
                 } else if (ilanSayi > 0 && piyasaOrtalama > 0) {
+                    // 3. Öncelik: Risk düşükse fiyat analizi yap
                     let karYuzdesi = ((piyasaOrtalama - ilanSayi) / piyasaOrtalama) * 100;
 
                     if (karYuzdesi >= 15) {
@@ -389,7 +395,7 @@ async function fetchGlobalStats() {
                     durumEtiketi = `<span class="badge" style="background: #374151; color: white; padding: 4px 8px; border-radius: 4px;">Fiyat Analizi Yapılamadı</span>`;
                 }
 
-                // 4. Tabloya Yazdırma (Eğer tableBody varsa ve HTML elementiyse)
+                // 4. Tabloya Yazdırma
                 if (tableBody) {
                     let durumMetni = "";
                     if (item.condition === 'TR_Sifir') durumMetni = " (Sıfır)";
