@@ -344,11 +344,8 @@ async function fetchGlobalStats() {
                 let ilanFiyati = item.fiyat || "Bilinmiyor";
                 let piyasaDegeri = "Bulunamadı";
 
-                // Veritabanından TR İkinci El değerini çekmeye çalış
-                if (frontEndDB[item.model] && frontEndDB[item.model]["TR_IkinciEl"]) {
-                    piyasaDegeri = frontEndDB[item.model]["TR_IkinciEl"];
-                } else if (frontEndDB[item.model] && frontEndDB[item.model]["YurtDisi_Sifir"]) {
-                    piyasaDegeri = frontEndDB[item.model]["YurtDisi_Sifir"];
+                if (frontEndDB[item.model] && frontEndDB[item.model][item.condition]) {
+                    piyasaDegeri = frontEndDB[item.model][item.condition];
                 }
 
                 // Kâr/Zarar Durumu Belirleme (Bizim sihirli etiketler)
@@ -364,7 +361,7 @@ async function fetchGlobalStats() {
                 if (tableBody) {
                     tableBody.innerHTML += `
                         <tr onclick="showImage('${item.imageUrl}')" style="cursor:pointer;" class="feed-item">
-                            <td>${item.model}</td>
+                            <td>${item.model} (${item.condition === 'TR_Sifir' ? 'Sıfır' : 'İkinci El'})</td>
                             <td style="color: var(--brand-accent); font-weight: 600;">${ilanFiyati}</td>
                             <td>${piyasaDegeri}</td>
                             <td>${durumEtiketi}</td>

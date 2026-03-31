@@ -228,7 +228,7 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
         - 50-100 arası: YÜKSEK RİSK (Fiyat piyasanın şüpheli şekilde çok çok altında, bariz oltalama tuzağı).
 
         SADECE JSON FORMATINDA CEVAP VER, EK AÇIKLAMA YAZMA:
-        {"score": 10, "reason": "Cihazın fiyatı piyasa ortalamasının biraz üzerinde...", "model": "iPhone 17 Pro Max", "fiyat": "25.000 TL"}`;
+        {"score": 10, "reason": "...", "model": "iPhone 17 Pro Max", "fiyat": "25.000 TL", "condition": "TR_Sifir"};`
 
         let MAX_RETRIES = 3;
         let success = false;
@@ -266,8 +266,13 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
             );
         }
 
+        if (!aiAnalysis.condition || aiAnalysis.condition === "Bilinmiyor") {
+            return res.json({ success: true, riskScore: aiAnalysis.score, reason: "Cihaz durumu tespit edilemediği için radara eklenmedi." });
+        }
+
         const newFeedItem = {
             model: aiAnalysis.model || "Bilinmeyen Cihaz",
+            condition: aiAnalysis.condition, // Bu satırı ekledik
             riskScore: aiAnalysis.score,
             fiyat: aiAnalysis.fiyat || "Belirtilmemiş", // İlan fiyatı verisi eklendi
             imageUrl: finalImageUrl,
@@ -300,5 +305,5 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Piyasa.ai DEVASA (APPLE + SAMSUNG + XIAOMI) VERİTABANLI AKTİF! 🚀`);
+    console.log("Piyasa.ai SISTEM AKTIF! 🚀");
 });
