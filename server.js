@@ -125,6 +125,20 @@ app.post('/add-alarm', async (req, res) => {
     }
 });
 
+app.get('/my-alarms', async (req, res) => {
+    const email = req.query.email;
+    if (!db) return res.status(500).json({ success: false, error: "Veritabanı bağlantısı kurulamadı." });
+    if (!email) return res.status(400).json({ success: false, error: "E-posta adresi belirtilmedi." });
+
+    try {
+        const alarmsCollection = db.collection("alarms");
+        const userAlarmlari = await alarmsCollection.find({ email: email }).toArray();
+        res.json({ success: true, alarmlar: userAlarmlari });
+    } catch (error) {
+        res.status(500).json({ success: false, error: "Alarmlar getirilemedi." });
+    }
+});
+
 app.post('/analyze', upload.array('images', 3), async (req, res) => {
     console.log("\n--- GÖRSEL ANALİZ BAŞLADI ---");
 

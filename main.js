@@ -382,6 +382,11 @@ function switchTab(tabId, element) {
     document.getElementById(tabId).classList.add('active');
     let target = element.closest('.nav-item');
     if (target) target.classList.add('active');
+
+    // Yeni eklenen kısım: Sekme 'alarms' ise verileri yükle
+    if (tabId === 'alarms') {
+        loadMyAlarms();
+    }
 }
 
 function runGlobalScan() {
@@ -660,6 +665,35 @@ async function saveAlarm() {
 
     } catch (err) {
         alert("Sunucuya ulaşılamadı, internetini kontrol et!");
+    }
+}
+
+async function loadMyAlarms() {
+    const alarmList = document.getElementById('alarmList');
+    if (!window.currentUserEmail) {
+        alarmList.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Alarmlarınızı görmek için lütfen giriş yapınız.</div>';
+        return;
+    }
+
+    try {
+        const response = await fetch(`https://piyasa-ai.onrender.com/my-alarms?email=${window.currentUserEmail}`);
+        const data = await response.json();
+
+        if (data.alarmlar && data.alarmlar.length > 0) {
+            alarmList.innerHTML = data.alarmlar.map(alarm => `
+                <div style="background: var(--bg-absolute); padding: 15px; border-radius: 8px; border: 1px solid var(--border-light); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: 600; color: white;">${alarm.model}</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">Hedef Fiyat: ${alarm.targetPrice.toLocaleString('tr-TR')} TL</div>
+                    </div>
+                    <div style="font-size: 11px; color: var(--brand-accent);">Takip Ediliyor <i class="fa-solid fa-clock"></i></div>
+                </div>
+            `).join('');
+        } else {
+            alarmList.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Henüz bir alarm kurmadınız.</div>';
+        }
+    } catch (error) {
+        console.error("Alarmlar yüklenirken hata oluştu:", error);
     }
 }
 
