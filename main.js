@@ -761,3 +761,5 @@ async function deleteAlarm(modelName) {
         alert("Silme işlemi sırasında sunucuya ulaşılamadı.");
     }
 }
+
+// Vercel zorunlu guncelleme tetikleyicisi
