@@ -344,27 +344,54 @@ async function fetchGlobalStats() {
                 let ilanFiyati = item.fiyat || "Bilinmiyor";
                 let piyasaDegeri = "Bulunamadı";
 
-                // Eğer durum bilgisi yoksa (eski veri), otomatik olarak İkinci El kabul et
-                const cihazDurumu = item.condition || "TR_IkinciEl";
-
-                if (frontEndDB[item.model] && frontEndDB[item.model][cihazDurumu]) {
-                    piyasaDegeri = frontEndDB[item.model][cihazDurumu];
+                // Veritabanından gelen net bir durum bilgisi varsa fiyatı eşleştir
+                if (item.condition && frontEndDB[item.model] && frontEndDB[item.model][item.condition]) {
+                    piyasaDegeri = frontEndDB[item.model][item.condition];
                 }
 
-                // Kâr/Zarar Durumu Belirleme (Bizim sihirli etiketler)
-                let durumEtiketi = `<span class="badge badge-risk-med">İncelenmeli</span>`;
+                // Kâr/Zarar Durumu (Yüzdelik Mantık)
+                let durumEtiketi = `<span class="badge" style="background: #374151; color: white; padding: 4px 8px; border-radius: 4px;">İnceleniyor</span>`;
+
+                let ilanSayi = parseInt(String(ilanFiyati).replace(/[^0-9]/g, '')) || 0;
+
+                // Piyasa değeri aralık ("10.000 - 14.000") veya tek sayı ("15.000") olabilir. Ortalamasını alalım.
+                let piyasaSayilari = String(piyasaDegeri).split('-').map(val => parseInt(val.replace(/[^0-9]/g, '')) || 0);
+                let piyasaOrtalama = 0;
+                if (piyasaSayilari.length === 2 && piyasaSayilari[0] > 0 && piyasaSayilari[1] > 0) {
+                    piyasaOrtalama = (piyasaSayilari[0] + piyasaSayilari[1]) / 2;
+                } else if (piyasaSayilari.length > 0) {
+                    piyasaOrtalama = piyasaSayilari[0];
+                }
+
                 if (isHighRisk) {
-                    durumEtiketi = `<span class="badge badge-risk-high">Riskli (Uzak Dur)</span>`;
-                } else if (item.riskScore < 15 && ilanFiyati !== "Bilinmiyor" && piyasaDegeri !== "Bulunamadı") {
-                    durumEtiketi = `<span class="badge badge-firsat">FIRSAT 🚀</span>`;
-                } else if (item.riskScore < 20) {
-                    durumEtiketi = `<span class="badge badge-risk-low">Normal</span>`;
+                    durumEtiketi = `<span class="badge" style="background: var(--risk-high, #ef4444); color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">Dolandırıcı Riski!</span>`;
+                } else if (ilanSayi > 0 && piyasaOrtalama > 0) {
+                    // Yüzde hesaplama: ((Piyasa - İlan) / Piyasa) * 100
+                    // Pozitif çıkarsa ilan ucuzdur (Kârlı), Negatif çıkarsa ilan pahalıdır (Zarar)
+                    let karYuzdesi = ((piyasaOrtalama - ilanSayi) / piyasaOrtalama) * 100;
+
+                    if (karYuzdesi >= 15) {
+                        durumEtiketi = `<span class="badge" style="background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">FIRSAT 🚀</span>`;
+                    } else if (karYuzdesi >= 5 && karYuzdesi < 15) {
+                        durumEtiketi = `<span class="badge" style="background: #059669; color: white; padding: 4px 8px; border-radius: 4px;">Uygun Fiyat</span>`;
+                    } else if (karYuzdesi > -5 && karYuzdesi < 5) {
+                        durumEtiketi = `<span class="badge" style="background: #6b7280; color: white; padding: 4px 8px; border-radius: 4px;">Nötr (Değerinde)</span>`;
+                    } else if (karYuzdesi <= -5 && karYuzdesi > -15) {
+                        durumEtiketi = `<span class="badge" style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px;">Biraz Pahalı</span>`;
+                    } else if (karYuzdesi <= -15) {
+                        durumEtiketi = `<span class="badge" style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">Çok Pahalı</span>`;
+                    }
                 }
 
                 if (tableBody) {
                     tableBody.innerHTML += `
                         <tr onclick="showImage('${item.imageUrl}')" style="cursor:pointer;" class="feed-item">
-                            <td>${item.model}${item.condition ? ` (${item.condition === 'TR_Sifir' ? 'Sıfır' : 'İkinci El'})` : ''}</td>
+                            // Sadece durumu net olarak bilinenlerin yanına etiket ekle
+let durumMetni = "";
+if (item.condition === 'TR_Sifir') durumMetni = " (Sıfır)";
+else if (item.condition === 'TR_IkinciEl') durumMetni = " (İkinci El)";
+
+<td>${item.model}${durumMetni}</td>
                             <td style="color: var(--brand-accent); font-weight: 600;">${ilanFiyati}</td>
                             <td>${piyasaDegeri}</td>
                             <td>${durumEtiketi}</td>
