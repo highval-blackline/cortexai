@@ -277,6 +277,21 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    const savedUser = localStorage.getItem('userData');
+    if (savedUser) {
+        const userData = JSON.parse(savedUser);
+        window.currentUserEmail = userData.email;
+        document.getElementById('userSection').innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px; padding: 5px;">
+            <img src="${userData.picture}" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--brand-accent);">
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-size: 12px; font-weight: 600;">${userData.name}</span>
+                <span style="font-size: 10px; color: var(--text-muted);">Aktif Kullanıcı</span>
+            </div>
+            <button onclick="logout()" style="background:none; border:none; color:var(--risk-high); cursor:pointer; font-size:10px; margin-left:5px; padding:0;">[Çıkış]</button>
+        </div>
+    `;
+    }
     fetchGlobalStats();
     setInterval(fetchGlobalStats, 5000);
 });
@@ -544,6 +559,12 @@ function handleCredentialResponse(response) {
 
     window.currentUserEmail = responsePayload.email; // Kullanıcı e-posta bilgisi sisteme kaydedilir.
 
+    localStorage.setItem('userData', JSON.stringify({
+        name: responsePayload.name,
+        email: responsePayload.email,
+        picture: responsePayload.picture
+    }));
+
     console.log("Giriş başarılı. Kullanıcı:", responsePayload.name);
 
     // Sidebar'daki giriş butonunu silip yerine profil resmini koyalım
@@ -640,4 +661,9 @@ async function saveAlarm() {
     } catch (err) {
         alert("Sunucuya ulaşılamadı, internetini kontrol et!");
     }
+}
+
+function logout() {
+    localStorage.removeItem('userData');
+    location.reload();
 }
