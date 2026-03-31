@@ -344,8 +344,11 @@ async function fetchGlobalStats() {
                 let ilanFiyati = item.fiyat || "Bilinmiyor";
                 let piyasaDegeri = "Bulunamadı";
 
-                if (frontEndDB[item.model] && frontEndDB[item.model][item.condition]) {
-                    piyasaDegeri = frontEndDB[item.model][item.condition];
+                // Eğer durum bilgisi yoksa (eski veri), otomatik olarak İkinci El kabul et
+                const cihazDurumu = item.condition || "TR_IkinciEl";
+
+                if (frontEndDB[item.model] && frontEndDB[item.model][cihazDurumu]) {
+                    piyasaDegeri = frontEndDB[item.model][cihazDurumu];
                 }
 
                 // Kâr/Zarar Durumu Belirleme (Bizim sihirli etiketler)
@@ -361,7 +364,7 @@ async function fetchGlobalStats() {
                 if (tableBody) {
                     tableBody.innerHTML += `
                         <tr onclick="showImage('${item.imageUrl}')" style="cursor:pointer;" class="feed-item">
-                            <td>${item.model} (${item.condition === 'TR_Sifir' ? 'Sıfır' : 'İkinci El'})</td>
+                            <td>${item.model}${item.condition ? ` (${item.condition === 'TR_Sifir' ? 'Sıfır' : 'İkinci El'})` : ''}</td>
                             <td style="color: var(--brand-accent); font-weight: 600;">${ilanFiyati}</td>
                             <td>${piyasaDegeri}</td>
                             <td>${durumEtiketi}</td>
