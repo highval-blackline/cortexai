@@ -1,4 +1,4 @@
-// Vercel uyan kanka
+// Vercel tetikleme satırı
 const frontEndDB = {
     // ==========================================
     //               APPLE iPHONE
@@ -283,7 +283,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function calculatePrice() {
     const model = document.getElementById('modelSelect').value;
-    const origin = document.getElementById('originSelect').value; // AZ ÖNCEKİ HATAYI DÜZELTTİM KANKA!
+    const origin = document.getElementById('originSelect').value; // Hata düzeltildi.
     const display = document.getElementById('priceDisplay');
 
     if (!model) return;
@@ -542,9 +542,9 @@ function handleCredentialResponse(response) {
     // Google'dan gelen şifreli paketi (JWT) parçalayıp kullanıcı bilgilerini alıyoruz
     const responsePayload = decodeJwtResponse(response.credential);
 
-    window.currentUserEmail = responsePayload.email; // Kanka bu kod senin mailini sitenin hafızasına yazar
+    window.currentUserEmail = responsePayload.email; // Kullanıcı e-posta bilgisi sisteme kaydedilir.
 
-    console.log("Giriş Başarılı kanka! Kullanıcı:", responsePayload.name);
+    console.log("Giriş başarılı. Kullanıcı:", responsePayload.name);
 
     // Sidebar'daki giriş butonunu silip yerine profil resmini koyalım
     const userSection = document.getElementById('userSection');
@@ -597,15 +597,15 @@ async function saveAlarm() {
     const model = document.getElementById('alarmModelInput').value;
     const price = document.getElementById('alarmPriceInput').value;
 
-    // 1. Kontrol: Fiyat yazmış mı?
+    // 1. Kontrol: Fiyat yazılmış mı?
     if (!price) {
-        alert("Kanka boş fiyat olmaz, bir rakam gir!");
+        alert("Lütfen geçerli bir fiyat giriniz.");
         return;
     }
 
-    // 2. Kontrol: Giriş yapmış mı?
+    // 2. Kontrol: Giriş yapılmış mı?
     if (!window.currentUserEmail) {
-        alert("Alarm kurmak için önce sol menüden Google ile giriş yapmalısın kanka!");
+        alert("Alarm kurmak için lütfen sol menüden Google ile giriş yapınız.");
         return;
     }
 
@@ -629,10 +629,10 @@ async function saveAlarm() {
         const data = await response.json();
 
         if (data.success) {
-            alert(`Helal! ${model} cihazı ${price} TL altına düşünce sana haber vereceğiz.`);
+            alert(`${model} cihazı ${price} TL altına düşünce sana haber vereceğiz.`);
             document.getElementById('alarmModal').style.display = 'none'; // Pencereyi kapat
         } else {
-            alert("Hata oluştu kanka: " + data.error);
+            alert("Bir hata oluştu: " + data.error);
         }
 
         btn.innerText = eskiYazi; // Butonu eski haline getir

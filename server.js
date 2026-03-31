@@ -11,7 +11,7 @@ const googleClient = new OAuth2Client("104508083781-2ib50lt8k0ud027375q9k3aja7gd
 const app = express();
 app.use(cors({ origin: '*' }));
 
-// EKSİK OLAN HAYATİ KOD BURASI KANKA (Gelen JSON verilerini okuması için):
+// Gelen JSON verilerini okumak için gerekli ayar:
 app.use(express.json());
 
 // YENİ: Tek resim yerine dizi (array) halinde en fazla 3 resim kabul eder.
@@ -88,7 +88,7 @@ app.post('/auth/google', async (req, res) => {
                         lastLogin: Date.now()
                     }
                 },
-                { upsert: true } // Varsa güncelle, yoksa yeni kayıt aç kanka
+                { upsert: true } // Kayıt varsa güncelle, yoksa yeni kayıt oluştur
             );
             res.json({ success: true, message: "Kullanıcı MongoDB'ye (Fil Hafızasına) başarıyla kaydedildi!" });
         } else {
@@ -105,7 +105,7 @@ app.post('/add-alarm', async (req, res) => {
     // Paketin içinden adamın mailini, modeli ve fiyatı çıkarıyoruz
     const { email, model, targetPrice } = req.body;
 
-    if (!db) return res.status(500).json({ success: false, error: "Veritabanı bağlantısı yok kanka." });
+    if (!db) return res.status(500).json({ success: false, error: "Veritabanı bağlantısı kurulamadı." });
     if (!email || !model || !targetPrice) return res.status(400).json({ success: false, error: "Eksik bilgi gönderdin!" });
 
     try {
@@ -242,7 +242,7 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
         const newFeedItem = {
             model: aiAnalysis.model || "Bilinmeyen Cihaz",
             riskScore: aiAnalysis.score,
-            fiyat: aiAnalysis.fiyat || "Belirtilmemiş", // <-- BAK BURAYI EKLEDİK KANKA
+            fiyat: aiAnalysis.fiyat || "Belirtilmemiş", // İlan fiyatı verisi eklendi
             imageUrl: finalImageUrl,
             time: Date.now()
         };
