@@ -301,8 +301,12 @@ async function fetchGlobalStats() {
         document.getElementById('fraudCount').innerText = data.fraudCount;
 
         const feedList = document.getElementById('liveFeedList');
+        const tableBody = document.getElementById('tableBody'); // Radar tablosunu yakalıyoruz
+
         if (data.recentFeed && data.recentFeed.length > 0) {
             feedList.innerHTML = '';
+            if (tableBody) tableBody.innerHTML = ''; // Eski radar verilerini temizle
+
             data.recentFeed.forEach(item => {
                 const timeDiff = Math.floor((Date.now() - item.time) / 60000);
                 const timeText = timeDiff === 0 ? "Şimdi" : timeDiff + " dk önce";
@@ -310,12 +314,45 @@ async function fetchGlobalStats() {
                 const isMedRisk = item.riskScore >= 20 && item.riskScore < 50;
                 const borderColor = isHighRisk ? 'var(--risk-high)' : (isMedRisk ? 'var(--risk-med)' : 'var(--risk-low)');
 
+                // 1. PİYASA ÖZETİ (Canlı Akış) KARTI
                 feedList.innerHTML += `
                     <div class="feed-item" onclick="showImage('${item.imageUrl}')" style="background: var(--bg-absolute); padding: 12px; border-radius: 8px; border-left: 4px solid ${borderColor}; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;">
                         <div><span style="font-weight: 600;">${item.model}</span> <span style="font-size: 12px; color: var(--text-muted); margin-left: 10px;">${timeText}</span></div>
                         <div style="color: ${borderColor}; font-weight: 600;">%${item.riskScore} Risk <i class="fa-solid fa-camera" style="margin-left:8px; color:var(--text-muted);"></i></div>
                     </div>
                 `;
+
+                // 2. CANLI RADAR İÇİN TABLO SATIRI
+                let ilanFiyati = item.fiyat || "Bilinmiyor";
+                let piyasaDegeri = "Bulunamadı";
+
+                // Veritabanından TR İkinci El değerini çekmeye çalış
+                if (frontEndDB[item.model] && frontEndDB[item.model]["TR_IkinciEl"]) {
+                    piyasaDegeri = frontEndDB[item.model]["TR_IkinciEl"];
+                } else if (frontEndDB[item.model] && frontEndDB[item.model]["YurtDisi_Sifir"]) {
+                    piyasaDegeri = frontEndDB[item.model]["YurtDisi_Sifir"];
+                }
+
+                // Kâr/Zarar Durumu Belirleme (Bizim sihirli etiketler)
+                let durumEtiketi = `<span class="badge badge-risk-med">İncelenmeli</span>`;
+                if (isHighRisk) {
+                    durumEtiketi = `<span class="badge badge-risk-high">Riskli (Uzak Dur)</span>`;
+                } else if (item.riskScore < 15 && ilanFiyati !== "Bilinmiyor" && piyasaDegeri !== "Bulunamadı") {
+                    durumEtiketi = `<span class="badge badge-firsat">FIRSAT 🚀</span>`;
+                } else if (item.riskScore < 20) {
+                    durumEtiketi = `<span class="badge badge-risk-low">Normal</span>`;
+                }
+
+                if (tableBody) {
+                    tableBody.innerHTML += `
+                        <tr onclick="showImage('${item.imageUrl}')" style="cursor:pointer;" class="feed-item">
+                            <td>${item.model}</td>
+                            <td style="color: var(--brand-accent); font-weight: 600;">${ilanFiyati}</td>
+                            <td>${piyasaDegeri}</td>
+                            <td>${durumEtiketi}</td>
+                        </tr>
+                    `;
+                }
             });
         }
     } catch (e) { console.log("Sayaçlara ulaşılamadı."); }

@@ -137,7 +137,7 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
         - 50-100 arası: YÜKSEK RİSK (Fiyat piyasanın şüpheli şekilde çok çok altında, bariz oltalama tuzağı).
 
         SADECE JSON FORMATINDA CEVAP VER, EK AÇIKLAMA YAZMA:
-        {"score": 10, "reason": "Cihazın fiyatı piyasa ortalamasının biraz üzerinde, ancak şüpheli bir oltalama tuzağı görünmüyor.", "model": "iPhone 17 Pro Max"}`;
+        {"score": 10, "reason": "Cihazın fiyatı piyasa ortalamasının biraz üzerinde...", "model": "iPhone 17 Pro Max", "fiyat": "25.000 TL"}`;
 
         let MAX_RETRIES = 3;
         let success = false;
@@ -178,6 +178,7 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
         const newFeedItem = {
             model: aiAnalysis.model || "Bilinmeyen Cihaz",
             riskScore: aiAnalysis.score,
+            fiyat: aiAnalysis.fiyat || "Belirtilmemiş", // <-- BAK BURAYI EKLEDİK KANKA
             imageUrl: finalImageUrl,
             time: Date.now()
         };
@@ -195,6 +196,7 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
             riskScore: aiAnalysis.score,
             reason: aiAnalysis.reason,
             model: aiAnalysis.model || "Bilinmeyen Cihaz",
+            fiyat: aiAnalysis.fiyat || "Belirtilmemiş", // <-- BURAYI DA EKLEDİK
             totalScans: globalScans,
             fraudCount: globalFrauds
         });

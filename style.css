@@ -301,6 +301,29 @@ td {
     border: 1px solid rgba(0, 200, 81, 0.2);
 }
 
+.badge-firsat {
+    background: rgba(0, 230, 118, 0.15);
+    color: #00e676;
+    border: 1px solid #00e676;
+    font-weight: 800;
+    box-shadow: 0 0 8px rgba(0, 230, 118, 0.4);
+    animation: firsatParlama 1.5s infinite;
+}
+
+@keyframes firsatParlama {
+    0% {
+        box-shadow: 0 0 5px rgba(0, 230, 118, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 15px rgba(0, 230, 118, 0.8);
+    }
+
+    100% {
+        box-shadow: 0 0 5px rgba(0, 230, 118, 0.2);
+    }
+}
+
 .tab-content {
     display: none;
     animation: fadeIn 0.3s ease;
