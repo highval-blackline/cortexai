@@ -11,6 +11,9 @@ const googleClient = new OAuth2Client("104508083781-2ib50lt8k0ud027375q9k3aja7gd
 const app = express();
 app.use(cors({ origin: '*' }));
 
+// EKSİK OLAN HAYATİ KOD BURASI KANKA (Gelen JSON verilerini okuması için):
+app.use(express.json());
+
 // YENİ: Tek resim yerine dizi (array) halinde en fazla 3 resim kabul eder.
 const upload = multer({ storage: multer.memoryStorage() });
 
