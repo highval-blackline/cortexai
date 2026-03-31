@@ -5,6 +5,8 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const cloudinary = require('cloudinary').v2;
 const { MongoClient } = require('mongodb');
 const piyasaVeritabani = require('./database.js');
+const { OAuth2Client } = require('google-auth-library');
+const googleClient = new OAuth2Client("104508083781-2ib50lt8k0ud027375q9k3aja7gd8403.apps.googleusercontent.com");
 
 const app = express();
 app.use(cors({ origin: '*' }));
@@ -59,6 +61,39 @@ app.get('/stats', (req, res) => {
         fraudCount: globalFrauds,
         recentFeed: recentFeed
     });
+});
+// Google Kullanıcı Girişini Karşılayan ve MongoDB'ye Kaydeden Bölüm
+app.post('/auth/google', async (req, res) => {
+    const { token } = req.body;
+    try {
+        const ticket = await googleClient.verifyIdToken({
+            idToken: token,
+            audience: "104508083781-2ib50lt8k0ud027375q9k3aja7gd8403.apps.googleusercontent.com",
+        });
+        const payload = ticket.getPayload();
+
+        // MongoDB'de "users" (Kullanıcılar) koleksiyonuna bağlanıyoruz
+        if (db) {
+            const usersCollection = db.collection("users");
+            await usersCollection.updateOne(
+                { email: payload.email },
+                {
+                    $set: {
+                        name: payload.name,
+                        picture: payload.picture,
+                        lastLogin: Date.now()
+                    }
+                },
+                { upsert: true } // Varsa güncelle, yoksa yeni kayıt aç kanka
+            );
+            res.json({ success: true, message: "Kullanıcı MongoDB'ye (Fil Hafızasına) başarıyla kaydedildi!" });
+        } else {
+            res.status(500).json({ success: false, error: "Veritabanı bağlantısı henüz hazır değil." });
+        }
+    } catch (error) {
+        console.error("Google Doğrulama Hatası:", error);
+        res.status(400).json({ success: false, error: "Google kimliği doğrulanamadı!" });
+    }
 });
 
 app.post('/analyze', upload.array('images', 3), async (req, res) => {

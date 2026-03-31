@@ -14,6 +14,7 @@
         src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.2.1/dist/browser-image-compression.js"></script>
 
     <link rel="stylesheet" href="style.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -28,6 +29,14 @@
     </div>
 
     <aside class="sidebar">
+        <div id="userSection"
+            style="padding: 10px 20px; border-bottom: 1px solid var(--border-light); margin-bottom: 10px;">
+            <div id="g_id_onload"
+                data-client_id="104508083781-2ib50lt8k0ud027375q9k3aja7gd8403.apps.googleusercontent.com"
+                data-callback="handleCredentialResponse">
+            </div>
+            <div class="g_id_signin" data-type="standard"></div>
+        </div>
         <div class="logo"><i class="fa-solid fa-radar"></i> Piyasa.ai</div>
         <ul class="nav-menu">
             <li><a class="nav-item active" onclick="switchTab('dashboard', this)"><i
@@ -36,6 +45,8 @@
                         class="fa-solid fa-satellite-dish"></i><span>Canlı Radar</span></a></li>
             <li><a class="nav-item" onclick="switchTab('fraud', this)"><i
                         class="fa-solid fa-shield-halved"></i><span>Sahtekarlık Tespiti</span></a></li>
+            <li><a class="nav-item" onclick="switchTab('alarms', this)"><i class="fa-solid fa-bell"></i><span>Fiyat
+                        Alarmlarım</span></a></li>
         </ul>
         <div class="system-status"><span class="status-dot"></span> Sistemler Aktif</div>
     </aside>
@@ -135,6 +146,20 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <div id="alarms" class="tab-content">
+                <div class="page-header">
+                    <h1 class="page-title">Fiyat Alarmlarım</h1>
+                    <p class="page-subtitle">Takip ettiğin cihazlar hedef fiyata düştüğünde burada görünecek.</p>
+                </div>
+                <div class="panel" id="alarmList">
+                    <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        <i class="fa-solid fa-bell-slash"
+                            style="font-size: 40px; margin-bottom: 15px; display: block;"></i>
+                        Henüz aktif bir alarmın bulunmuyor.
+                    </div>
                 </div>
             </div>
 

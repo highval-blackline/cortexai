@@ -534,3 +534,51 @@ function populateTable() {
         tableBody.innerHTML += row;
     });
 }
+// Google Girişini Karşılayan Fonksiyon
+function handleCredentialResponse(response) {
+    // Google'dan gelen şifreli paketi (JWT) parçalayıp kullanıcı bilgilerini alıyoruz
+    const responsePayload = decodeJwtResponse(response.credential);
+
+    console.log("Giriş Başarılı kanka! Kullanıcı:", responsePayload.name);
+
+    // Sidebar'daki giriş butonunu silip yerine profil resmini koyalım
+    const userSection = document.getElementById('userSection');
+    userSection.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px; padding: 5px;">
+            <img src="${responsePayload.picture}" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--brand-accent);">
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-size: 12px; font-weight: 600;">${responsePayload.name}</span>
+                <span style="font-size: 10px; color: var(--text-muted);">Aktif Kullanıcı</span>
+            </div>
+        </div>
+    `;
+
+    // Bu bilgiyi sunucuya (backend) gönderip MongoDB'ye kaydetmesini isteyeceğiz (Bir sonraki adımda!)
+    saveUserToDatabase(response.credential);
+}
+async function saveUserToDatabase(idToken) {
+    try {
+        const response = await fetch('https://piyasa-ai.onrender.com/auth/google', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: idToken })
+        });
+        const result = await response.json();
+        console.log("Sunucu yanıtı:", result.message);
+    } catch (error) {
+        console.error("Kullanıcı kaydedilirken hata oluştu:", error);
+    }
+}
+
+// handleCredentialResponse fonksiyonunun içindeki o yorum satırını şununla değiştir:
+// saveUserToDatabase(response.credential);
+
+// Şifreli veriyi çözmek için yardımcı küçük bir araç
+function decodeJwtResponse(token) {
+    let base64Url = token.split('.')[1];
+    let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    let jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+}
