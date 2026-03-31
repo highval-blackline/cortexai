@@ -473,3 +473,27 @@ function resetAnalysis() {
         <p class="error-msg" id="errorMsg">Lütfen en az bir fotoğraf seçin veya geçerli bir resim linki yapıştırın!</p>
     `;
 }
+// Canlı Radar için örnek ilan çekme fonksiyonu
+function populateTable() {
+    const tableBody = document.getElementById('tableBody');
+    // Hayali bir "pazar taraması" verisi
+    const sampleData = [
+        { model: "iPhone 15 Pro Max", price: "32.000 TL", aiValue: "40.000 TL", risk: "Yüksek", riskClass: "badge-risk-high" },
+        { model: "POCO X6 Pro", price: "18.500 TL", aiValue: "19.000 TL", risk: "Düşük", riskClass: "badge-risk-low" },
+        { model: "Galaxy S24 Ultra", price: "55.000 TL", aiValue: "62.000 TL", risk: "Orta", riskClass: "badge-risk-med" }
+    ];
+
+    tableBody.innerHTML = ""; // "Sistem bekliyor" yazısını siler
+
+    sampleData.forEach(item => {
+        let row = `
+            <tr>
+                <td>${item.model}</td>
+                <td>${item.price}</td>
+                <td style="font-weight: 600;">${item.aiValue}</td>
+                <td><span class="badge ${item.riskClass}">${item.risk}</span></td>
+            </tr>
+        `;
+        tableBody.innerHTML += row;
+    });
+}
