@@ -681,14 +681,14 @@ async function loadMyAlarms() {
 
         if (data.alarmlar && data.alarmlar.length > 0) {
             alarmList.innerHTML = data.alarmlar.map(alarm => `
-                <div style="background: var(--bg-absolute); padding: 15px; border-radius: 8px; border: 1px solid var(--border-light); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="font-weight: 600; color: white;">${alarm.model}</div>
-                        <div style="font-size: 12px; color: var(--text-muted);">Hedef Fiyat: ${alarm.targetPrice.toLocaleString('tr-TR')} TL</div>
-                    </div>
-                    <div style="font-size: 11px; color: var(--brand-accent);">Takip Ediliyor <i class="fa-solid fa-clock"></i></div>
-                </div>
-            `).join('');
+    <div style="background: var(--bg-absolute); padding: 15px; border-radius: 8px; border: 1px solid var(--border-light); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <div style="font-weight: 600; color: white;">${alarm.model}</div>
+            <div style="font-size: 12px; color: var(--text-muted);">Hedef Fiyat: ${Number(alarm.targetPrice).toLocaleString('tr-TR')} TL</div>
+        </div>
+        <button onclick="deleteAlarm('${alarm.model}')" style="background: none; border: 1px solid var(--risk-high); color: var(--risk-high); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Sil</button>
+    </div>
+`).join('');
         } else {
             alarmList.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Henüz bir alarm kurmadınız.</div>';
         }
@@ -700,4 +700,25 @@ async function loadMyAlarms() {
 function logout() {
     localStorage.removeItem('userData');
     location.reload();
+}
+
+async function deleteAlarm(modelName) {
+    if (!confirm(`${modelName} alarmını silmek istediğinize emin misiniz?`)) return;
+
+    try {
+        const response = await fetch('https://piyasa-ai.onrender.com/delete-alarm', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: window.currentUserEmail,
+                model: modelName
+            })
+        });
+        const data = await response.json();
+        if (data.success) {
+            loadMyAlarms(); // Listeyi yeniler
+        }
+    } catch (err) {
+        alert("Silme işlemi sırasında sunucuya ulaşılamadı.");
+    }
 }

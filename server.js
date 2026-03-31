@@ -139,6 +139,19 @@ app.get('/my-alarms', async (req, res) => {
     }
 });
 
+app.delete('/delete-alarm', async (req, res) => {
+    const { email, model } = req.body;
+    if (!db) return res.status(500).json({ success: false, error: "Veritabanı bağlantısı yok." });
+
+    try {
+        const alarmsCollection = db.collection("alarms");
+        await alarmsCollection.deleteOne({ email: email, model: model });
+        res.json({ success: true, message: "Alarm silindi." });
+    } catch (error) {
+        res.status(500).json({ success: false, error: "Silme işlemi başarısız." });
+    }
+});
+
 app.post('/analyze', upload.array('images', 3), async (req, res) => {
     console.log("\n--- GÖRSEL ANALİZ BAŞLADI ---");
 
