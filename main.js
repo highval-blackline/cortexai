@@ -289,7 +289,10 @@ function calculatePrice() {
     if (!model) return;
     const price = frontEndDB[model][origin];
 
-    if (price) { display.innerText = price; display.style.color = "var(--brand-accent)"; }
+    if (price) {
+        display.innerHTML = `${price} <button onclick="openAlarmModal('${model}')" style="margin-left: 15px; background: var(--bg-panel); border: 1px solid var(--border-focus); color: var(--text-main); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;"><i class="fa-solid fa-bell" style="color: var(--brand-accent);"></i> Alarm Kur</button>`;
+        display.style.color = "var(--brand-accent)";
+    }
     else { display.innerHTML = "<span style='font-size:13px; color:var(--risk-high);'>Bu cihazın bu kategoride güncel piyasası yoktur.</span>"; }
 }
 
@@ -570,9 +573,6 @@ async function saveUserToDatabase(idToken) {
     }
 }
 
-// handleCredentialResponse fonksiyonunun içindeki o yorum satırını şununla değiştir:
-// saveUserToDatabase(response.credential);
-
 // Şifreli veriyi çözmek için yardımcı küçük bir araç
 function decodeJwtResponse(token) {
     let base64Url = token.split('.')[1];
@@ -581,4 +581,26 @@ function decodeJwtResponse(token) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
     return JSON.parse(jsonPayload);
+}
+
+// Alarm Penceresini Açan Fonksiyon
+function openAlarmModal(modelName) {
+    document.getElementById('alarmModelInput').value = modelName;
+    document.getElementById('alarmPriceInput').value = '';
+    document.getElementById('alarmModal').style.display = 'flex';
+}
+
+// Kaydet Butonuna Basılınca (Şimdilik sadece ekrana yazdıralım, backend'i sonra bağlarız)
+function saveAlarm() {
+    const model = document.getElementById('alarmModelInput').value;
+    const price = document.getElementById('alarmPriceInput').value;
+
+    if (!price) {
+        alert("Kanka boş fiyat olmaz, bir rakam gir!");
+        return;
+    }
+
+    console.log("Alarm Kurgusu Hazır: ", model, price);
+    alert(`${model} cihazı ${price} TL altına düşünce sana haber vereceğiz (Arka planı bir sonraki adımda bağlayacağız)!`);
+    document.getElementById('alarmModal').style.display = 'none';
 }
