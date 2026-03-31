@@ -344,9 +344,14 @@ async function fetchGlobalStats() {
                 let ilanFiyati = item.fiyat || "Bilinmiyor";
                 let piyasaDegeri = "Bulunamadı";
 
-                // Veritabanından gelen net bir durum bilgisi varsa fiyatı eşleştir
-                if (item.condition && frontEndDB[item.model] && frontEndDB[item.model][item.condition]) {
-                    piyasaDegeri = frontEndDB[item.model][item.condition];
+                // Model veritabanında var mı kontrol et, yoksa hata verme
+                if (item.model && frontEndDB[item.model]) {
+                    const modelData = frontEndDB[item.model];
+                    if (item.condition && modelData[item.condition]) {
+                        piyasaDegeri = modelData[item.condition];
+                    } else if (modelData["TR_IkinciEl"]) {
+                        piyasaDegeri = modelData["TR_IkinciEl"];
+                    }
                 }
 
                 // Kâr/Zarar Durumu (Yüzdelik Mantık)

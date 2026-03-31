@@ -272,7 +272,7 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
 
         const newFeedItem = {
             model: aiAnalysis.model || "Bilinmeyen Cihaz",
-            condition: aiAnalysis.condition, // Bu satırı ekledik
+            condition: aiAnalysis.condition || "TR_IkinciEl", // Durum tespiti yapılamazsa güvenli liman olarak ikinci el ata
             riskScore: aiAnalysis.score,
             fiyat: aiAnalysis.fiyat || "Belirtilmemiş", // İlan fiyatı verisi eklendi
             imageUrl: finalImageUrl,
