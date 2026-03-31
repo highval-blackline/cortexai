@@ -648,7 +648,7 @@ async function saveAlarm() {
             body: JSON.stringify({
                 email: window.currentUserEmail,
                 model: model,
-                targetPrice: Number(price)
+                targetPrice: parseInt(price.toString().replace(/\./g, ''), 10)
             })
         });
 
