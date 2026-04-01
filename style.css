@@ -682,3 +682,27 @@ td {
 .logout-btn:hover i {
     transform: translateX(2px); /* Kapıya doğru hafif itme efekti */
 }
+
+/* ======================================================== */
+/* MOBİL SCROLL VE HİZALAMA SORUNLARINA KESİN VE NİHAİ ÇÖZÜM */
+/* ======================================================== */
+@media (max-width: 768px) {
+    /* Eski hatalı yükseklik ve boşluk sınırlarını zorla sıfırlıyoruz */
+    .main-content {
+        height: 100vh !important;
+        padding-bottom: 0 !important;
+    }
+    
+    /* Asıl kayan alana, alt menüden kurtulması için devasa boşluk veriyoruz */
+    .content-area {
+        padding-bottom: 160px !important; 
+    }
+
+    /* Ortalama Fiyat Sorgula ve diğer kutuların hizasını zorla hizaya sokuyoruz */
+    .wizard-inputs {
+        flex-direction: column !important;
+    }
+    .stat-card {
+        grid-column: span 1 !important;
+    }
+}

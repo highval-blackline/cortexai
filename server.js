@@ -12,10 +12,14 @@ const app = express();
 app.use(cors({ origin: '*' }));
 
 // Gelen JSON verilerini okumak için gerekli ayar:
-app.use(express.json());
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ limit: '20mb', extended: true }));
 
 // YENİ: Tek resim yerine dizi (array) halinde en fazla 3 resim kabul eder.
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 } // Tek bir dosya için 10MB limit
+});
 
 // DOĞRU OLAN (Render'daki Environment Variable'ı okur):
 const MONGO_URI = process.env.MONGO_URI;
