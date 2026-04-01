@@ -293,9 +293,6 @@ document.addEventListener("DOMContentLoaded", function () {
     `;
     }
 
-    document.getElementById('communityFeedback').style.display = 'block';
-    window.lastAnalyzedScore = data.riskScore;
-    
     fetchGlobalStats();
     setInterval(fetchGlobalStats, 5000);
 });
@@ -549,6 +546,10 @@ async function startAnalysis() {
             decisionBox.style.borderLeftColor = 'var(--risk-low)'; decisionBox.style.backgroundColor = 'rgba(0, 200, 81, 0.1)';
             decisionBox.innerHTML = `<div style="margin-bottom: 10px;"><strong>GÜVENLİ GÖRÜNÜYOR:</strong> Görseldeki ilan detaylarında bilinen bir oltalama taktiğine rastlanmadı.</div><div style="font-size: 13px; color: #e0e0e0; border-top: 1px solid rgba(0, 200, 81, 0.3); padding-top: 10px;"><i class="fa-solid fa-shield-check" style="color: var(--risk-low); margin-right: 5px;"></i> <b>Tavsiye:</b> İlan temiz görünse de internet alışverişlerinde tedbiri elden bırakmayın ve her zaman platformun kendi güvenli ödeme yöntemlerini tercih edin.</div>`;
         }
+
+        // YANLIŞ YERDEN KESİP BURAYA YAPIŞTIRDIK
+        document.getElementById('communityFeedback').style.display = 'block';
+        window.lastAnalyzedScore = data.riskScore;
 
         fetchGlobalStats();
 
