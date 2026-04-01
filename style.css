@@ -693,9 +693,9 @@ td {
         padding-bottom: 0 !important;
     }
     
-    /* Asıl kayan alana, alt menüden kurtulması için devasa boşluk veriyoruz */
-    .content-area {
-        padding-bottom: 160px !important; 
+    /* Mobil tarayıcıların boşluğu yutmasını engellemek için direkt içeriğin bizzat kendisine boşluk veriyoruz! */
+    .tab-content {
+        padding-bottom: 140px !important; 
     }
 
     /* Ortalama Fiyat Sorgula ve diğer kutuların hizasını zorla hizaya sokuyoruz */
