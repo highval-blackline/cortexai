@@ -292,6 +292,10 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
     `;
     }
+
+    document.getElementById('communityFeedback').style.display = 'block';
+    window.lastAnalyzedScore = data.riskScore;
+    
     fetchGlobalStats();
     setInterval(fetchGlobalStats, 5000);
 });
@@ -554,6 +558,7 @@ async function startAnalysis() {
 function resetAnalysis() {
     pastedFiles = [];
     document.getElementById('analysisResult').style.display = 'none';
+    document.getElementById('communityFeedback').style.display = 'none'; // BUNU YENİ EKLEDİK
     const box = document.getElementById('dropZone');
     box.style.display = 'block';
 
@@ -768,4 +773,14 @@ async function deleteAlarm(modelName) {
     }
 }
 
-// Vercel zorunlu guncelleme tetikleyicisi
+async function sendFeedback(isCorrect) {
+    const feedbackBox = document.getElementById('communityFeedback');
+    feedbackBox.innerHTML = '<p style="font-size: 13px; color: var(--risk-low);"><i class="fa-solid fa-circle-check"></i> Geri bildiriminiz için teşekkürler! Piyasa veri tabanına işlendi.</p>';
+    
+    if (isCorrect && window.lastAnalyzedScore >= 75) {
+        try {
+            await fetch('https://piyasa-ai.onrender.com/report-fraud', { method: 'POST' });
+            setTimeout(fetchGlobalStats, 1000); 
+        } catch (e) { console.log("Geri bildirim gönderilemedi."); }
+    }
+}

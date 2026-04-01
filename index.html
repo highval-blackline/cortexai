@@ -267,6 +267,15 @@
                             style="margin-top: 20px; padding: 15px; background: rgba(255, 68, 68, 0.1); border-left: 3px solid var(--risk-high); border-radius: 4px;">
                             <strong>AI Kararı: Bekleniyor...</strong>
                         </div>
+                        
+                        <div id="communityFeedback" style="display: none; margin-top: 15px; padding: 15px; border-radius: 8px; border: 1px solid var(--border-light); background: var(--bg-absolute); text-align: center;">
+                            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Yapay zekanın bu tespiti sence doğru mu?</p>
+                            <div style="display: flex; gap: 10px; justify-content: center;">
+                                <button onclick="sendFeedback(true)" class="btn-outline" style="border-color: var(--risk-low); color: var(--risk-low); padding: 6px 15px;"><i class="fa-solid fa-thumbs-up"></i> Evet, Doğru</button>
+                                <button onclick="sendFeedback(false)" class="btn-outline" style="border-color: var(--risk-high); color: var(--risk-high); padding: 6px 15px;"><i class="fa-solid fa-thumbs-down"></i> Hayır, Yanlış</button>
+                            </div>
+                        </div>
+
                         <button class="btn-outline" style="margin-top: 20px; width: 100%;"
                             onclick="resetAnalysis()">Yeni Bir Analiz Yap</button>
                     </div>

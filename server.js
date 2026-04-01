@@ -152,6 +152,22 @@ app.delete('/delete-alarm', async (req, res) => {
     }
 });
 
+app.post('/report-fraud', async (req, res) => {
+    try {
+        globalFrauds++; 
+        if (statsCollection) {
+            await statsCollection.updateOne(
+                { id: "global" },
+                { $set: { globalFrauds: globalFrauds } },
+                { upsert: true }
+            );
+        }
+        res.json({ success: true, newFraudCount: globalFrauds });
+    } catch (error) {
+        res.status(500).json({ success: false, error: "Sayaç güncellenemedi." });
+    }
+});
+
 app.post('/analyze', upload.array('images', 3), async (req, res) => {
     console.log("\n--- GÖRSEL ANALİZ BAŞLADI ---");
 
