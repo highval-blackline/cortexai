@@ -615,14 +615,22 @@ td {
     background: rgba(25, 25, 25, 0.7) !important;
 }
 
-/* 6. Canlı Akış (Radar) - Sağa Kayma İptal, Sadece Çok Hafif Büyüme */
+/* 6. Canlı Akış (Radar) - ULTRA AKIŞKAN VE YAVAŞ BÜYÜME */
 .feed-item {
-    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s ease, border-color 0.4s ease !important;
-    animation: slideDownFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    /* Süreyi 0.6s'den 1.2s'ye çıkardık. Bu, büyümenin neredeyse hissedilerek başlamasını sağlar. */
+    transition: transform 1.2s cubic-bezier(0.1, 0.9, 0.2, 1), background-color 0.8s ease !important;
+    animation: slideDownFade 0.8s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+    transform-origin: center;
+    /* Tarayıcının bu animasyonu ekran kartıyla işlemesini sağlayarak pürüzsüzlüğü (FPS) artırır */
+    will-change: transform; 
 }
+
 .feed-item:hover {
-    transform: scale(1.01) !important; /* Göz yoran sağa kaymayı sildik, sadece 0.01 büyüyecek */
-    background-color: rgba(255, 255, 255, 0.03) !important;
+    /* Büyüme oranını 1.025 yaparak yavaş hareketin daha belirgin olmasını sağladık */
+    transform: scale(1.025) !important; 
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    z-index: 10;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
 
 @keyframes slideDownFade {
