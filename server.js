@@ -231,11 +231,15 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
         GÖREVİN (ÇOK KRİTİK VE DİKKATLİ OL):
         1. Model Tespiti: İlanın modelini KESİNLİKLE yukarıdaki veritabanında yazan isimle birebir aynı olacak şekilde yaz (Örn: 'Apple iPhone 17 Pro Max' değil, sadece 'iPhone 17 Pro Max' yaz).
         2. İlandaki ana fiyatı gör. DİKKAT: '23.00' veya '19:00' gibi saat ibarelerini fiyat sanma.
-        3. Cihazın Durumu: JSON içindeki 'condition' değerine SADECE VE KESİNLİKLE şu 4 koddan birini yazmalısın (başka kelime uydurma):
-           - "TR_Sifir" (Türkiye garantili, kapalı kutu)
-           - "TR_IkinciEl" (Türkiye garantili/garantisi bitmiş ikinci el)
-           - "YurtDisi_Sifir" (Yurt dışı, kapalı kutu/sıfır vb.)
-           - "YurtDisi_IkinciEl" (Yurt dışı ikinci el)
+        
+        3. Cihazın Durumu (ÇOK ÖNEMLİ KURAL): 
+           - İlanın açıklamasında veya başlığında "yd", "yurtdışı", "yurt dışı", "kayıtsız", "server kayıtlı", "çift hatlı", "pasaport kayıtlı" gibi kelimeler geçiyorsa, ilandaki teknik özellikler tablosunda 'Alındığı Yer: Yurt İçi' yazsa BİLE BU CİHAZ KESİNLİKLE YURT DIŞIDIR! Başlık ve açıklama, tablodan her zaman üstündür.
+           - Bu kurala göre JSON içindeki 'condition' değerine SADECE VE KESİNLİKLE şu 4 koddan birini yazmalısın:
+             * "TR_Sifir" (Türkiye garantili, kapalı kutu)
+             * "TR_IkinciEl" (Türkiye garantili/garantisi bitmiş ikinci el)
+             * "YurtDisi_Sifir" (Yurt dışı, kapalı kutu/sıfır vb.)
+             * "YurtDisi_IkinciEl" (Yurt dışı ikinci el)
+             
         4. FİYAT ANALİZİ: İlandaki istenen fiyatı, seçtiğin "condition" kategorisindeki piyasa fiyatıyla karşılaştır. 
         
         !!! ÇOK ÖNEMLİ OLTALAMA (SCAM) KURALI !!!
