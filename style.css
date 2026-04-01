@@ -712,35 +712,47 @@ td {
     }
 
     /* ===================================================================
-       MOBİL YATAY SCROLLBAR ÇÖZÜMÜ (3 KATMANLI KORUMA)
+       MOBİL YATAY SCROLLBAR KESİN ÇÖZÜMÜ
        
-       Sorun: overflow-x:auto olan bir container'da, scrollbar container'ın
-       padding alanı DAHİLİNDE render olur. Yani padding-bottom veya ::after
-       scrollbar'ı aşağı itemez — scrollbar onların da üzerine biner.
-       
-       Çözüm: Scrollbar'ın bindirdiği alanı İÇERİĞİN KENDİSİNDE büyüterek
-       metni scrollbar'dan fiziksel olarak uzaklaştırıyoruz.
+       Strateji: overflow-x:auto artık .table-container'da değil,
+       içerideki .table-scroll-wrapper'da. Böylece:
+       1) Container'ın kendisi scroll yapmıyor → scrollbar container'a ait değil
+       2) Wrapper'a verilen padding-bottom, scrollbar ile metin arasına
+          boşluk koyuyor
+       3) ::-webkit-scrollbar ile Chrome'da scrollbar overlay modundan
+          çıkarılıp gerçek yer kaplayan scrollbar yapılıyor
        =================================================================== */
 
-    /* KATMAN 1: Container'a padding-bottom — tarayıcı scroll hesaplamasını
-       biraz rahatlatır ama tek başına yetmez. */
+    /* Container'dan overflow'u kaldır — scroll işi wrapper'a devredildi */
     .table-container {
-        padding-bottom: 8px !important;
-        -webkit-overflow-scrolling: touch !important; /* iOS momentum scroll */
+        overflow-x: visible !important;
+        overflow-y: visible !important;
     }
 
-    /* KATMAN 2: Tablonun kendisine margin-bottom — bu margin scrollable
-       content'in BİR PARÇASIDIR, yani scrollbar'ın ALT SINIRINI aşağı iter.
-       Bu en kritik katmandır. */
-    .table-container table {
-        margin-bottom: 36px !important;
+    /* Scroll wrapper: Yatay kaydırma burada gerçekleşiyor */
+    .table-scroll-wrapper {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-bottom: 36px !important; /* Scrollbar bu boşluğa oturacak */
+    }
+
+    /* Chrome/Android: Scrollbar'ı overlay modundan çıkar, gerçek yer kaplasın */
+    .table-scroll-wrapper::-webkit-scrollbar {
+        height: 6px !important;
+        background: transparent !important;
+    }
+    .table-scroll-wrapper::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.03) !important;
+        border-radius: 3px !important;
+    }
+    .table-scroll-wrapper::-webkit-scrollbar-thumb {
+        background: var(--border-focus) !important;
+        border-radius: 3px !important;
+    }
+
+    /* Tablo alt border temizliği */
+    .table-scroll-wrapper table {
         border-bottom: none !important;
-    }
-
-    /* KATMAN 3: Son satırdaki hücrelerin padding-bottom'unu artır.
-       Bu, metnin kendisini scrollbar'dan uzaklaştırır.
-       Scrollbar boş padding alanına oturur, metne değmez. */
-    .table-container table tbody tr:last-child td {
-        padding-bottom: 32px !important;
+        margin-bottom: 0 !important;
     }
 }
