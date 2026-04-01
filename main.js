@@ -1,4 +1,5 @@
 // Vercel tetikleme satırı
+let lastFeedJSON = ""; // Son gelen veriyi hafızada tutmak için
 const frontEndDB = {
     // ==========================================
     //               APPLE iPHONE
@@ -344,14 +345,18 @@ async function fetchGlobalStats() {
         document.getElementById('fraudCount').innerText = data.fraudCount;
 
         const feedList = document.getElementById('liveFeedList');
-        const tableBody = document.getElementById('tableBody'); // Radar tablosunu yakalıyoruz
+        const tableBody = document.getElementById('tableBody');
 
-        // YENİ EKLENEN KISIM: Veri geldiği an yükleme ekranını sil ve asıl listeyi göster
         const feedLoader = document.getElementById('feedLoading');
         if (feedLoader) feedLoader.style.display = 'none';
         if (feedList) feedList.style.display = 'flex';
 
         if (data.recentFeed && data.recentFeed.length > 0) {
+            // YENİ: Eğer gelen veri eskisiyle aynıysa listeyi yenileme (Animasyon bozulmasın diye)
+            const currentFeedJSON = JSON.stringify(data.recentFeed);
+            if (currentFeedJSON === lastFeedJSON) return; 
+            lastFeedJSON = currentFeedJSON;
+
             feedList.innerHTML = '';
             if (tableBody) tableBody.innerHTML = '';
 
@@ -622,7 +627,7 @@ function resetAnalysis() {
             <button class="btn-outline" style="background: white; color: black; min-width: 150px; margin-top: 10px; padding: 12px;" onclick="startAnalysis()">Yapay Zekaya Gönder</button>
         </div>
         <div class="info-warning">
-            <i class="fa-solid fa-circle-info"></i> <b>ÖNEMLİ:</b> Yapay zekanın kusursuz analiz yapabilmesi için sadece ilk fotoğrafı değil; ilanın <b>Hafıza Kapasitesi, Garanti Durumu, Cihaz Durumu ve Açıklama</b> kısımlarını gösteren alt bölümlerini de ekran görüntüsü alıp (en fazla 3 adet) yükleyiniz. Fiyatlar bu detaylara göre devasa farklar gösterir.
+            <b>ÖNEMLİ:</b> Yapay zekanın kusursuz analiz yapabilmesi için sadece ilk fotoğrafı değil; ilanın <b>Hafıza Kapasitesi, Garanti Durumu, Cihaz Durumu ve Açıklama</b> kısımlarını gösteren alt bölümlerini de ekran görüntüsü alıp (en fazla 3 adet) yükleyiniz. Fiyatlar bu detaylara göre devasa farklar gösterir.
         </div>
         <p class="error-msg" id="errorMsg">Lütfen en az bir fotoğraf seçin veya geçerli bir resim linki yapıştırın!</p>
     `;
