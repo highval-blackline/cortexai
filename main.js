@@ -293,12 +293,14 @@ document.addEventListener("DOMContentLoaded", function () {
         window.currentUserEmail = userData.email;
         document.getElementById('userSection').innerHTML = `
         <div style="display: flex; align-items: center; gap: 10px; padding: 5px;">
-            <img src="${userData.picture}" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--brand-accent);">
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 12px; font-weight: 600;">${userData.name}</span>
+            <img src="${userData.picture}" style="width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                <span style="font-size: 13px; font-weight: 600; color: white;">${userData.name}</span>
                 <span style="font-size: 10px; color: var(--text-muted);">Aktif Kullanıcı</span>
             </div>
-            <button onclick="logout()" style="background:none; border:none; color:var(--risk-high); cursor:pointer; font-size:10px; margin-left:5px; padding:0;">[Çıkış]</button>
+            <button onclick="logout()" class="logout-btn" title="Çıkış Yap">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </button>
         </div>
     `;
     } else {
@@ -675,11 +677,14 @@ function handleCredentialResponse(response) {
     const userSection = document.getElementById('userSection');
     userSection.innerHTML = `
         <div style="display: flex; align-items: center; gap: 10px; padding: 5px;">
-            <img src="${responsePayload.picture}" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--brand-accent);">
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 12px; font-weight: 600;">${responsePayload.name}</span>
+            <img src="${responsePayload.picture}" style="width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                <span style="font-size: 13px; font-weight: 600; color: white;">${responsePayload.name}</span>
                 <span style="font-size: 10px; color: var(--text-muted);">Aktif Kullanıcı</span>
             </div>
+            <button onclick="logout()" class="logout-btn" title="Çıkış Yap">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </button>
         </div>
     `;
 

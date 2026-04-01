@@ -646,3 +646,34 @@ td {
     50% { opacity: 1; }
     100% { opacity: 0.5; }
 }
+
+/* --- Apple Stili Çıkış Butonu --- */
+.logout-btn {
+    background: rgba(255, 69, 58, 0.1) !important; /* Apple Kırmızısı (Çok Hafif) */
+    color: var(--risk-high) !important;
+    border: 1px solid rgba(255, 69, 58, 0.15) !important;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    background: var(--risk-high) !important;
+    color: white !important;
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(255, 69, 58, 0.3);
+}
+
+.logout-btn i {
+    transition: transform 0.3s ease;
+}
+
+.logout-btn:hover i {
+    transform: translateX(2px); /* Kapıya doğru hafif itme efekti */
+}
