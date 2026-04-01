@@ -539,11 +539,10 @@ td {
 }
 
 /* ==========================================
-   APPLE TARZI LİQUİD GLASS & ULTRA AKIŞKAN ANİMASYONLAR (BELİRGİN SÜRÜM)
+   APPLE TARZI MİNİMAL LİQUİD GLASS & AKIŞKAN ANİMASYONLAR (HAFİF SÜRÜM)
    ========================================== */
 
-/* 1. Üst Menü ve Yan Menü Sıvı Cam Efekti */
-/* DİKKAT: Üst menüyü sabitledik ki içerikler altından geçerken blur efekti BARK BARK görünsün! */
+/* 1. Üst Menü ve Yan Menü Sıvı Cam Efekti (Daha Koyu ve Şık) */
 .header {
     position: sticky !important;
     top: 0;
@@ -551,80 +550,83 @@ td {
 }
 
 .header, .sidebar {
-    /* Siyah yerine çok hafif beyaz-gri bir buzlanma (tint) veriyoruz */
-    background: rgba(35, 35, 35, 0.4) !important; 
-    backdrop-filter: blur(25px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    background: rgba(10, 10, 10, 0.75) !important; /* Çamur gibi yapan beyazlığı aldık, tam karanlık cam yaptık */
+    backdrop-filter: blur(20px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.03) !important;
+    box-shadow: none !important;
 }
 
-/* 2. Açılır Menüler, Paneller ve Kartlar İçin Belirgin Buzlu Cam */
+/* 2. Açılır Menüler, Paneller ve Kartlar (Karanlık Cam) */
 #modelDropdownList, #wizardDropdownList, .panel {
-    background: rgba(30, 30, 30, 0.45) !important;
-    backdrop-filter: blur(30px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.2) !important; /* Camın kalınlığı - Üstten ışık vuruyor hissi */
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8) !important;
+    background: rgba(15, 15, 15, 0.7) !important;
+    backdrop-filter: blur(25px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
 }
 
 /* 3. Alarm ve Görsel Pencereleri (Modal) */
 #alarmModal > div, #imageModal > div {
-    background: rgba(40, 40, 40, 0.55) !important;
-    backdrop-filter: blur(40px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9) !important;
+    background: rgba(15, 15, 15, 0.85) !important;
+    backdrop-filter: blur(30px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
-/* 4. Arama Kutuları ve Inputlar (Daha Parlak) */
+/* 4. Arama Kutuları ve Inputlar (Kutu Görüntüsü Tamamen Kaldırıldı) */
 .search-bar, .scan-input, select, input[type="text"] {
-    background: rgba(255, 255, 255, 0.05) !important; /* Hafif beyaz buzlanma */
+    background: rgba(20, 20, 20, 0.6) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    color: white !important;
+    outline: none !important; /* Dış çizgiyi tamamen siler */
+}
+
+/* İçteki o beyazımsı dikdörtgeni silmek için bu ekstra satırı ekledik */
+.search-bar input {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding-left: 10px;
+}
+
+.search-bar:focus-within, .scan-input:focus, input[type="text"]:focus, select:focus {
+    background: rgba(30, 30, 30, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    box-shadow: none !important;
+}
+
+/* 5. Kart Yükselme - Daha Sade ve Oturaklı */
+.stat-card {
+    background: rgba(15, 15, 15, 0.6) !important;
     backdrop-filter: blur(15px) !important;
     -webkit-backdrop-filter: blur(15px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-.search-bar:focus-within, .scan-input:focus, input[type="text"]:focus, select:focus {
-    background: rgba(255, 255, 255, 0.12) !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1) !important;
-    transform: scale(1.02);
-}
-
-/* 5. Kart Yükselme - Daha İddialı Hissiyat */
-.stat-card {
-    background: rgba(20, 20, 20, 0.5) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
     border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, background 0.4s ease !important;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease, border-color 0.4s ease, background 0.4s ease !important;
 }
 .stat-card:hover {
-    transform: translateY(-8px) scale(1.03) !important;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.05) !important;
-    border-color: rgba(255, 255, 255, 0.25) !important;
-    background: rgba(45, 45, 45, 0.6) !important;
+    transform: translateY(-4px) !important; /* -8px çok abartıydı, -4px ile sakinleştirdik */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(25, 25, 25, 0.7) !important;
 }
 
-/* 6. Canlı Akış (Radar) - iOS Liste Kaydırma (Swipe) Hissi */
+/* 6. Canlı Akış (Radar) - Sağa Kayma İptal, Sadece Çok Hafif Büyüme */
 .feed-item {
-    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.6s ease, border-color 0.6s ease !important;
-    animation: slideDownFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    border-right: 1px solid transparent;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s ease, border-color 0.4s ease !important;
+    animation: slideDownFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 .feed-item:hover {
-    transform: scale(1.02) translateX(8px) !important; /* Hafif sağa kayma (iOS swipe hissi) */
-    background-color: rgba(255, 255, 255, 0.06) !important;
-    border-color: rgba(255, 255, 255, 0.15) !important;
+    transform: scale(1.01) !important; /* Göz yoran sağa kaymayı sildik, sadece 0.01 büyüyecek */
+    background-color: rgba(255, 255, 255, 0.03) !important;
 }
 
 @keyframes slideDownFade {
-    from { opacity: 0; transform: translateY(-20px); }
+    from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
