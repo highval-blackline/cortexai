@@ -371,28 +371,34 @@ async function fetchGlobalStats() {
 
                 // Risk Kontrolü (Değişken çakışmasını önlemek için doğrudan skorları kontrol ediyoruz)
                 if (item.riskScore >= 75) {
-                    // 1. Öncelik: Kritik Risk (Fiyata bakmaz)
-                    durumEtiketi = `<span class="badge" style="background: var(--risk-high, #ef4444); color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">Dolandırıcı Riski!</span>`;
+                    // 1. Öncelik: Kritik Risk - KOYU KIRMIZI ZEMİN / BEYAZ YAZI
+                    durumEtiketi = `<span class="badge" style="background: #C92A2A; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Dolandırıcı Riski!</span>`;
                 } else if (item.riskScore >= 40 && item.riskScore < 75) {
-                    // 2. Öncelik: Orta/Yüksek Risk (Fiyata bakmaz)
-                    durumEtiketi = `<span class="badge" style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">Şüpheli İlan (%${item.riskScore} Risk)</span>`;
+                    // 2. Öncelik: Orta/Yüksek Risk - KOYU TURUNCU ZEMİN / BEYAZ YAZI
+                    durumEtiketi = `<span class="badge" style="background: #D97706; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Şüpheli İlan (%${item.riskScore} Risk)</span>`;
                 } else if (ilanSayi > 0 && piyasaOrtalama > 0) {
                     // 3. Öncelik: Risk düşükse fiyat analizi yap
                     let karYuzdesi = ((piyasaOrtalama - ilanSayi) / piyasaOrtalama) * 100;
 
                     if (karYuzdesi >= 15) {
-                        durumEtiketi = `<span class="badge" style="background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">FIRSAT 🚀</span>`;
+                        // ÇOK UCUZ - KOYU MAVİ ZEMİN / BEYAZ YAZI
+                        durumEtiketi = `<span class="badge" style="background: #0056B3; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">FIRSAT 🚀</span>`;
                     } else if (karYuzdesi >= 5 && karYuzdesi < 15) {
-                        durumEtiketi = `<span class="badge" style="background: #059669; color: white; padding: 4px 8px; border-radius: 4px;">Uygun Fiyat</span>`;
+                        // UCUZ - KOYU YEŞİL ZEMİN / BEYAZ YAZI
+                        durumEtiketi = `<span class="badge" style="background: #248A3D; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Uygun Fiyat</span>`;
                     } else if (karYuzdesi > -5 && karYuzdesi < 5) {
-                        durumEtiketi = `<span class="badge" style="background: #6b7280; color: white; padding: 4px 8px; border-radius: 4px;">Nötr (Değerinde)</span>`;
+                        // NORMAL - KOYU GRİ ZEMİN / BEYAZ YAZI
+                        durumEtiketi = `<span class="badge" style="background: #636366; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Nötr (Değerinde)</span>`;
                     } else if (karYuzdesi <= -5 && karYuzdesi > -15) {
-                        durumEtiketi = `<span class="badge" style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px;">Biraz Pahalı</span>`;
+                        // BİRAZ PAHALI - KOYU TURUNCU ZEMİN / BEYAZ YAZI
+                        durumEtiketi = `<span class="badge" style="background: #D97706; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Biraz Pahalı</span>`;
                     } else if (karYuzdesi <= -15) {
-                        durumEtiketi = `<span class="badge" style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">Çok Pahalı</span>`;
+                        // ÇOK PAHALI - KOYU KIRMIZI ZEMİN / BEYAZ YAZI
+                        durumEtiketi = `<span class="badge" style="background: #C92A2A; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Çok Pahalı</span>`;
                     }
                 } else {
-                    durumEtiketi = `<span class="badge" style="background: #374151; color: white; padding: 4px 8px; border-radius: 4px;">Fiyat Analizi Yapılamadı</span>`;
+                    // VERİ YOK - SİYAHIMSI GRİ ZEMİN / BEYAZ YAZI
+                    durumEtiketi = `<span class="badge" style="background: #3A3A3C; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Fiyat Analizi Yapılamadı</span>`;
                 }
 
                 // 4. Tabloya Yazdırma
@@ -575,11 +581,11 @@ function resetAnalysis() {
 // Canlı Radar için örnek ilan çekme fonksiyonu
 function populateTable() {
     const tableBody = document.getElementById('tableBody');
-    // Hayali bir "pazar taraması" verisi
+    // Hayali bir "pazar taraması" verisi (Koyu renkler ve bembeyaz yazılar)
     const sampleData = [
-        { model: "iPhone 15 Pro Max", price: "32.000 TL", aiValue: "40.000 TL", risk: "Yüksek", riskClass: "badge-risk-high" },
-        { model: "POCO X6 Pro", price: "18.500 TL", aiValue: "19.000 TL", risk: "Düşük", riskClass: "badge-risk-low" },
-        { model: "Galaxy S24 Ultra", price: "55.000 TL", aiValue: "62.000 TL", risk: "Orta", riskClass: "badge-risk-med" }
+        { model: "iPhone 15 Pro Max", price: "32.000 TL", aiValue: "40.000 TL", risk: "Dolandırıcı Riski!", riskClass: "background: #C92A2A; color: white; font-weight: 600;" },
+        { model: "POCO X6 Pro", price: "18.500 TL", aiValue: "19.000 TL", risk: "Uygun Fiyat", riskClass: "background: #248A3D; color: white; font-weight: 600;" },
+        { model: "Galaxy S24 Ultra", price: "55.000 TL", aiValue: "62.000 TL", risk: "Şüpheli İlan (%60 Risk)", riskClass: "background: #D97706; color: white; font-weight: 600;" }
     ];
 
     tableBody.innerHTML = ""; // "Sistem bekliyor" yazısını siler
@@ -590,7 +596,7 @@ function populateTable() {
                 <td>${item.model}</td>
                 <td>${item.price}</td>
                 <td style="font-weight: 600;">${item.aiValue}</td>
-                <td><span class="badge ${item.riskClass}">${item.risk}</span></td>
+                <td><span class="badge" style="${item.riskClass}">${item.risk}</span></td>
             </tr>
         `;
         tableBody.innerHTML += row;

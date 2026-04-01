@@ -205,7 +205,7 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
         const bugun = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
         const dbMetni = JSON.stringify(piyasaVeritabani, null, 2);
 
-        // YENİ PROMPT: Yapay Zekaya özel ayar çekildi
+        // YENİ PROMPT: Yapay Zekaya özel ayar çekildi ve kurallar katılaştırıldı
         const prompt = `Sen Türkiye'nin en iyi ve en kurt ikinci el telefon piyasası uzmanısın. Bugünün tarihi: ${bugun}. 
         Sana bir ilana ait 1'den fazla ekran görüntüsü göndermiş olabilirim. Lütfen gönderdiğim TÜM fotoğrafları inceleyerek, oradaki bilgileri (fiyat, açıklama, kapasite, garanti durumu vb.) birleştirip tam bir analiz yap.
         
@@ -213,22 +213,26 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
         ${dbMetni}
         
         GÖREVİN (ÇOK KRİTİK VE DİKKATLİ OL):
-        1. Ekran görüntülerindeki ilanın telefon modelini tam olarak anlamaya çalış. (Hafızası yazıyorsa onu da dikkate al).
-        2. İlandaki ana fiyatı gör. DİKKAT: '23.00' veya '19:00' gibi saat ibarelerini veya taksitleri fiyat sanma.
-        3. Cihazın durumunu tespit et (TR Garantili, Yurt Dışı, Sıfır, İkinci El vs.). "Direnç", "Server Kayıt", "Çift E-Sim" varsa Yurt Dışıdır.
-        4. FİYAT ANALİZİ VE MANTIK: İlandaki cihazın istenen fiyatı ile veritabanındaki ortalama fiyatı karşılaştır. 
+        1. Model Tespiti: İlanın modelini KESİNLİKLE yukarıdaki veritabanında yazan isimle birebir aynı olacak şekilde yaz (Örn: 'Apple iPhone 17 Pro Max' değil, sadece 'iPhone 17 Pro Max' yaz).
+        2. İlandaki ana fiyatı gör. DİKKAT: '23.00' veya '19:00' gibi saat ibarelerini fiyat sanma.
+        3. Cihazın Durumu: JSON içindeki 'condition' değerine SADECE VE KESİNLİKLE şu 4 koddan birini yazmalısın (başka kelime uydurma):
+           - "TR_Sifir" (Türkiye garantili, kapalı kutu)
+           - "TR_IkinciEl" (Türkiye garantili/garantisi bitmiş ikinci el)
+           - "YurtDisi_Sifir" (Yurt dışı, kapalı kutu/sıfır vb.)
+           - "YurtDisi_IkinciEl" (Yurt dışı ikinci el)
+        4. FİYAT ANALİZİ: İlandaki istenen fiyatı, seçtiğin "condition" kategorisindeki piyasa fiyatıyla karşılaştır. 
         
         !!! ÇOK ÖNEMLİ OLTALAMA (SCAM) KURALI !!!
-        Eğer istenen fiyat, veritabanındaki fiyattan YÜKSEKSE veya piyasasına göre normalden biraz daha PAHALIYSA, bu genellikle oltalama (dolandırıcılık) DEĞİLDİR. Satıcı sadece tok satıcıdır veya kazık atmaya çalışıyordur, buna yüksek risk puanı VERME. 
-        Oltalama (Scam/Dolandırıcılık) asıl fiyat piyasanın İNANILMAZ ALTINDA olduğunda (Örn: 60 binlik telefonu 25 bine satmak) olur. Bu ayrımı mükemmel yapmalısın!
+        Eğer istenen fiyat, veritabanındaki fiyattan YÜKSEKSE veya piyasasına göre normalden biraz daha PAHALIYSA, bu genellikle oltalama DEĞİLDİR. Satıcı tok satıcıdır, buna yüksek risk puanı VERME. 
+        Oltalama (Scam) asıl fiyat piyasanın İNANILMAZ ALTINDA olduğunda olur. Bu ayrımı mükemmel yapmalısın!
         
         PUANLAMA:
-        - 0-20 arası: DÜŞÜK RİSK (Fiyat normal veya normalden biraz pahalı, sorun yok).
+        - 0-20 arası: DÜŞÜK RİSK (Fiyat normal veya biraz pahalı).
         - 20-50 arası: ORTA RİSK.
-        - 50-100 arası: YÜKSEK RİSK (Fiyat piyasanın şüpheli şekilde çok çok altında, bariz oltalama tuzağı).
+        - 50-100 arası: YÜKSEK RİSK (Fiyat şüpheli şekilde çok çok altında).
 
         SADECE JSON FORMATINDA CEVAP VER, EK AÇIKLAMA YAZMA:
-        {"score": 10, "reason": "...", "model": "iPhone 17 Pro Max", "fiyat": "25.000 TL", "condition": "TR_Sifir"};`
+        {"score": 10, "reason": "Fiyat yurtdışı sıfır piyasasına uygun.", "model": "iPhone 17 Pro Max", "fiyat": "74.999 TL", "condition": "YurtDisi_Sifir"};`
 
         let MAX_RETRIES = 3;
         let success = false;

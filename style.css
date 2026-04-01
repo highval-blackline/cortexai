@@ -5,10 +5,10 @@
     --border-light: #1a1a1a;
     --border-focus: #333333;
     --text-main: #ffffff;
-    --text-muted: #7a7a7a;
-    --risk-high: #ff4444;
-    --risk-med: #ffbb33;
-    --risk-low: #00C851;
+    --text-muted: #8E8E93; /* Apple Orijinal Gri */
+    --risk-high: #FF453A; /* Apple Borsa Kırmızısı */
+    --risk-med: #FF9F0A; /* Apple Orijinal Turuncu */
+    --risk-low: #30D158; /* Apple Borsa Yeşili */
     --brand-accent: #ffffff;
 }
 
@@ -277,10 +277,11 @@ td {
 }
 
 .badge {
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 11px;
+    padding: 6px 12px !important; /* Etiketin iç boşluğunu genişletir, daha etli durur */
+    border-radius: 6px !important; /* Köşeleri çok hafif daha yumuşak yapar */
+    font-size: 13px; /* Yazı boyutunu büyütür (Eskisi 11px idi) */
     font-weight: 600;
+    letter-spacing: 0.3px; /* Harflerin arasını milimetrik açarak okunabilirliği artırır */
 }
 
 .badge-risk-high {
