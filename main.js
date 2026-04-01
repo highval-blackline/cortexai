@@ -291,6 +291,21 @@ document.addEventListener("DOMContentLoaded", function () {
             <button onclick="logout()" style="background:none; border:none; color:var(--risk-high); cursor:pointer; font-size:10px; margin-left:5px; padding:0;">[Çıkış]</button>
         </div>
     `;
+    } else {
+        // YENİ EKLENEN KISIM: Sadece giriş YAPMAMIŞ kişilere Google Login göster
+        setTimeout(() => {
+            if (window.google) {
+                google.accounts.id.initialize({
+                    client_id: "104508083781-2ib50lt8k0ud027375q9k3aja7gd8403.apps.googleusercontent.com",
+                    callback: handleCredentialResponse
+                });
+                google.accounts.id.renderButton(
+                    document.getElementById("googleButtonContainer"),
+                    { theme: "filled_black", size: "large", type: "standard" }
+                );
+                google.accounts.id.prompt(); // Sağ üstteki popup'ı SADECE bunlara çıkar
+            }
+        }, 800); // Sistemin tam yüklenmesi için ufak bir bekleme süresi
     }
 
     fetchGlobalStats();
