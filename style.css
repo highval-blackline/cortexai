@@ -554,10 +554,13 @@ td {
 
 /* 2. Canlı Akış (Radar) Büyüme ve Süzülme Efekti */
 .feed-item {
-    transition: transform 0.2s ease, background-color 0.2s ease !important;
-    animation: slideDownFade 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    /* Süreyi 0.4s'den 0.6s'ye çıkardık, bu daha ağır ve premium bir his verir */
+    transition: transform 0.6s cubic-bezier(0.2, 1, 0.2, 1), background-color 0.5s ease !important;
+    animation: slideDownFade 0.6s cubic-bezier(0.2, 1, 0.2, 1) forwards;
 }
+
 .feed-item:hover {
+    /* Büyümeyi 1.01'den 1.015'e çekerek yavaş hareketin belli olmasını sağladık */
     transform: scale(1.015) !important;
 }
 
