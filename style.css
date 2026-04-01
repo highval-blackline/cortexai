@@ -447,15 +447,15 @@ td {
     .wizard-inputs {
         flex-direction: column !important;
     }
-    
+
     /* Ortadaki kartın mobilde sağdan kısa kalma/hizalama sorununu %100 çözer */
     .stat-card {
         grid-column: span 1 !important;
     }
 
-    /* Mobilde sayfanın en altına inilememe sorununu çözer (Alt menü payı) */
-    .main-content {
-        padding-bottom: 95px !important; 
+    /* Mobilde sayfanın en altına inilememe sorununu KESİN çözer */
+    .content-area {
+        padding-bottom: 140px !important;
     }
     body {
         flex-direction: column;
@@ -502,12 +502,6 @@ td {
     .nav-item i {
         font-size: 18px;
         margin: 0;
-    }
-
-    .main-content {
-        order: 1;
-        height: 100vh;
-        padding-bottom: 70px;
     }
 
     .header {
