@@ -443,6 +443,15 @@ td {
 }
 
 @media (max-width: 768px) {
+    /* Mobilde arama kutularını alt alta dizer, kutu taşmasını ve kesilmeyi %100 çözer */
+    .wizard-inputs {
+        flex-direction: column !important;
+    }
+
+    /* Mobilde sayfanın en altına inilememe sorununu çözer (Alt menü payı) */
+    .main-content {
+        padding-bottom: 95px !important; 
+    }
     body {
         flex-direction: column;
     }

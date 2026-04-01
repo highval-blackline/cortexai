@@ -364,7 +364,17 @@ async function fetchGlobalStats() {
 
             data.recentFeed.forEach(item => {
                 const timeDiff = Math.floor((Date.now() - item.time) / 60000);
-                const timeText = timeDiff === 0 ? "Şimdi" : timeDiff + " dk önce";
+                let timeText = "Şimdi";
+                
+                if (timeDiff > 0 && timeDiff < 60) {
+                    timeText = timeDiff + " dk önce";
+                } else if (timeDiff >= 60 && timeDiff < 1440) {
+                    const diffHour = Math.floor(timeDiff / 60);
+                    timeText = diffHour + " saat önce";
+                } else if (timeDiff >= 1440) {
+                    const diffDay = Math.floor(timeDiff / 1440);
+                    timeText = diffDay + " gün önce";
+                }
                 const isHighRisk = item.riskScore >= 50;
                 const isMedRisk = item.riskScore >= 20 && item.riskScore < 50;
                 const borderColor = isHighRisk ? 'var(--risk-high)' : (isMedRisk ? 'var(--risk-med)' : 'var(--risk-low)');
