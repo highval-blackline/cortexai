@@ -698,6 +698,11 @@ td {
         padding-bottom: 140px !important; 
     }
 
+    /* YENİ: Tüm sayfalardaki kutuların en alt yuvarlak köşelerinin görünmesi için dış boşluk */
+    .panel, .table-container {
+        margin-bottom: 60px !important;
+    }
+
     /* Ortalama Fiyat Sorgula ve diğer kutuların hizasını zorla hizaya sokuyoruz */
     .wizard-inputs {
         flex-direction: column !important;
