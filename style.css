@@ -711,12 +711,33 @@ td {
         grid-column: span 1 !important;
     }
 
-/* YENİ: Kaydırma çubuğunun yazıyı ezmesine KESİN çözüm */
+/* YENİ: Yatay scroll çubuğunun yazıyı ezmesine %100 HÜCRE İÇİ ÇÖZÜM */
     .table-container {
-        padding-bottom: 35px !important;
+        padding-bottom: 10px !important;
     }
     .table-container table {
-        border-bottom: 25px solid transparent !important;
+        border-bottom: none !important;
         margin-bottom: 0 !important;
     }
-} /* <-- Bu o en sondaki kapatma parantezi */
+    /* YENİ: Yatay scroll çubuğunun yazıyı ezmesine %100 HÜCRE İÇİ ÇÖZÜM */
+    .table-container {
+        padding-bottom: 10px !important;
+    }
+    .table-container table {
+        border-bottom: none !important;
+        margin-bottom: 0 !important;
+    }
+    
+    /* 1. KORUMA: Tablonun altına görünmez bir duvar örüyoruz */
+    .table-container::after {
+        content: '';
+        display: block;
+        height: 20px;
+    }
+    
+    /* 2. KORUMA VE ASIL ÇÖZÜM: Son satırdaki hücrelerin iç boşluğunu uzatıyoruz. 
+       Scroll çubuğu artık yazının değil, bu fazladan boşluğun üstüne oturacak! */
+    .table-container tbody tr:last-child td {
+        padding-bottom: 40px !important;
+    }
+}
