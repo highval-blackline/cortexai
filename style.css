@@ -711,21 +711,36 @@ td {
         grid-column: span 1 !important;
     }
 
-    /* 1. KORUMA: Tablonun altına görünmez bir duvar örüyoruz (Scrollbar buraya oturacak) */
+    /* ===================================================================
+       MOBİL YATAY SCROLLBAR ÇÖZÜMÜ (3 KATMANLI KORUMA)
+       
+       Sorun: overflow-x:auto olan bir container'da, scrollbar container'ın
+       padding alanı DAHİLİNDE render olur. Yani padding-bottom veya ::after
+       scrollbar'ı aşağı itemez — scrollbar onların da üzerine biner.
+       
+       Çözüm: Scrollbar'ın bindirdiği alanı İÇERİĞİN KENDİSİNDE büyüterek
+       metni scrollbar'dan fiziksel olarak uzaklaştırıyoruz.
+       =================================================================== */
+
+    /* KATMAN 1: Container'a padding-bottom — tarayıcı scroll hesaplamasını
+       biraz rahatlatır ama tek başına yetmez. */
     .table-container {
-        padding-bottom: 30px !important;
+        padding-bottom: 8px !important;
+        -webkit-overflow-scrolling: touch !important; /* iOS momentum scroll */
     }
-    
-    .table-container::after {
-        content: '' !important;
-        display: block !important;
-        width: 100% !important;
-        height: 24px !important;
-        background: transparent !important;
-    }
-    
+
+    /* KATMAN 2: Tablonun kendisine margin-bottom — bu margin scrollable
+       content'in BİR PARÇASIDIR, yani scrollbar'ın ALT SINIRINI aşağı iter.
+       Bu en kritik katmandır. */
     .table-container table {
+        margin-bottom: 36px !important;
         border-bottom: none !important;
-        margin-bottom: 0 !important;
+    }
+
+    /* KATMAN 3: Son satırdaki hücrelerin padding-bottom'unu artır.
+       Bu, metnin kendisini scrollbar'dan uzaklaştırır.
+       Scrollbar boş padding alanına oturur, metne değmez. */
+    .table-container table tbody tr:last-child td {
+        padding-bottom: 32px !important;
     }
 }
