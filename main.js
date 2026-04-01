@@ -337,6 +337,14 @@ async function fetchGlobalStats() {
         const feedList = document.getElementById('liveFeedList');
         const tableBody = document.getElementById('tableBody'); // Radar tablosunu yakalıyoruz
 
+        // YENİ EKLENEN KISIM: Veri geldiği an yükleme ekranını sil ve asıl listeyi göster
+        const feedLoader = document.getElementById('feedLoading');
+        if (feedLoader) feedLoader.style.display = 'none';
+        if (feedList) feedList.style.display = 'flex';
+
+        if (data.recentFeed && data.recentFeed.length > 0) {
+            feedList.innerHTML = '';
+
         if (data.recentFeed && data.recentFeed.length > 0) {
             feedList.innerHTML = '';
             if (tableBody) tableBody.innerHTML = ''; // Eski radar verilerini temizle

@@ -139,18 +139,18 @@
                 <div class="panel" style="margin-bottom: 30px;">
                     <div class="panel-title"
                         style="font-size: 16px; font-weight: 600; margin-bottom: 15px; color: var(--text-main); border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">
-                        <i class="fa-solid fa-bolt" style="color: var(--risk-med); margin-right: 8px;"></i>Son Yapılan
-                        Analizler (Canlı Akış)
+                        <i class="fa-solid fa-bolt" style="color: var(--risk-med); margin-right: 8px;"></i>Son Yapılan Analizler (Canlı Akış)
                     </div>
-                    <div id="liveFeedList" style="display: flex; flex-direction: column; gap: 10px;">
-                        <div style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 30px 20px;">
-                            <i class="fa-solid fa-circle-notch fa-spin" style="color: var(--risk-low); font-size: 18px; margin-bottom: 10px; display: block;"></i>
-                            Veriler sunucudan çekiliyor...
-                        </div>
+                    
+                    <div id="feedLoading" style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 30px 20px;">
+                        <i class="fa-solid fa-circle-notch fa-spin" style="color: var(--risk-low); font-size: 18px; margin-bottom: 10px; display: block;"></i>
+                        Veriler sunucudan çekiliyor...
+                    </div>
+
+                    <div id="liveFeedList" style="display: none; flex-direction: column; gap: 10px;">
                     </div>
                 </div>
-            </div>
-
+            
             <div id="radar" class="tab-content">
                 <div class="page-header">
                     <h1 class="page-title">Canlı Radar</h1>
