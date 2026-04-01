@@ -539,37 +539,78 @@ td {
 }
 
 /* ==========================================
-   APPLE TARZI MİKRO-ANİMASYONLAR
+   APPLE TARZI LİQUİD GLASS & ULTRA AKIŞKAN ANİMASYONLAR
    ========================================== */
 
-/* 1. Kart Yükselme (Hover) Efekti */
+/* 1. Üst Menü ve Yan Menü Sıvı Cam (Glassmorphism) Efekti */
+.header, .sidebar {
+    background-color: rgba(10, 10, 10, 0.65) !important;
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* 2. Açılır Menüler (Dropdown) İçin Buzlu Cam */
+#modelDropdownList, #wizardDropdownList {
+    background: rgba(20, 20, 20, 0.6) !important;
+    backdrop-filter: blur(30px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* 3. Alarm ve Görsel Pencereleri (Modal) İçin Premium Cam */
+#alarmModal > div, #imageModal > div {
+    background: rgba(15, 15, 15, 0.55) !important;
+    backdrop-filter: blur(40px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9) !important;
+    border-radius: 16px !important;
+}
+
+/* 4. Arama Kutuları ve Inputlar İçin Derinlik Efekti */
+.search-bar, .scan-input, select, input[type="text"] {
+    background: rgba(25, 25, 25, 0.5) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.search-bar:focus-within, .scan-input:focus, input[type="text"]:focus, select:focus {
+    background: rgba(35, 35, 35, 0.7) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05) !important;
+    transform: scale(1.005);
+}
+
+/* 5. Kart Yükselme (Hover) Efekti - Yay (Spring) Hissi */
 .stat-card {
-    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease !important;
+    /* Apple'ın meşhur 0.16, 1, 0.3, 1 eğrisi: Hızlı başlar, mükemmel yavaşlar */
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.7s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.5s ease !important;
 }
 .stat-card:hover {
-    transform: translateY(-4px) !important;
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6) !important;
-    border-color: #333333 !important;
+    transform: translateY(-6px) scale(1.01) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* 2. Canlı Akış (Radar) Büyüme ve Süzülme Efekti */
+/* 6. Canlı Akış (Radar) Büyüme ve Süzülme Efekti */
 .feed-item {
-    /* Süreyi 0.4s'den 0.6s'ye çıkardık, bu daha ağır ve premium bir his verir */
-    transition: transform 0.6s cubic-bezier(0.2, 1, 0.2, 1), background-color 0.5s ease !important;
-    animation: slideDownFade 0.6s cubic-bezier(0.2, 1, 0.2, 1) forwards;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.6s ease !important;
+    animation: slideDownFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-
 .feed-item:hover {
-    /* Büyümeyi 1.01'den 1.015'e çekerek yavaş hareketin belli olmasını sağladık */
     transform: scale(1.015) !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
 }
 
 @keyframes slideDownFade {
-    from { opacity: 0; transform: translateY(-15px); }
+    from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* 3. Modern AI Yükleme (Loading) Efektleri */
+/* 7. Modern AI Yükleme (Loading) Efektleri */
 @keyframes spinApple {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
