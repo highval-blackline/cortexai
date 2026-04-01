@@ -519,7 +519,13 @@ async function startAnalysis() {
     errorMsg.style.display = 'none';
     const box = document.getElementById('dropZone');
 
-    box.innerHTML = `<i class="fa-solid fa-cloud-arrow-up fa-fade" style="color: var(--text-main); font-size: 40px;"></i><h3 style="margin-top: 15px; color: white;">Yapay Zeka Analiz Ediyor...</h3><p style="color: var(--text-muted); margin-top: 10px;">${filesToProcess.length > 0 ? filesToProcess.length + ' fotoğraf işleniyor ve birleştiriliyor...' : 'Link indiriliyor...'}</p>`;
+    box.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0;">
+            <div style="width: 44px; height: 44px; border: 3px solid var(--border-focus); border-top: 3px solid var(--brand-accent); border-radius: 50%; animation: spinApple 1s linear infinite; margin-bottom: 20px;"></div>
+            <h3 style="color: white; font-weight: 500; letter-spacing: 0.5px; animation: pulseApple 2s infinite;">Yapay Zeka Analiz Ediyor...</h3>
+            <p style="color: var(--text-muted); font-size: 13px; margin-top: 10px;">${filesToProcess.length > 0 ? filesToProcess.length + ' fotoğraf işleniyor ve birleştiriliyor...' : 'Link indiriliyor...'}</p>
+        </div>
+    `;
 
     const formData = new FormData();
 
@@ -811,18 +817,47 @@ async function sendFeedback(isCorrect) {
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    const wizardList = document.getElementById('wizardModelList');
-    if (wizardList) {
-        Object.keys(frontEndDB).forEach(model => {
-            let option = document.createElement('option');
-            option.value = model;
-            wizardList.appendChild(option);
+    const wizardInput = document.getElementById('wizardModelInput');
+    const wizardDropdown = document.getElementById('wizardDropdownList');
+    const wizardHidden = document.getElementById('wizardModel');
+
+    if (!wizardInput || !wizardDropdown) return;
+
+    function renderWizardDropdown(filterText = "") {
+        wizardDropdown.innerHTML = "";
+        const models = Object.keys(frontEndDB);
+        const filtered = models.filter(m => m.toLowerCase().includes(filterText.toLowerCase()));
+
+        if (filtered.length === 0) {
+            wizardDropdown.innerHTML = "<div style='padding: 10px; color: var(--text-muted); font-size: 13px;'>Sonuç bulunamadı</div>";
+            return;
+        }
+
+        filtered.forEach(model => {
+            let div = document.createElement('div');
+            div.className = 'dropdown-item';
+            div.innerText = model;
+            div.onclick = function() {
+                wizardInput.value = model;
+                wizardHidden.value = model;
+                wizardDropdown.style.display = 'none';
+            };
+            wizardDropdown.appendChild(div);
         });
     }
+
+    wizardInput.addEventListener('focus', () => { renderWizardDropdown(wizardInput.value); wizardDropdown.style.display = 'block'; });
+    wizardInput.addEventListener('input', (e) => { wizardHidden.value = ""; renderWizardDropdown(e.target.value); wizardDropdown.style.display = 'block'; });
+    
+    document.addEventListener('click', (e) => {
+        if (!wizardInput.contains(e.target) && !wizardDropdown.contains(e.target)) {
+            wizardDropdown.style.display = 'none';
+        }
+    });
 });
 
 function calculateWizardPrice() {
-    const modelInput = document.getElementById('wizardModel').value.trim();
+    const modelInput = document.getElementById('wizardModel').value;
     const condition = document.getElementById('wizardCondition').value;
     const batteryMult = parseFloat(document.getElementById('wizardBattery').value);
     const cosmeticMult = parseFloat(document.getElementById('wizardCosmetic').value);

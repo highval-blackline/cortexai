@@ -179,16 +179,21 @@
             </div>
 <div id="wizardSection" class="tab-content">
                 <div class="page-header">
-                    <h1 class="page-title">Cihazım Ne Kadar Eder? <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--risk-low); font-size: 24px;"></i></h1>
+                    <h1 class="page-title">Cihazım Ne Kadar Eder?</h1>
                     <p class="page-subtitle">Cihazınızın detaylarını girin, piyasa değerini anında hesaplayalım.</p>
                 </div>
                 
                 <div class="panel">
                     <div style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;">
-                        <div>
+                        <div style="position: relative;">
                             <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Cihaz Modeli</label>
-                            <input type="text" id="wizardModel" class="search-bar" placeholder="Örn: iPhone 16 Pro Max" list="wizardModelList" style="width: 100%; border: 1px solid var(--border-focus); background: var(--bg-absolute); color: white; padding: 12px; border-radius: 6px; outline: none;">
-                            <datalist id="wizardModelList"></datalist>
+                            <input type="text" id="wizardModelInput" placeholder="Cihaz modelini yazarak arayın..." 
+                                style="background: var(--bg-absolute); border: 1px solid var(--border-focus); color: white; padding: 12px; border-radius: 6px; width: 100%; outline: none;" 
+                                autocomplete="off">
+                            <div id="wizardDropdownList" 
+                                style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-panel); border: 1px solid var(--border-focus); border-top: none; max-height: 200px; overflow-y: auto; z-index: 1000; border-radius: 0 0 6px 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.8);">
+                            </div>
+                            <input type="hidden" id="wizardModel" value="">
                         </div>
                         
                         <div>

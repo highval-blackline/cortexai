@@ -537,3 +537,42 @@ td {
         gap: 15px;
     }
 }
+
+/* ==========================================
+   APPLE TARZI MİKRO-ANİMASYONLAR
+   ========================================== */
+
+/* 1. Kart Yükselme (Hover) Efekti */
+.stat-card {
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease !important;
+}
+.stat-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6) !important;
+    border-color: #333333 !important;
+}
+
+/* 2. Canlı Akış (Radar) Büyüme ve Süzülme Efekti */
+.feed-item {
+    transition: transform 0.2s ease, background-color 0.2s ease !important;
+    animation: slideDownFade 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+.feed-item:hover {
+    transform: scale(1.015) !important;
+}
+
+@keyframes slideDownFade {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 3. Modern AI Yükleme (Loading) Efektleri */
+@keyframes spinApple {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+@keyframes pulseApple {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
