@@ -447,6 +447,11 @@ td {
     .wizard-inputs {
         flex-direction: column !important;
     }
+    
+    /* Ortadaki kartın mobilde sağdan kısa kalma/hizalama sorununu %100 çözer */
+    .stat-card {
+        grid-column: span 1 !important;
+    }
 
     /* Mobilde sayfanın en altına inilememe sorununu çözer (Alt menü payı) */
     .main-content {
