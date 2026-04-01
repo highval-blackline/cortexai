@@ -344,10 +344,7 @@ async function fetchGlobalStats() {
 
         if (data.recentFeed && data.recentFeed.length > 0) {
             feedList.innerHTML = '';
-
-        if (data.recentFeed && data.recentFeed.length > 0) {
-            feedList.innerHTML = '';
-            if (tableBody) tableBody.innerHTML = ''; // Eski radar verilerini temizle
+            if (tableBody) tableBody.innerHTML = '';
 
             data.recentFeed.forEach(item => {
                 const timeDiff = Math.floor((Date.now() - item.time) / 60000);
@@ -807,4 +804,61 @@ async function sendFeedback(isCorrect) {
             setTimeout(fetchGlobalStats, 1000); 
         } catch (e) { console.log("Geri bildirim gönderilemedi."); }
     }
+}
+
+// ==========================================
+// CİHAZIM NE KADAR EDER? - SİHİRBAZ KODLARI
+// ==========================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    const wizardList = document.getElementById('wizardModelList');
+    if (wizardList) {
+        Object.keys(frontEndDB).forEach(model => {
+            let option = document.createElement('option');
+            option.value = model;
+            wizardList.appendChild(option);
+        });
+    }
+});
+
+function calculateWizardPrice() {
+    const modelInput = document.getElementById('wizardModel').value.trim();
+    const condition = document.getElementById('wizardCondition').value;
+    const batteryMult = parseFloat(document.getElementById('wizardBattery').value);
+    const cosmeticMult = parseFloat(document.getElementById('wizardCosmetic').value);
+    const resultDiv = document.getElementById('wizardResult');
+
+    if (!frontEndDB[modelInput]) {
+        alert("Lütfen listeden geçerli bir cihaz modeli seçin (Örn: iPhone 16 Pro Max)");
+        return;
+    }
+
+    const dbPriceString = frontEndDB[modelInput][condition];
+    if (!dbPriceString) {
+        alert("Bu cihaz modeli için seçtiğiniz garanti durumuna ait fiyat verisi bulunamadı.");
+        return;
+    }
+
+    let basePrice = 0;
+    const numbers = dbPriceString.match(/\d+\.\d+/g); 
+    if (numbers && numbers.length === 2) {
+        const min = parseInt(numbers[0].replace('.', ''));
+        const max = parseInt(numbers[1].replace('.', ''));
+        basePrice = (min + max) / 2;
+    } else if (numbers && numbers.length === 1) {
+        basePrice = parseInt(numbers[0].replace('.', ''));
+    } else {
+        alert("Fiyat hesaplanırken veritabanı hatası oluştu.");
+        return;
+    }
+
+    let finalPrice = basePrice * batteryMult * cosmeticMult;
+    const fastPrice = finalPrice * 0.88; 
+    const patientPrice = finalPrice * 1.10; 
+
+    document.getElementById('priceFast').innerText = fastPrice.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + " TL";
+    document.getElementById('priceNormal').innerText = finalPrice.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + " TL";
+    document.getElementById('pricePatient').innerText = patientPrice.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + " TL";
+
+    resultDiv.style.display = 'block';
 }

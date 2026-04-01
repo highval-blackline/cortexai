@@ -247,73 +247,7 @@
                     </div>
                 </div>
             </div>
-            ```
 
----
-
-### Adım 3 (JS Kodlarını Ekleyelim)
-
-Az önceki mesajımda bahsettiğim gibi, artık menü geçişi için `switchTab` kodunu değiştirmemize **gerek kalmadı**. Yeni kod direkt sistemin bir parçası oldu.
-
-Sadece `main.js` dosyasını açıp, **en alt satıra (bütün kodların en sonuna)** hesaplama yapacak olan o zeka kodunu yapıştırman yeterli:
-
-```javascript
-// ==========================================
-// CİHAZIM NE KADAR EDER? - SİHİRBAZ KODLARI
-// ==========================================
-
-document.addEventListener('DOMContentLoaded', () => {
-    const wizardList = document.getElementById('wizardModelList');
-    if (wizardList) {
-        Object.keys(frontEndDB).forEach(model => {
-            let option = document.createElement('option');
-            option.value = model;
-            wizardList.appendChild(option);
-        });
-    }
-});
-
-function calculateWizardPrice() {
-    const modelInput = document.getElementById('wizardModel').value.trim();
-    const condition = document.getElementById('wizardCondition').value;
-    const batteryMult = parseFloat(document.getElementById('wizardBattery').value);
-    const cosmeticMult = parseFloat(document.getElementById('wizardCosmetic').value);
-    const resultDiv = document.getElementById('wizardResult');
-
-    if (!frontEndDB[modelInput]) {
-        alert("Lütfen listeden geçerli bir cihaz modeli seçin (Örn: iPhone 16 Pro Max)");
-        return;
-    }
-
-    const dbPriceString = frontEndDB[modelInput][condition];
-    if (!dbPriceString) {
-        alert("Bu cihaz modeli için seçtiğiniz garanti durumuna ait fiyat verisi bulunamadı.");
-        return;
-    }
-
-    let basePrice = 0;
-    const numbers = dbPriceString.match(/\d+\.\d+/g); 
-    if (numbers && numbers.length === 2) {
-        const min = parseInt(numbers[0].replace('.', ''));
-        const max = parseInt(numbers[1].replace('.', ''));
-        basePrice = (min + max) / 2;
-    } else if (numbers && numbers.length === 1) {
-        basePrice = parseInt(numbers[0].replace('.', ''));
-    } else {
-        alert("Fiyat hesaplanırken veritabanı hatası oluştu.");
-        return;
-    }
-
-    let finalPrice = basePrice * batteryMult * cosmeticMult;
-    const fastPrice = finalPrice * 0.88; 
-    const patientPrice = finalPrice * 1.10; 
-
-    document.getElementById('priceFast').innerText = fastPrice.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + " TL";
-    document.getElementById('priceNormal').innerText = finalPrice.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + " TL";
-    document.getElementById('pricePatient').innerText = patientPrice.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + " TL";
-
-    resultDiv.style.display = 'block';
-}
             <div id="alarms" class="tab-content">
                 <div class="page-header">
                     <h1 class="page-title">Fiyat Alarmlarım</h1>
