@@ -710,4 +710,9 @@ td {
     .stat-card {
         grid-column: span 1 !important;
     }
-}
+    
+/* YENİ: Sağa sola kaydırma çubuğunun tablonun son satırını kapatmasını engeller */
+    .table-container table {
+        margin-bottom: 16px !important;
+    }
+} /* <-- Bu o en sondaki kapatma parantezi */
