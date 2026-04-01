@@ -70,8 +70,10 @@
                         class="fa-solid fa-satellite-dish"></i><span>Canlı Radar</span></a></li>
             <li><a class="nav-item" onclick="switchTab('fraud', this)"><i
                         class="fa-solid fa-shield-halved"></i><span>Sahtekarlık Tespiti</span></a></li>
-            <li><a class="nav-item" onclick="switchTab('alarms', this)"><i class="fa-solid fa-bell"></i><span>Fiyat
-                        Alarmlarım</span></a></li>
+            <li><a class="nav-item" onclick="switchTab('alarms', this)"><i
+                class="fa-solid fa-bell"></i><span>Fiyat Alarmlarım</span></a></li>
+            <li><a class="nav-item" onclick="switchTab('wizardSection', this)"><i
+                class="fa-solid fa-wand-magic-sparkles"></i><span>Değer Hesapla</span></a></li>
         </ul>
         <div class="system-status"><span class="status-dot"></span> Sistemler Aktif</div>
     </aside>
@@ -173,7 +175,143 @@
                     </table>
                 </div>
             </div>
+<div id="wizardSection" class="tab-content">
+                <div class="page-header">
+                    <h1 class="page-title">Cihazım Ne Kadar Eder? <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--risk-low); font-size: 24px;"></i></h1>
+                    <p class="page-subtitle">Cihazınızın detaylarını girin, piyasa değerini anında hesaplayalım.</p>
+                </div>
+                
+                <div class="panel">
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div>
+                            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Cihaz Modeli</label>
+                            <input type="text" id="wizardModel" class="search-bar" placeholder="Örn: iPhone 16 Pro Max" list="wizardModelList" style="width: 100%; border: 1px solid var(--border-focus); background: var(--bg-absolute); color: white; padding: 12px; border-radius: 6px; outline: none;">
+                            <datalist id="wizardModelList"></datalist>
+                        </div>
+                        
+                        <div>
+                            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Garanti ve Kayıt Durumu</label>
+                            <select id="wizardCondition" class="search-bar" style="width: 100%; cursor: pointer; border: 1px solid var(--border-focus); background: var(--bg-absolute); color: white; padding: 12px; border-radius: 6px; outline: none;">
+                                <option value="TR_IkinciEl">Türkiye Garantili (İkinci El)</option>
+                                <option value="TR_Sifir">Türkiye Garantili (Sıfır / Kapalı Kutu)</option>
+                                <option value="YurtDisi_IkinciEl">Yurt Dışı (İkinci El)</option>
+                                <option value="YurtDisi_Sifir">Yurt Dışı (Sıfır / Kapalı Kutu)</option>
+                            </select>
+                        </div>
 
+                        <div>
+                            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Pil Sağlığı</label>
+                            <select id="wizardBattery" class="search-bar" style="width: 100%; cursor: pointer; border: 1px solid var(--border-focus); background: var(--bg-absolute); color: white; padding: 12px; border-radius: 6px; outline: none;">
+                                <option value="1">Mükemmel (%90 - %100)</option>
+                                <option value="0.95">İyi (%80 - %89) [- %5 Değer Kaybı]</option>
+                                <option value="0.85">Servis Uyarısı (%80 Altı) [- %15 Değer Kaybı]</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Kozmetik Durum</label>
+                            <select id="wizardCosmetic" class="search-bar" style="width: 100%; cursor: pointer; border: 1px solid var(--border-focus); background: var(--bg-absolute); color: white; padding: 12px; border-radius: 6px; outline: none;">
+                                <option value="1">Kusursuz (Çiziksiz ve Orijinal)</option>
+                                <option value="0.95">Ufak Kılcal Çizikler Var [- %5 Değer Kaybı]</option>
+                                <option value="0.85">Ezik, Vuruk veya Değişen Parça Var [- %15 Değer Kaybı]</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button class="btn-outline" style="width: 100%; padding: 12px; font-size: 15px; background: white; color: black; font-weight: bold;" onclick="calculateWizardPrice()">Fiyatı Hesapla</button>
+
+                    <div id="wizardResult" style="display: none; margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-light);">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            
+                            <div style="background: var(--bg-absolute); padding: 15px; border-radius: 8px; border: 1px solid var(--border-light); text-align: center; border-bottom: 3px solid #0A84FF;">
+                                <div style="color: var(--text-muted); font-size: 12px; margin-bottom: 5px;">Hızlı Satış Fiyatı</div>
+                                <div id="priceFast" style="font-size: 20px; font-weight: 700; color: #0A84FF;">-</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">1-3 gün içinde satmak için</div>
+                            </div>
+
+                            <div style="background: var(--bg-absolute); padding: 15px; border-radius: 8px; border: 1px solid var(--border-light); text-align: center; border-bottom: 3px solid var(--risk-low);">
+                                <div style="color: var(--text-muted); font-size: 12px; margin-bottom: 5px;">Normal Piyasa Değeri</div>
+                                <div id="priceNormal" style="font-size: 24px; font-weight: 800; color: var(--text-main);">-</div>
+                                <div style="font-size: 11px; color: var(--risk-low); margin-top: 5px;">İdeal satış rakamı</div>
+                            </div>
+
+                            <div style="background: var(--bg-absolute); padding: 15px; border-radius: 8px; border: 1px solid var(--border-light); text-align: center; border-bottom: 3px solid var(--risk-med);">
+                                <div style="color: var(--text-muted); font-size: 12px; margin-bottom: 5px;">Tok Satıcı Fiyatı</div>
+                                <div id="pricePatient" style="font-size: 20px; font-weight: 700; color: var(--risk-med);">-</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">Acelesi olmayanlar için</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            ```
+
+---
+
+### Adım 3 (JS Kodlarını Ekleyelim)
+
+Az önceki mesajımda bahsettiğim gibi, artık menü geçişi için `switchTab` kodunu değiştirmemize **gerek kalmadı**. Yeni kod direkt sistemin bir parçası oldu.
+
+Sadece `main.js` dosyasını açıp, **en alt satıra (bütün kodların en sonuna)** hesaplama yapacak olan o zeka kodunu yapıştırman yeterli:
+
+```javascript
+// ==========================================
+// CİHAZIM NE KADAR EDER? - SİHİRBAZ KODLARI
+// ==========================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    const wizardList = document.getElementById('wizardModelList');
+    if (wizardList) {
+        Object.keys(frontEndDB).forEach(model => {
+            let option = document.createElement('option');
+            option.value = model;
+            wizardList.appendChild(option);
+        });
+    }
+});
+
+function calculateWizardPrice() {
+    const modelInput = document.getElementById('wizardModel').value.trim();
+    const condition = document.getElementById('wizardCondition').value;
+    const batteryMult = parseFloat(document.getElementById('wizardBattery').value);
+    const cosmeticMult = parseFloat(document.getElementById('wizardCosmetic').value);
+    const resultDiv = document.getElementById('wizardResult');
+
+    if (!frontEndDB[modelInput]) {
+        alert("Lütfen listeden geçerli bir cihaz modeli seçin (Örn: iPhone 16 Pro Max)");
+        return;
+    }
+
+    const dbPriceString = frontEndDB[modelInput][condition];
+    if (!dbPriceString) {
+        alert("Bu cihaz modeli için seçtiğiniz garanti durumuna ait fiyat verisi bulunamadı.");
+        return;
+    }
+
+    let basePrice = 0;
+    const numbers = dbPriceString.match(/\d+\.\d+/g); 
+    if (numbers && numbers.length === 2) {
+        const min = parseInt(numbers[0].replace('.', ''));
+        const max = parseInt(numbers[1].replace('.', ''));
+        basePrice = (min + max) / 2;
+    } else if (numbers && numbers.length === 1) {
+        basePrice = parseInt(numbers[0].replace('.', ''));
+    } else {
+        alert("Fiyat hesaplanırken veritabanı hatası oluştu.");
+        return;
+    }
+
+    let finalPrice = basePrice * batteryMult * cosmeticMult;
+    const fastPrice = finalPrice * 0.88; 
+    const patientPrice = finalPrice * 1.10; 
+
+    document.getElementById('priceFast').innerText = fastPrice.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + " TL";
+    document.getElementById('priceNormal').innerText = finalPrice.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + " TL";
+    document.getElementById('pricePatient').innerText = patientPrice.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + " TL";
+
+    resultDiv.style.display = 'block';
+}
             <div id="alarms" class="tab-content">
                 <div class="page-header">
                     <h1 class="page-title">Fiyat Alarmlarım</h1>
