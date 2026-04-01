@@ -351,6 +351,14 @@
                             </div>
                         </div>
 
+                        <div id="shareBox" style="display: none; margin-top: 15px; padding: 15px; background: var(--bg-absolute); border: 1px dashed var(--border-light); border-radius: 8px; text-align: center;">
+                            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;"><i class="fa-solid fa-share-nodes"></i> Bu analizi başkalarıyla paylaş:</p>
+                            <div style="display: flex; gap: 10px; justify-content: center;">
+                                <input type="text" id="shareUrlInput" readonly style="width: 100%; padding: 10px; background: var(--bg-panel); border: 1px solid var(--border-focus); color: white; border-radius: 6px; font-size: 12px; outline: none;">
+                                <button class="btn-outline" onclick="copyShareUrl()" style="padding: 10px 20px; background: white; color: black; font-weight: bold; white-space: nowrap;">Kopyala</button>
+                            </div>
+                        </div>
+                        
                         <button class="btn-outline" style="margin-top: 20px; width: 100%;"
                             onclick="resetAnalysis()">Yeni Bir Analiz Yap</button>
                     </div>

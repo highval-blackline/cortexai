@@ -243,6 +243,15 @@ function showImage(url) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    // Eğer URL'de bir ID varsa (paylaşılan linke tıklandıysa) direkt o analizi aç
+    const urlParams = new URLSearchParams(window.location.search);
+    const sharedId = urlParams.get('id');
+    if (sharedId) {
+        // Sahtekarlık Analizi sekmesine geç
+        const fraudTab = document.querySelector('.nav-item[onclick*="fraud"]');
+        if (fraudTab) switchTab('fraud', fraudTab);
+        loadSharedAnalysis(sharedId);
+    }
     const searchInput = document.getElementById('modelSearchInput');
     const dropdownList = document.getElementById('modelDropdownList');
     const hiddenSelect = document.getElementById('modelSelect');
@@ -551,6 +560,14 @@ async function startAnalysis() {
         const data = await response.json();
 
         if (data.error) { alert("Analiz Hatası: " + data.error); resetAnalysis(); return; }
+
+        // YENİ: Başarılı analiz sonrası URL'ye ID ekle (Sayfa yenilenmeden)
+        if (data.analysisId) {
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?id=' + data.analysisId;
+            window.history.pushState({ path: newUrl }, '', newUrl);
+            document.getElementById('shareUrlInput').value = newUrl;
+            document.getElementById('shareBox').style.display = 'block';
+        }
 
         document.getElementById('analysisResult').style.display = 'block';
         box.style.display = 'none';
@@ -896,4 +913,64 @@ function calculateWizardPrice() {
     document.getElementById('pricePatient').innerText = patientPrice.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + " TL";
 
     resultDiv.style.display = 'block';
+}
+
+// Paylaşılan Analizi Getirme Fonksiyonu
+async function loadSharedAnalysis(id) {
+    const box = document.getElementById('dropZone');
+    const resultBox = document.getElementById('analysisResult');
+    
+    box.style.display = 'none';
+    resultBox.style.display = 'block';
+    
+    document.getElementById('scannedUrl').innerText = "Buluttan çekiliyor...";
+    document.getElementById('scoreResult').innerText = "...";
+    document.getElementById('keywordResult').innerText = "...";
+    document.getElementById('aiDecision').innerHTML = `<strong>Analiz Yükleniyor...</strong>`;
+
+    try {
+        const response = await fetch(`https://piyasa-ai.onrender.com/analysis/${id}`);
+        const result = await response.json();
+
+        if (result.success) {
+            const data = result.data;
+            document.getElementById('scannedUrl').innerText = "Paylaşılan Piyasa.ai Bağlantısı";
+            
+            const scoreBox = document.getElementById('scoreResult');
+            scoreBox.innerText = "%" + data.riskScore + " Risk";
+            scoreBox.style.color = data.riskScore > 50 ? 'var(--risk-high)' : (data.riskScore > 0 ? 'var(--risk-med)' : 'var(--risk-low)');
+            document.getElementById('keywordResult').innerText = data.reason || "Detay bulunamadı.";
+
+            const decisionBox = document.getElementById('aiDecision');
+            if (data.riskScore >= 50) {
+                decisionBox.style.borderLeftColor = 'var(--risk-high)'; decisionBox.style.backgroundColor = 'rgba(255, 68, 68, 0.1)';
+                decisionBox.innerHTML = `<div style="margin-bottom: 10px;"><strong>DİKKAT YÜKSEK RİSK:</strong> Sistem bu paylaşımda yüksek oltalama şüphesi tespit etti.</div>`;
+            } else if (data.riskScore >= 20) {
+                decisionBox.style.borderLeftColor = 'var(--risk-med)'; decisionBox.style.backgroundColor = 'rgba(255, 187, 51, 0.1)';
+                decisionBox.innerHTML = `<div style="margin-bottom: 10px;"><strong>ORTA RİSK:</strong> Bu ilanda bazı şüpheli izler veya tutarsızlıklar bulunuyor.</div>`;
+            } else {
+                decisionBox.style.borderLeftColor = 'var(--risk-low)'; decisionBox.style.backgroundColor = 'rgba(0, 200, 81, 0.1)';
+                decisionBox.innerHTML = `<div style="margin-bottom: 10px;"><strong>GÜVENLİ GÖRÜNÜYOR:</strong> Bu analizde bilinen bir oltalama taktiğine rastlanmadı.</div>`;
+            }
+
+            document.getElementById('shareUrlInput').value = window.location.href;
+            document.getElementById('shareBox').style.display = 'block';
+        } else {
+            alert("Bu analiz bağlantısı geçersiz veya silinmiş.");
+            resetAnalysis();
+        }
+    } catch (err) {
+        alert("Bağlantı hatası.");
+        resetAnalysis();
+    }
+}
+
+// Link Kopyalama Butonu Fonksiyonu
+function copyShareUrl() {
+    const copyText = document.getElementById("shareUrlInput");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); 
+    navigator.clipboard.writeText(copyText.value).then(() => {
+        alert("Piyasa.ai analiz linki başarıyla kopyalandı! İstediğiniz yere yapıştırabilirsiniz.");
+    });
 }

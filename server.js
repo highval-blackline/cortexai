@@ -3,7 +3,7 @@ const cors = require('cors');
 const multer = require('multer');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const cloudinary = require('cloudinary').v2;
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const piyasaVeritabani = require('./database.js');
 const { OAuth2Client } = require('google-auth-library');
 const googleClient = new OAuth2Client("104508083781-2ib50lt8k0ud027375q9k3aja7gd8403.apps.googleusercontent.com");
@@ -296,15 +296,18 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
 
         const newFeedItem = {
             model: aiAnalysis.model || "Bilinmeyen Cihaz",
-            condition: aiAnalysis.condition || "TR_IkinciEl", // Durum tespiti yapılamazsa güvenli liman olarak ikinci el ata
+            condition: aiAnalysis.condition || "TR_IkinciEl",
             riskScore: aiAnalysis.score,
-            fiyat: aiAnalysis.fiyat || "Belirtilmemiş", // İlan fiyatı verisi eklendi
+            fiyat: aiAnalysis.fiyat || "Belirtilmemiş",
+            reason: aiAnalysis.reason || "Belirtilmedi", // Rapor detayını da DB'ye ekledik
             imageUrl: finalImageUrl,
             time: Date.now()
         };
 
+        let insertedId = null;
         if (feedCollection) {
-            await feedCollection.insertOne(newFeedItem);
+            const result = await feedCollection.insertOne(newFeedItem);
+            insertedId = result.insertedId; // MongoDB'nin atadığı eşsiz ID'yi yakaladık
             recentFeed = await feedCollection.find().sort({ time: -1 }).limit(10).toArray();
         } else {
             recentFeed.unshift(newFeedItem);
@@ -313,10 +316,11 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
 
         res.json({
             success: true,
+            analysisId: insertedId, // Frontend'e paylaşım için ID'yi gönderiyoruz
             riskScore: aiAnalysis.score,
             reason: aiAnalysis.reason,
             model: aiAnalysis.model || "Bilinmeyen Cihaz",
-            fiyat: aiAnalysis.fiyat || "Belirtilmemiş", // <-- BURAYI DA EKLEDİK
+            fiyat: aiAnalysis.fiyat || "Belirtilmemiş",
             totalScans: globalScans,
             fraudCount: globalFrauds
         });
@@ -327,9 +331,19 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
     }
 });
 
+// Paylaşılan Analiz URL'sini Karşılayan Rota
+app.get('/analysis/:id', async (req, res) => {
+    if (!feedCollection) return res.status(500).json({ error: "Veritabanı hazır değil." });
+    try {
+        const item = await feedCollection.findOne({ _id: new ObjectId(req.params.id) });
+        if (!item) return res.status(404).json({ error: "Analiz bulunamadı veya silinmiş." });
+        res.json({ success: true, data: item });
+    } catch (err) {
+        res.status(400).json({ error: "Geçersiz analiz kimliği." });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log("Piyasa.ai SISTEM AKTIF! 🚀");
 });
-
-// tetikleme
