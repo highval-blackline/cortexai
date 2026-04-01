@@ -387,13 +387,13 @@ async function fetchGlobalStats() {
                     if (karYuzdesi >= 15) {
                         // ÇOK UCUZ - KOYU MAVİ ZEMİN / BEYAZ YAZI
                         durumEtiketi = `<span class="badge" style="background: #0056B3; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">FIRSAT 🚀</span>`;
-                    } else if (karYuzdesi >= 5 && karYuzdesi < 15) {
-                        // UCUZ - KOYU YEŞİL ZEMİN / BEYAZ YAZI
+                    } else if (karYuzdesi >= 10 && karYuzdesi < 15) {
+                        // UCUZ - KOYU YEŞİL ZEMİN / BEYAZ YAZI (Alt sınır %5'ten %10'a çıkarıldı)
                         durumEtiketi = `<span class="badge" style="background: #248A3D; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Uygun Fiyat</span>`;
-                    } else if (karYuzdesi > -5 && karYuzdesi < 5) {
-                        // NORMAL - KOYU GRİ ZEMİN / BEYAZ YAZI
+                    } else if (karYuzdesi > -10 && karYuzdesi < 10) {
+                        // NORMAL - KOYU GRİ ZEMİN / BEYAZ YAZI (Nötr alanı genişletildi)
                         durumEtiketi = `<span class="badge" style="background: #636366; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Nötr (Değerinde)</span>`;
-                    } else if (karYuzdesi <= -5 && karYuzdesi > -15) {
+                    } else if (karYuzdesi <= -10 && karYuzdesi > -15) {
                         // BİRAZ PAHALI - KOYU TURUNCU ZEMİN / BEYAZ YAZI
                         durumEtiketi = `<span class="badge" style="background: #D97706; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Biraz Pahalı</span>`;
                     } else if (karYuzdesi <= -15) {
