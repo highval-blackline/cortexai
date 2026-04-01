@@ -711,33 +711,21 @@ td {
         grid-column: span 1 !important;
     }
 
-/* YENİ: Yatay scroll çubuğunun yazıyı ezmesine %100 HÜCRE İÇİ ÇÖZÜM */
+    /* 1. KORUMA: Tablonun altına görünmez bir duvar örüyoruz (Scrollbar buraya oturacak) */
     .table-container {
-        padding-bottom: 10px !important;
-    }
-    .table-container table {
-        border-bottom: none !important;
-        margin-bottom: 0 !important;
-    }
-    /* YENİ: Yatay scroll çubuğunun yazıyı ezmesine %100 HÜCRE İÇİ ÇÖZÜM */
-    .table-container {
-        padding-bottom: 10px !important;
-    }
-    .table-container table {
-        border-bottom: none !important;
-        margin-bottom: 0 !important;
+        padding-bottom: 30px !important;
     }
     
-    /* 1. KORUMA: Tablonun altına görünmez bir duvar örüyoruz */
     .table-container::after {
-        content: '';
-        display: block;
-        height: 20px;
+        content: '' !important;
+        display: block !important;
+        width: 100% !important;
+        height: 24px !important;
+        background: transparent !important;
     }
     
-    /* 2. KORUMA VE ASIL ÇÖZÜM: Son satırdaki hücrelerin iç boşluğunu uzatıyoruz. 
-       Scroll çubuğu artık yazının değil, bu fazladan boşluğun üstüne oturacak! */
-    .table-container tbody tr:last-child td {
-        padding-bottom: 40px !important;
+    .table-container table {
+        border-bottom: none !important;
+        margin-bottom: 0 !important;
     }
 }
