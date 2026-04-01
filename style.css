@@ -617,15 +617,14 @@ td {
 
 /* 6. Canlı Akış (Radar) - EKSTRA YAVAŞ VE SAKİN BÜYÜME */
 .feed-item {
-    /* Süreyi tam 2.0 saniyeye çıkardık (Animasyon dünyasında çok uzun bir süredir). */
+    transform: scale(1); /* Zıplamayı önleyen temel kilit kod eklendi */
     transition: transform 2.0s cubic-bezier(0.22, 1, 0.36, 1), background-color 1.5s ease, box-shadow 1.5s ease !important;
-    animation: slideDownFade 0.8s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+    animation: slideDownFade 0.8s cubic-bezier(0.1, 0.9, 0.2, 1); /* 'forwards' kilidi silindi */
     transform-origin: center;
     will-change: transform, box-shadow; 
 }
 
 .feed-item:hover {
-    /* Büyüme oranını 1.025'ten 1.015'e düşürdük. Az mesafe + Uzun süre = Aşırı yavaşlık */
     transform: scale(1.015) !important; 
     background-color: rgba(255, 255, 255, 0.04) !important;
     z-index: 10;
@@ -633,8 +632,8 @@ td {
 }
 
 @keyframes slideDownFade {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(-10px) scale(1); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* 7. Loading Efektleri */
