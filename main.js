@@ -994,3 +994,94 @@ function copyShareUrl() {
         alert("Piyasa.ai analiz linki başarıyla kopyalandı! İstediğiniz yere yapıştırabilirsiniz.");
     });
 }
+
+// ==========================================
+// KESİN ÇÖZÜM: NATIVE SELECT'LERİ APPLE TARZI ÖZEL MENÜYE ÇEVİRİR
+// ==========================================
+function upgradeSelectsToAppleStyle() {
+    const selects = document.querySelectorAll('#wizardSection select');
+    selects.forEach(select => {
+        // Eğer zaten dönüştürülmüşse bir daha dokunma
+        if(select.nextElementSibling && select.nextElementSibling.classList.contains('apple-select-wrapper')) return;
+
+        // 1. Orijinal o çirkin select'i gizle
+        select.style.display = 'none';
+
+        // 2. Kapsayıcı oluştur
+        const wrapper = document.createElement('div');
+        wrapper.className = 'apple-select-wrapper';
+        wrapper.style.position = 'relative';
+
+        // 3. Tıklanabilir premium buton oluştur
+        const displayBtn = document.createElement('div');
+        displayBtn.className = 'apple-select-btn';
+        displayBtn.innerHTML = `<span>${select.options[select.selectedIndex].text}</span> <i class="fa-solid fa-chevron-down" style="font-size: 12px; color: var(--text-muted); transition: transform 0.3s;"></i>`;
+
+        // 4. Açılır menü kutusunu oluştur
+        const menu = document.createElement('div');
+        menu.className = 'apple-select-menu';
+
+        // 5. Seçenekleri Apple tarzı listeye ekle
+        Array.from(select.options).forEach(option => {
+            const item = document.createElement('div');
+            item.className = 'apple-select-item';
+            if (option.selected) item.classList.add('selected');
+            item.innerHTML = `${option.text} <i class="fa-solid fa-check check-icon" style="display: ${option.selected ? 'block' : 'none'}; color: var(--brand-accent);"></i>`;
+
+            // Seçeneğe tıklanınca
+            item.onclick = (e) => {
+                e.stopPropagation();
+                select.value = option.value; // Orijinal select'i günceller ki senin fiyat hesaplama kodun bozulmasın
+                displayBtn.querySelector('span').innerText = option.text;
+                
+                menu.querySelectorAll('.apple-select-item').forEach(i => {
+                    i.classList.remove('selected');
+                    i.querySelector('.check-icon').style.display = 'none';
+                });
+                
+                item.classList.add('selected');
+                item.querySelector('.check-icon').style.display = 'block';
+                menu.classList.remove('show');
+                displayBtn.classList.remove('active');
+                displayBtn.querySelector('i').style.transform = 'rotate(0deg)';
+            };
+            menu.appendChild(item);
+        });
+
+        // Butona tıklayınca menüyü aç/kapat animasyonları
+        displayBtn.onclick = (e) => {
+            e.stopPropagation();
+            const isShowing = menu.classList.contains('show');
+            
+            // Açık olan diğer menüleri kapat
+            document.querySelectorAll('.apple-select-menu.show').forEach(m => {
+                m.classList.remove('show');
+                m.previousSibling.classList.remove('active');
+                m.previousSibling.querySelector('i').style.transform = 'rotate(0deg)';
+            });
+            
+            if (!isShowing) {
+                menu.classList.add('show');
+                displayBtn.classList.add('active');
+                displayBtn.querySelector('i').style.transform = 'rotate(180deg)';
+            }
+        };
+
+        wrapper.appendChild(displayBtn);
+        wrapper.appendChild(menu);
+        select.parentNode.insertBefore(wrapper, select.nextSibling);
+    });
+
+    // Ekranda boş bir yere tıklanırsa açık menüleri kapat
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.apple-select-menu.show').forEach(m => {
+            m.classList.remove('show');
+            m.previousSibling.classList.remove('active');
+            m.previousSibling.querySelector('i').style.transform = 'rotate(0deg)';
+        });
+    });
+}
+
+// Sayfa yüklendiğinde eski kutuları yok et ve yenilerini çiz
+document.addEventListener('DOMContentLoaded', upgradeSelectsToAppleStyle);
+setTimeout(upgradeSelectsToAppleStyle, 500);
