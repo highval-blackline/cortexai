@@ -1,4 +1,13 @@
 // Vercel tetikleme satırı
+// GLOBAL NATIVE ALERT EZİCİ (Android/iOS uyarılarını iptal eder)
+let alertTimeout;
+window.alert = function(message) {
+    const alertBox = document.getElementById('customAlertBox');
+    document.getElementById('customAlertText').innerText = message;
+    alertBox.style.display = 'flex';
+    clearTimeout(alertTimeout);
+    alertTimeout = setTimeout(() => { alertBox.style.display = 'none'; }, 3500);
+};
 let lastFeedJSON = ""; // Son gelen veriyi hafızada tutmak için
 const frontEndDB = {
     // ==========================================
@@ -816,25 +825,29 @@ function logout() {
     location.reload();
 }
 
-async function deleteAlarm(modelName) {
-    if (!confirm(`${modelName} alarmını silmek istediğinize emin misiniz?`)) return;
+function deleteAlarm(modelName) {
+    const confirmBox = document.getElementById('customConfirmModal');
+    document.getElementById('customConfirmText').innerText = `${modelName} cihazına ait fiyat alarmını silmek istediğinize emin misiniz?`;
+    confirmBox.style.display = 'flex';
 
-    try {
-        const response = await fetch('https://piyasa-ai.onrender.com/delete-alarm', {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: window.currentUserEmail,
-                model: modelName
-            })
-        });
-        const data = await response.json();
-        if (data.success) {
-            loadMyAlarms(); // Listeyi yeniler
+    document.getElementById('customConfirmCancel').onclick = function() {
+        confirmBox.style.display = 'none';
+    };
+
+    document.getElementById('customConfirmOk').onclick = async function() {
+        confirmBox.style.display = 'none';
+        try {
+            const response = await fetch('https://piyasa-ai.onrender.com/delete-alarm', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: window.currentUserEmail, model: modelName })
+            });
+            const data = await response.json();
+            if (data.success) { loadMyAlarms(); }
+        } catch (err) {
+            alert("Silme işlemi sırasında sunucuya ulaşılamadı.");
         }
-    } catch (err) {
-        alert("Silme işlemi sırasında sunucuya ulaşılamadı.");
-    }
+    };
 }
 
 async function sendFeedback(isCorrect) {
