@@ -756,3 +756,24 @@ td {
         margin-bottom: 0 !important;
     }
 }
+
+/* SİTEYE MOBİL UYGULAMA HAVASI VEREN KRİTİK AYARLAR */
+* {
+    /* Dokunulduğunda çıkan o mavi gölgeyi her yerden siler */
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+}
+
+/* Menü butonları, simgeler ve başlıklar seçilemesin (Uygulama gibi) */
+.nav-item, .sidebar, button, i, span, h1, h2 {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+}
+
+/* Basıldığında çıkan çerçeveleri yok eder */
+button:focus, input:focus, select:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
