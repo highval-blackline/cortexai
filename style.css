@@ -777,3 +777,11 @@ button:focus, input:focus, select:focus {
     outline: none !important;
     box-shadow: none !important;
 }
+
+/* Mobilde tablodaki etiketlerin sıkışıp alt alta geçmesini KESİN engeller (Tek satır yapar) */
+@media (max-width: 768px) {
+    .table-container td, 
+    .table-container span {
+        white-space: nowrap !important;
+    }
+}
