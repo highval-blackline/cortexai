@@ -1098,3 +1098,57 @@ function upgradeSelectsToAppleStyle() {
 // Sayfa yüklendiğinde eski kutuları yok et ve yenilerini çiz
 document.addEventListener('DOMContentLoaded', upgradeSelectsToAppleStyle);
 setTimeout(upgradeSelectsToAppleStyle, 500);
+
+// ==========================================
+// GLOBAL ÜST ARAMA MOTORU MANTIĞI
+// ==========================================
+document.addEventListener("DOMContentLoaded", function () {
+    const headerInput = document.getElementById('headerSearchInput');
+    const headerDropdown = document.getElementById('headerDropdownList');
+
+    function renderHeaderResults(term = "") {
+        headerDropdown.innerHTML = "";
+        const allModels = Object.keys(frontEndDB);
+        const matches = allModels.filter(m => m.toLowerCase().includes(term.toLowerCase()));
+
+        if (matches.length === 0) {
+            headerDropdown.innerHTML = "<div style='padding: 12px; color: var(--text-muted); font-size: 13px;'>Cihaz bulunamadı...</div>";
+            return;
+        }
+
+        matches.forEach(model => {
+            let item = document.createElement('div');
+            item.className = 'dropdown-item'; // Mevcut CSS sınıflarını kullanır
+            item.style.padding = "12px 16px";
+            item.innerText = model;
+            item.onclick = function () {
+                // 1. Piyasa Özeti sekmesine otomatik geçiş yap
+                switchTab('dashboard', document.querySelector('.nav-item'));
+                // 2. Dashboard'daki arama kutularını doldur
+                document.getElementById('modelSearchInput').value = model;
+                document.getElementById('modelSelect').value = model;
+                // 3. Fiyatı hesapla ve göster
+                calculatePrice();
+                // 4. Arama çubuğunu temizle ve kapat
+                headerInput.value = "";
+                headerDropdown.style.display = 'none';
+            };
+            headerDropdown.appendChild(item);
+        });
+    }
+
+    headerInput.addEventListener('focus', () => { if(headerInput.value) headerDropdown.style.display = 'block'; });
+    headerInput.addEventListener('input', (e) => {
+        if (e.target.value.length > 0) {
+            renderHeaderResults(e.target.value);
+            headerDropdown.style.display = 'block';
+        } else {
+            headerDropdown.style.display = 'none';
+        }
+    });
+
+    // Boşluğa tıklayınca kapat
+    document.addEventListener('click', (e) => {
+        if (!headerInput.contains(e.target) && !headerDropdown.contains(e.target)) headerDropdown.style.display = 'none';
+    });
+});
