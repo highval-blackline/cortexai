@@ -390,12 +390,11 @@
 
     <script src="main.js"></script>
 <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js')
-          .then(() => console.log('Service Worker Kaydedildi!'));
-      }
-    </script>
-    
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+      .then(() => console.log('Service Worker Kaydedildi!'));
+  }
+</script>
 </body>
 
 </html>
