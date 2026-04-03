@@ -228,6 +228,11 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
         // YENİ PROMPT: Yapay Zekaya özel ayar çekildi ve kurallar katılaştırıldı
         const prompt = `Sen Türkiye'nin en iyi ve en kurt ikinci el telefon piyasası uzmanısın. Bugünün tarihi: ${bugun}. 
         Sana bir ilana ait 1'den fazla ekran görüntüsü göndermiş olabilirim. Lütfen gönderdiğim TÜM fotoğrafları inceleyerek, oradaki bilgileri (fiyat, açıklama, kapasite, garanti durumu vb.) birleştirip tam bir analiz yap.
+
+        İLK VE EN ÖNEMLİ KURAL (GÜVENLİK DUVARI): Yüklenen görseller SATILIK BİR TELEFON VEYA CİHAZ İLANI DEĞİLSE (örneğin kedi, manzara, rastgele bir insan yüzü, araba, oyun ekranı veya alakasız bir metin ise), analizi DERHAL DURDUR ve SADECE ŞU JSON'u döndür:
+        {"isListing": false, "error": "Geçersiz görsel. Lütfen geçerli bir cihaz ilanı yükleyin."}
+
+        EĞER GÖRSEL GERÇEKTEN BİR İLAN İSE, analiz yap ve AŞAĞIDAKİ KURALLARA GÖRE DEVAM ET.
         
         KULLANMAN GEREKEN GÜNCEL PİYASA REFERANS FİYATLARI (VERİTABANI):
         ${dbMetni}
@@ -255,8 +260,9 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
         - 20-50 arası: ORTA RİSK.
         - 50-100 arası: YÜKSEK RİSK (Fiyat şüpheli şekilde çok çok altında).
 
-        SADECE JSON FORMATINDA CEVAP VER, EK AÇIKLAMA YAZMA:
-        {"score": 10, "reason": "Fiyat yurtdışı sıfır piyasasına uygun.", "model": "iPhone 17 Pro Max", "fiyat": "74.999 TL", "condition": "YurtDisi_Sifir"};`
+        SADECE JSON FORMATINDA CEVAP VER, EK AÇIKLAMA YAZMA. GÖRSEL GEÇERLİ BİR İLAN İSE FORMAT ŞU ŞEKİLDE OLMALIDIR:
+        {"isListing": true, "score": 10, "reason": "Fiyat yurtdışı sıfır piyasasına uygun.", "model": "iPhone 17 Pro Max", "fiyat": "74.999 TL", "condition": "YurtDisi_Sifir"}
+        `;
 
         let MAX_RETRIES = 3;
         let success = false;
@@ -280,8 +286,12 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
 
         if (!success) throw new Error("Analiz tamamlanamadı.");
 
-        const jsonMatch = responseText.match(/\{.*\}/s);
         const aiAnalysis = JSON.parse(jsonMatch[0]);
+
+        // GÜVENLİK DUVARI: Eğer ilan değilse işlemi durdur ve hatayı fırlat! (DB'ye kaydetme)
+        if (aiAnalysis.isListing === false) {
+            return res.json({ error: aiAnalysis.error });
+        }
 
         globalScans++;
         if (aiAnalysis.score >= 75) globalFrauds++;
@@ -344,6 +354,33 @@ app.get('/analysis/:id', async (req, res) => {
         res.json({ success: true, data: item });
     } catch (err) {
         res.status(400).json({ error: "Geçersiz analiz kimliği." });
+    }
+});
+
+// GİZLİ TEMİZLİK ROTASI (Siteyi temizlemek için tarayıcıdan bu linke gireceksin)
+app.get('/temizlik-yap', async (req, res) => {
+    try {
+        if (!feedCollection || !statsCollection) return res.send("DB Bağlanamadı.");
+
+        // 1. Troll ilanları (Bilinmiyor, Bilgi Yok vb.) veritabanından tamamen sil
+        await feedCollection.deleteMany({
+            model: { $in: ["Bilinmiyor", "Tespit edilemedi", "Belirlenemedi", "Bilgi Yok", "Bilinmeyen Cihaz"] }
+        });
+
+        // 2. Dolandırıcı sayacını 2'ye eşitle
+        globalFrauds = 2;
+        await statsCollection.updateOne(
+            { id: "global" },
+            { $set: { globalFrauds: 2 } },
+            { upsert: true }
+        );
+
+        // 3. Son 10 listesini güncelle
+        recentFeed = await feedCollection.find().sort({ time: -1 }).limit(10).toArray();
+
+        res.send("<h1 style='color:green;'>Temizlik Başarılı!</h1><p>Troll ilanlar silindi, Dolandırıcı sayısı 2 yapıldı. Kendi siteni yenileyebilirsin.</p>");
+    } catch(e) {
+        res.send("Hata: " + e.message);
     }
 });
 
