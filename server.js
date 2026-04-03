@@ -229,7 +229,7 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
         const prompt = `Sen Türkiye'nin en iyi ve en kurt ikinci el telefon piyasası uzmanısın. Bugünün tarihi: ${bugun}. 
         Sana bir ilana ait 1'den fazla ekran görüntüsü göndermiş olabilirim. Lütfen gönderdiğim TÜM fotoğrafları inceleyerek, oradaki bilgileri (fiyat, açıklama, kapasite, garanti durumu vb.) birleştirip tam bir analiz yap.
 
-        İLK VE EN ÖNEMLİ KURAL (GÜVENLİK DUVARI): Yüklenen görseller SATILIK BİR TELEFON VEYA CİHAZ İLANI DEĞİLSE (örneğin kedi, manzara, rastgele bir insan yüzü, araba, oyun ekranı veya alakasız bir metin ise), analizi DERHAL DURDUR ve SADECE ŞU JSON'u döndür:
+        İLK VE EN ÖNEMLİ KURAL (GÜVENLİK DUVARI): Yüklenen görseller SATILIK BİR TELEFON VEYA CİHAZ İLANI DEĞİLSE veya görselde NET BİR SATIŞ FİYATI YAZMIYORSA (örneğin kedi, manzara, YouTube kutu açılışı, rastgele insan), analizi DERHAL DURDUR ve SADECE ŞU JSON'u döndür:
         {"isListing": false, "error": "Geçersiz görsel. Lütfen geçerli bir cihaz ilanı yükleyin."}
 
         EĞER GÖRSEL GERÇEKTEN BİR İLAN İSE, analiz yap ve AŞAĞIDAKİ KURALLARA GÖRE DEVAM ET.
@@ -293,17 +293,21 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
         }
         const aiAnalysis = JSON.parse(jsonMatch[0]);
 
-        // 2. KÖKÜNDEN ENGELLEME (YENİ JAVASCRIPT DUVARI)
-        // Eğer AI "bu bir ilan değil" dediyse VEYA zorla uydurup "Belirsiz/Bilinmiyor" vb. yazdıysa:
-        const uydurmaModeller = ["belirsiz", "bilinmiyor", "tespit", "bilgi yok", "bilinmeyen"];
+        // 2. KÖKÜNDEN ENGELLEME (AŞILAMAZ JAVASCRIPT DUVARI)
         const algilananModel = (aiAnalysis.model || "").toLowerCase();
+        const fiyatMetni = String(aiAnalysis.fiyat || "").toLowerCase(); // Sayı bile gelse metne çevirir
+        
+        const uydurmaModeller = ["belirsiz", "bilinmiyor", "tespit", "bilgi yok", "bilinmeyen", "yok", "bulunamadı", "diğer"];
         const trollMu = uydurmaModeller.some(kelime => algilananModel.includes(kelime));
+        
+        // MURATABİGF ENGELİ: Eğer görselden bir "Fiyat (Rakam + TL/Lira)" çıkmıyorsa, KESİNLİKLE İLAN DEĞİLDİR!
+        const gercekFiyatMi = /\d/.test(fiyatMetni) && (fiyatMetni.includes('tl') || fiyatMetni.includes('lira') || fiyatMetni.includes('₺'));
 
-        if (aiAnalysis.isListing === false || trollMu) {
-            return res.json({ error: "Geçersiz görsel. Bu bir teknolojik cihaz ilanı değil." });
+        if (aiAnalysis.isListing === false || trollMu || !gercekFiyatMi) {
+            return res.json({ error: "Geçersiz görsel. Sistem bu görselde net bir fiyat veya teknolojik cihaz ilanı tespit edemedi." });
         }
 
-        // Eğer buraya kadar gelebildiyse GERÇEK BİR İLANDIR, DB'ye kaydetmeye devam et:
+        // Eğer buraya kadar gelebildiyse görselde Fiyat ve Model vardır (GERÇEK BİR İLANDIR)
         globalScans++;
         if (aiAnalysis.score >= 75) globalFrauds++;
 
@@ -373,9 +377,9 @@ app.get('/temizlik-yap', async (req, res) => {
     try {
         if (!feedCollection || !statsCollection) return res.send("DB Bağlanamadı.");
 
-        // 1. Troll ilanları (Bilinmiyor, Bilgi Yok vb.) veritabanından tamamen sil
+        // 1. Troll ilanları veritabanından KESİN OLARAK sil (Büyük/Küçük harf duyarlılığını kaldırdık)
         await feedCollection.deleteMany({
-            model: { $in: ["Bilinmiyor", "Tespit edilemedi", "Belirlenemedi", "Bilgi Yok", "Bilinmeyen Cihaz", "Belirsiz"] }
+            model: { $regex: /bilinmiyor|tespit|belirlenemedi|bilgi yok|bilinmeyen|belirsiz/i }
         });
 
         // 2. Dolandırıcı sayacını 2'ye eşitle
