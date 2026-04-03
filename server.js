@@ -286,13 +286,24 @@ app.post('/analyze', upload.array('images', 3), async (req, res) => {
 
         if (!success) throw new Error("Analiz tamamlanamadı.");
 
+        // 1. JSON Çıkarma ve Çözümleme (Kayıp kod eklendi)
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+            return res.json({ error: "Yapay zeka görseli tanımlayamadı. Lütfen net bir ilan fotoğrafı yükleyin." });
+        }
         const aiAnalysis = JSON.parse(jsonMatch[0]);
 
-        // GÜVENLİK DUVARI: Eğer ilan değilse işlemi durdur ve hatayı fırlat! (DB'ye kaydetme)
-        if (aiAnalysis.isListing === false) {
-            return res.json({ error: aiAnalysis.error });
+        // 2. KÖKÜNDEN ENGELLEME (YENİ JAVASCRIPT DUVARI)
+        // Eğer AI "bu bir ilan değil" dediyse VEYA zorla uydurup "Belirsiz/Bilinmiyor" vb. yazdıysa:
+        const uydurmaModeller = ["belirsiz", "bilinmiyor", "tespit", "bilgi yok", "bilinmeyen"];
+        const algilananModel = (aiAnalysis.model || "").toLowerCase();
+        const trollMu = uydurmaModeller.some(kelime => algilananModel.includes(kelime));
+
+        if (aiAnalysis.isListing === false || trollMu) {
+            return res.json({ error: "Geçersiz görsel. Bu bir teknolojik cihaz ilanı değil." });
         }
 
+        // Eğer buraya kadar gelebildiyse GERÇEK BİR İLANDIR, DB'ye kaydetmeye devam et:
         globalScans++;
         if (aiAnalysis.score >= 75) globalFrauds++;
 
@@ -364,7 +375,7 @@ app.get('/temizlik-yap', async (req, res) => {
 
         // 1. Troll ilanları (Bilinmiyor, Bilgi Yok vb.) veritabanından tamamen sil
         await feedCollection.deleteMany({
-            model: { $in: ["Bilinmiyor", "Tespit edilemedi", "Belirlenemedi", "Bilgi Yok", "Bilinmeyen Cihaz"] }
+            model: { $in: ["Bilinmiyor", "Tespit edilemedi", "Belirlenemedi", "Bilgi Yok", "Bilinmeyen Cihaz", "Belirsiz"] }
         });
 
         // 2. Dolandırıcı sayacını 2'ye eşitle
