@@ -382,11 +382,11 @@ app.get('/temizlik-yap', async (req, res) => {
             model: { $regex: /bilinmiyor|tespit|belirlenemedi|bilgi yok|bilinmeyen|belirsiz/i }
         });
 
-        // 2. Dolandırıcı sayacını 2'ye eşitle
-        globalFrauds = 2;
+        // 2. Dolandırıcı sayacını 5'e eşitle
+        globalFrauds = 5;
         await statsCollection.updateOne(
             { id: "global" },
-            { $set: { globalFrauds: 2 } },
+            { $set: { globalFrauds: 5 } },
             { upsert: true }
         );
 
