@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
+const rateLimit = require('express-rate-limit');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const cloudinary = require('cloudinary').v2;
 const { MongoClient, ObjectId } = require('mongodb');
@@ -62,6 +63,15 @@ async function connectDB() {
     }
 }
 connectDB();
+
+// YENİ: Yapay Zeka Suistimal Koruması (Rate Limiter)
+const analyzeLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 dakika (60.000 milisaniye)
+    max: 3, // Aynı IP adresinden 1 dakikada en fazla 3 analiz izni
+    message: { error: "Çok fazla analiz isteği gönderdiniz. Güvenlik gereği lütfen 1 dakika bekleyip tekrar deneyin." },
+    standardHeaders: true, // Rate limit bilgisini `RateLimit-*` başlıklarında gönderir
+    legacyHeaders: false, // Eski `X-RateLimit-*` başlıklarını devre dışı bırakır
+});
 
 app.get('/stats', (req, res) => {
     res.json({
@@ -172,7 +182,7 @@ app.post('/report-fraud', async (req, res) => {
     }
 });
 
-app.post('/analyze', upload.array('images', 3), async (req, res) => {
+app.post('/analyze', analyzeLimiter, upload.array('images', 3), async (req, res) => {
     console.log("\n--- GÖRSEL ANALİZ BAŞLADI ---");
 
     let imageParts = [];
