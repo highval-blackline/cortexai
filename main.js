@@ -25,6 +25,17 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(data => {
             frontEndDB = data;
             console.log("✅ Güncel fiyatlar sunucudan başarıyla çekildi!");
+            
+            // YENİ: Veri geldiğinde açık olan arama kutusu varsa anında otomatik yenile
+            if (document.getElementById('modelDropdownList')?.style.display === 'block') {
+                document.getElementById('modelSearchInput').dispatchEvent(new Event('input'));
+            }
+            if (document.getElementById('wizardDropdownList')?.style.display === 'block') {
+                document.getElementById('wizardModelInput').dispatchEvent(new Event('input'));
+            }
+            if (document.getElementById('headerDropdownList')?.style.display === 'block') {
+                document.getElementById('headerSearchInput').dispatchEvent(new Event('input'));
+            }
         })
         .catch(err => console.error("❌ Fiyat listesi çekilirken hata oluştu:", err));
     // Eğer URL'de bir ID varsa (paylaşılan linke tıklandıysa) direkt o analizi aç
@@ -43,6 +54,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function renderDropdown(filterText = "") {
         dropdownList.innerHTML = "";
         const models = Object.keys(frontEndDB);
+        
+        // YENİ: Veritabanı boşsa (Henüz sunucudan gelmediyse) loading göster
+        if (models.length === 0) {
+            dropdownList.innerHTML = "<div style='padding: 10px 12px; color: var(--text-muted); font-size: 13px;'><i class='fa-solid fa-circle-notch fa-spin'></i> Sunucu uyanıyor, veriler çekiliyor...</div>";
+            return;
+        }
+
         const filteredModels = models.filter(model => model.toLowerCase().includes(filterText.toLowerCase()));
 
         if (filteredModels.length === 0) {
@@ -650,6 +668,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderWizardDropdown(filterText = "") {
         wizardDropdown.innerHTML = "";
         const models = Object.keys(frontEndDB);
+        
+        if (models.length === 0) {
+            wizardDropdown.innerHTML = "<div style='padding: 10px; color: var(--text-muted); font-size: 13px;'><i class='fa-solid fa-circle-notch fa-spin'></i> Sunucu uyanıyor, veriler çekiliyor...</div>";
+            return;
+        }
+
         const filtered = models.filter(m => m.toLowerCase().includes(filterText.toLowerCase()));
 
         if (filtered.length === 0) {
@@ -883,6 +907,12 @@ document.addEventListener("DOMContentLoaded", function () {
     function renderHeaderResults(term = "") {
         headerDropdown.innerHTML = "";
         const allModels = Object.keys(frontEndDB);
+        
+        if (allModels.length === 0) {
+            headerDropdown.innerHTML = "<div style='padding: 12px; color: var(--text-muted); font-size: 13px;'><i class='fa-solid fa-circle-notch fa-spin'></i> Sunucu uyanıyor, veriler çekiliyor...</div>";
+            return;
+        }
+
         const matches = allModels.filter(m => m.toLowerCase().includes(term.toLowerCase()));
 
         if (matches.length === 0) {
