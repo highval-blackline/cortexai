@@ -445,13 +445,15 @@ cron.schedule('* * * * *', async () => {
             // Cihaz veritabanında yoksa veya TR_IkinciEl fiyatı girilmemişse atla
             if (!cihazData || !cihazData["TR_IkinciEl"]) continue;
 
-            // Fiyat metninden ortalama matematiksel değeri (integer) çıkarıyoruz
-            const numbers = cihazData["TR_IkinciEl"].match(/\d+\.\d+/g);
+            // Yeni - Hata Toleranslı Blok (Tüm sayı formatlarını destekler)
+            let stringFiyat = String(cihazData["TR_IkinciEl"]);
+            let piyasaSayilari = stringFiyat.split('-').map(val => parseInt(val.replace(/[^0-9]/g, '')) || 0);
             let guncelFiyat = 0;
-            if (numbers && numbers.length === 2) {
-                guncelFiyat = (parseInt(numbers[0].replace('.', '')) + parseInt(numbers[1].replace('.', ''))) / 2;
-            } else if (numbers && numbers.length === 1) {
-                guncelFiyat = parseInt(numbers[0].replace('.', ''));
+
+            if (piyasaSayilari.length === 2 && piyasaSayilari[0] > 0 && piyasaSayilari[1] > 0) {
+                guncelFiyat = (piyasaSayilari[0] + piyasaSayilari[1]) / 2;
+            } else if (piyasaSayilari.length > 0 && piyasaSayilari[0] > 0) {
+                guncelFiyat = piyasaSayilari[0];
             }
 
             // MANTIK: Eğer güncel piyasa fiyatı, adamın hedeflediği fiyata eşit veya altındaysa VUR!

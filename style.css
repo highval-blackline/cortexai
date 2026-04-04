@@ -813,135 +813,52 @@ button:focus, input:focus, select:focus {
 }
 
 /* ======================================================== */
-/* APPLE TARZI ÖZEL AÇILIR MENÜLER (DEĞER HESAPLA İÇİN)     */
-/* ======================================================== */
-.apple-select-wrapper {
-    width: 100%;
-}
-.apple-select-btn {
-    background: rgba(20, 20, 20, 0.6) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    color: white;
-    padding: 14px 16px;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 13px;
-    font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.apple-select-btn.active {
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    background: rgba(30, 30, 30, 0.8) !important;
-}
-.apple-select-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: rgba(15, 15, 15, 0.85);
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    margin-top: 8px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-    z-index: 1000;
-    overflow: hidden;
-    animation: slideDownApple 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.apple-select-menu.show {
-    display: block;
-}
-.apple-select-item {
-    padding: 14px 16px;
-    font-size: 13px;
-    color: var(--text-muted);
-    cursor: pointer;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: all 0.2s;
-}
-.apple-select-item:last-child {
-    border-bottom: none;
-}
-.apple-select-item:hover, .apple-select-item.selected {
-    background: rgba(255, 255, 255, 0.08);
-    color: white;
-    font-weight: 600;
-}
-@keyframes slideDownApple {
-    from { opacity: 0; transform: translateY(-8px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* ======================================================== */
-/* ÖZEL UYARI (ALERT/CONFIRM) ANİMASYONLARI                 */
-/* ======================================================== */
-@keyframes slideDownAlert {
-    from { top: -50px; opacity: 0; transform: translate(-50%, -10px) scale(0.9); }
-    to { top: 20px; opacity: 1; transform: translate(-50%, 0) scale(1); }
-}
-@keyframes scaleUp {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-/* ======================================================== */
 /* ARAMA VE SELECT MENÜLERİ İÇİN SCROLL (KAYDIRMA) ÇÖZÜMÜ   */
 /* ======================================================== */
 
+/* Sorunun Sebebi: Tarayıcılarda (Chrome/Edge vb.) "backdrop-filter" (cam efekti) 
+   ile "overflow-y" aynı elementte kullanıldığında mouse tekerleği bug'a girip donar.
+   Çözüm: transform: translateZ(0) ile donanımsal hızlandırmayı zorluyoruz.
+*/
 #modelDropdownList, 
 #wizardDropdownList, 
 #headerDropdownList, 
 .apple-select-menu {
     max-height: 240px !important;
     overflow-y: auto !important;
-    overscroll-behavior: contain !important;
-    transform: translateZ(0) !important; 
-    -webkit-overflow-scrolling: touch !important; 
-    padding-right: 2px !important; /* Scrollbar'ın köşeye yapışıp ezilmesini önler */
+    overscroll-behavior: contain !important; /* Mouse tekerleğinin arkadaki ana sayfayı kaydırmasını engeller */
+    transform: translateZ(0) !important; /* Scroll donma bug'ının kesin ve donanımsal çözümü */
+    -webkit-overflow-scrolling: touch !important; /* Mobilde parmakla kaydırmayı akıcı yapar */
+    pointer-events: auto !important;
 }
 
-/* Kaydırma Çubuğu Genişliği */
+/* Kaydırma çubuğunu (Scrollbar) görünür yapıp Apple estetiğine uyduruyoruz */
 #modelDropdownList::-webkit-scrollbar, 
 #wizardDropdownList::-webkit-scrollbar, 
 #headerDropdownList::-webkit-scrollbar, 
 .apple-select-menu::-webkit-scrollbar {
-    width: 10px !important; /* Daha rahat tutulması için biraz kalınlaştırıldı */
+    width: 6px !important;
 }
 
-/* Kaydırma Çubuğu Arka Planı (Track) */
 #modelDropdownList::-webkit-scrollbar-track, 
 #wizardDropdownList::-webkit-scrollbar-track, 
 #headerDropdownList::-webkit-scrollbar-track, 
 .apple-select-menu::-webkit-scrollbar-track {
     background: transparent !important;
-    margin: 6px 0 !important; /* Kapsülün en üst ve en alta çarpmasını engeller */
+    border-radius: 0 0 10px 0 !important;
 }
 
-/* Kaydırma Çubuğu Tutamacı (Thumb) - KAYBOLMA BUG'ININ ÇÖZÜLDÜĞÜ YER */
 #modelDropdownList::-webkit-scrollbar-thumb, 
 #wizardDropdownList::-webkit-scrollbar-thumb, 
 #headerDropdownList::-webkit-scrollbar-thumb, 
 .apple-select-menu::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.25) !important;
-    border-radius: 10px !important;
-    border: 3px solid transparent !important; /* Çubuğun etrafına görünmez bir zırh örer */
-    background-clip: padding-box !important; /* Arka plan rengini zırhın içine hapseder, cam efektinde kaybolmasını KESİN engeller */
+    background: rgba(255, 255, 255, 0.25) !important;
+    border-radius: 4px !important;
 }
 
-/* Tutamaca Hover (Üzerine Gelme) Durumu */
 #modelDropdownList::-webkit-scrollbar-thumb:hover, 
 #wizardDropdownList::-webkit-scrollbar-thumb:hover, 
 #headerDropdownList::-webkit-scrollbar-thumb:hover, 
 .apple-select-menu::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 255, 255, 0.45) !important;
+    background: rgba(255, 255, 255, 0.45) !important;
 }
