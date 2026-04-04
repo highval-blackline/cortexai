@@ -60,8 +60,8 @@ function parsePriceValue(priceText) {
 function buildAlarmEmailHtml(alarm, currentPrice) {
     return `
         <div style="font-family: Arial; padding: 30px; background: #000; color: #fff; border: 1px solid #333; max-width: 500px; border-radius: 12px;">
-            <h2 style="color: #30D158;">Fiyat Radara Takildi!</h2>
-            <p>${alarm.model} icin bekledigin firsat geldi.</p>
+            <h2 style="color: #30D158;">Piyasa.ai fiyat uyarisi</h2>
+            <p>${alarm.model} icin belirledigine yakin bir fiyat bulundu.</p>
             <div style="background: #111; padding: 15px; border-radius: 8px; margin: 20px 0;">
                 <strong>Guncel Piyasa:</strong> ${currentPrice.toLocaleString('tr-TR')} TL<br>
                 <strong>Senin Hedefin:</strong> ${Number(alarm.targetPrice).toLocaleString('tr-TR')} TL
@@ -70,10 +70,20 @@ function buildAlarmEmailHtml(alarm, currentPrice) {
         </div>`;
 }
 
-async function sendBrevoEmail({ to, subject, htmlContent }) {
+function buildAlarmEmailText(alarm, currentPrice) {
+    return [
+        'Piyasa.ai fiyat uyarisi',
+        `${alarm.model} icin belirledigine yakin bir fiyat bulundu.`,
+        `Guncel piyasa: ${currentPrice.toLocaleString('tr-TR')} TL`,
+        `Senin hedefin: ${Number(alarm.targetPrice).toLocaleString('tr-TR')} TL`,
+        'Ilanlara git: https://piyasai.com.tr'
+    ].join('\n');
+}
+
+async function sendBrevoEmail({ to, subject, htmlContent, textContent }) {
     const apiKey = process.env.BREVO_API_KEY;
-    const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.EMAIL_USER;
-    const senderName = process.env.BREVO_SENDER_NAME || 'Piyasa.ai Radar';
+    const senderEmail = process.env.BREVO_SENDER_EMAIL;
+    const senderName = process.env.BREVO_SENDER_NAME || 'Piyasa.ai';
 
     if (!apiKey) {
         throw new Error('BREVO_API_KEY tanimli degil.');
@@ -94,7 +104,8 @@ async function sendBrevoEmail({ to, subject, htmlContent }) {
             sender: { name: senderName, email: senderEmail },
             to: [{ email: to }],
             subject,
-            htmlContent
+            htmlContent,
+            textContent
         })
     });
 
@@ -121,6 +132,7 @@ async function checkPriceAlarms() {
 
     try {
         const alarms = await db.collection('alarms').find().toArray();
+        const seenAlarmKeys = new Set();
 
         if (alarms.length === 0) {
             console.log('[CRON] Aktif alarm bulunamadi.');
@@ -143,11 +155,18 @@ async function checkPriceAlarms() {
                 continue;
             }
 
+            const alarmKey = `${alarm.email}|${alarm.model}|${Number(alarm.targetPrice)}`;
+            if (seenAlarmKeys.has(alarmKey)) {
+                continue;
+            }
+            seenAlarmKeys.add(alarmKey);
+
             try {
                 await sendBrevoEmail({
                     to: alarm.email,
-                    subject: `Hedef Vuruldu: ${alarm.model} Fiyati Dustu!`,
-                    htmlContent: buildAlarmEmailHtml(alarm, currentPrice)
+                    subject: `Piyasa.ai fiyat uyarisi: ${alarm.model}`,
+                    htmlContent: buildAlarmEmailHtml(alarm, currentPrice),
+                    textContent: buildAlarmEmailText(alarm, currentPrice)
                 });
 
                 console.log(`[CRON] Mail basariyla gonderildi: ${alarm.email}`);
