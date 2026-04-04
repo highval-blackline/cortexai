@@ -1,6 +1,5 @@
 const express = require('express');
 const cron = require('node-cron');
-const nodemailer = require('nodemailer');
 const cors = require('cors');
 const multer = require('multer');
 const rateLimit = require('express-rate-limit');
@@ -10,21 +9,6 @@ const { MongoClient, ObjectId } = require('mongodb');
 const piyasaVeritabani = require('./database.js');
 const { OAuth2Client } = require('google-auth-library');
 const googleClient = new OAuth2Client("104508083781-2ib50lt8k0ud027375q9k3aja7gd8403.apps.googleusercontent.com");
-
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false, // 587 için her zaman false
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
-    tls: {
-        // Render ve benzeri bulut platformlarındaki ağ engellerini aşar
-        rejectUnauthorized: false,
-        minVersion: "TLSv1.2"
-    }
-});
 
 const app = express();
 app.use(cors({ origin: '*' }));
@@ -434,7 +418,7 @@ app.get('/temizlik-yap', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-// OTONOM FİYAT ALARMI MOTORU (Geliştirilmiş Hata Logları ve Regex)
+// OTONOM FİYAT ALARMI MOTORU (API Tabanlı, Port Engeli Aşılmış Sürüm)
 cron.schedule('* * * * *', async () => {
     console.log("⏰ [CRON] Fiyat alarmı kontrolü başlatıldı...");
     if (!db) return console.log("❌ DB bağlantısı yok, işlem iptal.");
@@ -444,10 +428,11 @@ cron.schedule('* * * * *', async () => {
         if (alarms.length === 0) return console.log("ℹ️ Aktif alarm bulunamadı.");
 
         for (let alarm of alarms) {
+            // Veritabanından (piyasaVeritabani) cihaz bilgisini çekiyoruz
             const cihazData = piyasaVeritabani[alarm.model];
             if (!cihazData || !cihazData["TR_IkinciEl"]) continue;
 
-            // Fiyatı daha güvenli ayrıştır (Noktalı veya düz sayı fark etmez)
+            // Fiyatı ayrıştırma ve tolerans (Regex)
             let stringFiyat = String(cihazData["TR_IkinciEl"]);
             let piyasaSayilari = stringFiyat.split('-').map(val => parseInt(val.replace(/[^0-9]/g, '')) || 0);
             let guncelFiyat = 0;
@@ -461,29 +446,44 @@ cron.schedule('* * * * *', async () => {
             console.log(`🔍 Kontrol: ${alarm.model} | Piyasa: ${guncelFiyat} TL | Hedef: ${alarm.targetPrice} TL`);
 
             if (guncelFiyat > 0 && guncelFiyat <= alarm.targetPrice) {
-                const mailOptions = {
-                    from: `"Piyasa.ai Radar" <${process.env.EMAIL_USER}>`,
-                    to: alarm.email,
-                    subject: `🚀 Hedef Vuruldu: ${alarm.model} Fiyatı Düştü!`,
-                    html: `
-                        <div style="font-family: Arial; padding: 30px; background: #000; color: #fff; border: 1px solid #333; max-width: 500px; border-radius: 12px;">
-                            <h2 style="color: #30D158;">Fiyat Radara Takıldı!</h2>
-                            <p>${alarm.model} için beklediğin fırsat geldi.</p>
-                            <div style="background: #111; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                                <strong>Güncel Piyasa:</strong> ${guncelFiyat.toLocaleString('tr-TR')} TL<br>
-                                <strong>Senin Hedefin:</strong> ${alarm.targetPrice.toLocaleString('tr-TR')} TL
-                            </div>
-                            <a href="https://piyasai.com.tr" style="background: #fff; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">İlanlara Git</a>
-                        </div>`
-                };
+                const htmlContent = `
+                    <div style="font-family: Arial; padding: 30px; background: #000; color: #fff; border: 1px solid #333; max-width: 500px; border-radius: 12px;">
+                        <h2 style="color: #30D158;">Fiyat Radara Takıldı!</h2>
+                        <p>${alarm.model} için beklediğin fırsat geldi.</p>
+                        <div style="background: #111; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                            <strong>Güncel Piyasa:</strong> ${guncelFiyat.toLocaleString('tr-TR')} TL<br>
+                            <strong>Senin Hedefin:</strong> ${alarm.targetPrice.toLocaleString('tr-TR')} TL
+                        </div>
+                        <a href="https://piyasai.com.tr" style="background: #fff; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">İlanlara Git</a>
+                    </div>`;
 
+                // Render SMTP engeli HTTP (fetch) ile aşılıyor
                 try {
-                    await transporter.sendMail(mailOptions);
-                    console.log(`✅ Mail gönderildi: ${alarm.email}`);
-                    await db.collection("alarms").deleteOne({ _id: alarm._id });
-                } catch (mailErr) {
-                    console.error(`❌ SMTP Hatası (${alarm.email}):`, mailErr.message);
-                    // Hata "Invalid login" ise uygulama şifresi patlamış demektir
+                    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+                        method: 'POST',
+                        headers: {
+                            'accept': 'application/json',
+                            'api-key': process.env.BREVO_API_KEY,
+                            'content-type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            sender: { name: "Piyasa.ai Radar", email: process.env.EMAIL_USER },
+                            to: [{ email: alarm.email }],
+                            subject: `🚀 Hedef Vuruldu: ${alarm.model} Fiyatı Düştü!`,
+                            htmlContent: htmlContent
+                        })
+                    });
+
+                    // Başarılı olursa dönecek yanıt boş olabilir, hatalıysa JSON döner.
+                    if (response.ok) {
+                        console.log(`✅ Mail HTTP API ile başarıyla gönderildi: ${alarm.email}`);
+                        await db.collection("alarms").deleteOne({ _id: alarm._id });
+                    } else {
+                        const errorResult = await response.json();
+                        console.error(`❌ Mail API Hatası (${alarm.email}):`, errorResult);
+                    }
+                } catch (fetchErr) {
+                    console.error(`❌ Fetch/Ağ Hatası (${alarm.email}):`, fetchErr.message);
                 }
             }
         }
