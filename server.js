@@ -11,12 +11,18 @@ const piyasaVeritabani = require('./database.js');
 const { OAuth2Client } = require('google-auth-library');
 const googleClient = new OAuth2Client("104508083781-2ib50lt8k0ud027375q9k3aja7gd8403.apps.googleusercontent.com");
 
-// YENİ: E-posta Gönderici Motoru
+// YENİ: Ağ hatalarına karşı dayanıklı e-posta motoru
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // 587 portu için her zaman false olmalıdır
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
+    },
+    tls: {
+        // Bulut sunuculardaki bağlantı reddetme sorunlarını aşmak için kritik ayar
+        rejectUnauthorized: false
     }
 });
 
@@ -428,24 +434,20 @@ app.get('/temizlik-yap', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-// ==========================================
-// OTONOM FİYAT ALARMI MOTORU (CRON JOB)
-// Her gün sabah 10:00'da çalışır ('0 10 * * *')
-// ==========================================
+// OTONOM FİYAT ALARMI MOTORU (Geliştirilmiş Hata Logları ve Regex)
 cron.schedule('* * * * *', async () => {
     console.log("⏰ [CRON] Fiyat alarmı kontrolü başlatıldı...");
-    if (!db) return;
+    if (!db) return console.log("❌ DB bağlantısı yok, işlem iptal.");
 
     try {
         const alarms = await db.collection("alarms").find().toArray();
-        if (alarms.length === 0) return console.log("Aktif alarm bulunamadı.");
+        if (alarms.length === 0) return console.log("ℹ️ Aktif alarm bulunamadı.");
 
         for (let alarm of alarms) {
             const cihazData = piyasaVeritabani[alarm.model];
-            // Cihaz veritabanında yoksa veya TR_IkinciEl fiyatı girilmemişse atla
             if (!cihazData || !cihazData["TR_IkinciEl"]) continue;
 
-            // Yeni - Hata Toleranslı Blok (Tüm sayı formatlarını destekler)
+            // Fiyatı daha güvenli ayrıştır (Noktalı veya düz sayı fark etmez)
             let stringFiyat = String(cihazData["TR_IkinciEl"]);
             let piyasaSayilari = stringFiyat.split('-').map(val => parseInt(val.replace(/[^0-9]/g, '')) || 0);
             let guncelFiyat = 0;
@@ -456,42 +458,36 @@ cron.schedule('* * * * *', async () => {
                 guncelFiyat = piyasaSayilari[0];
             }
 
-            // MANTIK: Eğer güncel piyasa fiyatı, adamın hedeflediği fiyata eşit veya altındaysa VUR!
+            console.log(`🔍 Kontrol: ${alarm.model} | Piyasa: ${guncelFiyat} TL | Hedef: ${alarm.targetPrice} TL`);
+
             if (guncelFiyat > 0 && guncelFiyat <= alarm.targetPrice) {
                 const mailOptions = {
-                    from: '"Piyasa.ai Radar" <' + process.env.EMAIL_USER + '>',
+                    from: `"Piyasa.ai Radar" <${process.env.EMAIL_USER}>`,
                     to: alarm.email,
-                    subject: '🚀 Hedef Vuruldu: ' + alarm.model + ' Fiyatı Düştü!',
+                    subject: `🚀 Hedef Vuruldu: ${alarm.model} Fiyatı Düştü!`,
                     html: `
-                        <div style="font-family: Arial, sans-serif; padding: 30px; background-color: #000000; color: #ffffff; border-radius: 12px; border: 1px solid #333333; max-width: 500px; margin: 0 auto; text-align: center;">
-                            <h2 style="color: #30D158; margin-bottom: 10px;">Fiyat Radara Takıldı!</h2>
-                            <p style="color: #8E8E93; font-size: 14px; margin-bottom: 25px;">Takip ettiğin cihaz istediğin seviyeye geriledi.</p>
-                            
-                            <div style="background: #121212; border: 1px solid #333; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
-                                <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">${alarm.model}</div>
-                                <div style="color: #8E8E93; font-size: 12px;">Güncel Piyasa Ortalaması</div>
-                                <div style="font-size: 24px; font-weight: bold; color: #ffffff;">${guncelFiyat.toLocaleString('tr-TR')} TL</div>
-                                <div style="color: #8E8E93; font-size: 12px; margin-top: 10px;">Senin Hedefin: ${alarm.targetPrice.toLocaleString('tr-TR')} TL</div>
+                        <div style="font-family: Arial; padding: 30px; background: #000; color: #fff; border: 1px solid #333; max-width: 500px; border-radius: 12px;">
+                            <h2 style="color: #30D158;">Fiyat Radara Takıldı!</h2>
+                            <p>${alarm.model} için beklediğin fırsat geldi.</p>
+                            <div style="background: #111; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                                <strong>Güncel Piyasa:</strong> ${guncelFiyat.toLocaleString('tr-TR')} TL<br>
+                                <strong>Senin Hedefin:</strong> ${alarm.targetPrice.toLocaleString('tr-TR')} TL
                             </div>
-                            
-                            <a href="https://piyasai.com.tr" style="background-color: #ffffff; color: #000000; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">Hemen İlanlara Bak</a>
-                        </div>
-                    `
+                            <a href="https://piyasai.com.tr" style="background: #fff; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">İlanlara Git</a>
+                        </div>`
                 };
 
-                // Maili Gönder
-                await transporter.sendMail(mailOptions);
-                console.log(`📧 E-posta başarıyla gönderildi: ${alarm.email} -> ${alarm.model}`);
-
-                // Adamı her gün spamllememek için hedefine ulaşan alarmı veritabanından siliyoruz
-                await db.collection("alarms").deleteOne({ _id: alarm._id });
+                try {
+                    await transporter.sendMail(mailOptions);
+                    console.log(`✅ Mail gönderildi: ${alarm.email}`);
+                    await db.collection("alarms").deleteOne({ _id: alarm._id });
+                } catch (mailErr) {
+                    console.error(`❌ SMTP Hatası (${alarm.email}):`, mailErr.message);
+                    // Hata "Invalid login" ise uygulama şifresi patlamış demektir
+                }
             }
         }
     } catch (err) {
-        console.error("❌ Cron Job Hatası:", err);
+        console.error("❌ Cron Job Genel Hatası:", err);
     }
-});
-
-app.listen(PORT, () => {
-    console.log("Piyasa.ai SISTEM AKTIF! 🚀");
 });
