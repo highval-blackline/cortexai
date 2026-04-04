@@ -3,30 +3,31 @@ const cron = require('node-cron');
 const cors = require('cors');
 const multer = require('multer');
 const rateLimit = require('express-rate-limit');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const cloudinary = require('cloudinary').v2;
 const { MongoClient, ObjectId } = require('mongodb');
-const piyasaVeritabani = require('./database.js');
 const { OAuth2Client } = require('google-auth-library');
-const googleClient = new OAuth2Client("104508083781-2ib50lt8k0ud027375q9k3aja7gd8403.apps.googleusercontent.com");
+const piyasaVeritabani = require('./database.js');
+
+const googleClient = new OAuth2Client(
+    '104508083781-2ib50lt8k0ud027375q9k3aja7gd8403.apps.googleusercontent.com'
+);
 
 const app = express();
 app.use(cors({ origin: '*' }));
-
-// Gelen JSON verilerini okumak için gerekli ayar:
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ limit: '20mb', extended: true }));
 
-// YENİ: Tek resim yerine dizi (array) halinde en fazla 3 resim kabul eder.
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 } // Tek bir dosya için 10MB limit
+    limits: { fileSize: 10 * 1024 * 1024 }
 });
 
-// DOĞRU OLAN (Render'daki Environment Variable'ı okur):
 const MONGO_URI = process.env.MONGO_URI;
 const client = new MongoClient(MONGO_URI);
-let db, statsCollection, feedCollection;
+let db;
+let statsCollection;
+let feedCollection;
 
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
@@ -35,24 +36,144 @@ cloudinary.config({
 });
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-const delay = (ms) => new Promise(res => setTimeout(res, ms));
+const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview' });
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 let globalScans = 0;
 let globalFrauds = 0;
 let recentFeed = [];
+let isAlarmJobRunning = false;
+
+function parsePriceValue(priceText) {
+    const values = String(priceText || '')
+        .split('-')
+        .map((value) => parseInt(value.replace(/[^0-9]/g, ''), 10) || 0)
+        .filter((value) => value > 0);
+
+    if (values.length >= 2) {
+        return (values[0] + values[1]) / 2;
+    }
+
+    return values[0] || 0;
+}
+
+function buildAlarmEmailHtml(alarm, currentPrice) {
+    return `
+        <div style="font-family: Arial; padding: 30px; background: #000; color: #fff; border: 1px solid #333; max-width: 500px; border-radius: 12px;">
+            <h2 style="color: #30D158;">Fiyat Radara Takildi!</h2>
+            <p>${alarm.model} icin bekledigin firsat geldi.</p>
+            <div style="background: #111; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <strong>Guncel Piyasa:</strong> ${currentPrice.toLocaleString('tr-TR')} TL<br>
+                <strong>Senin Hedefin:</strong> ${Number(alarm.targetPrice).toLocaleString('tr-TR')} TL
+            </div>
+            <a href="https://piyasai.com.tr" style="background: #fff; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">Ilanlara Git</a>
+        </div>`;
+}
+
+async function sendBrevoEmail({ to, subject, htmlContent }) {
+    const apiKey = process.env.BREVO_API_KEY;
+    const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.EMAIL_USER;
+    const senderName = process.env.BREVO_SENDER_NAME || 'Piyasa.ai Radar';
+
+    if (!apiKey) {
+        throw new Error('BREVO_API_KEY tanimli degil.');
+    }
+
+    if (!senderEmail) {
+        throw new Error('Brevo gonderici e-posta adresi tanimli degil.');
+    }
+
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+            accept: 'application/json',
+            'api-key': apiKey,
+            'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+            sender: { name: senderName, email: senderEmail },
+            to: [{ email: to }],
+            subject,
+            htmlContent
+        })
+    });
+
+    if (response.ok) {
+        return;
+    }
+
+    const responseText = await response.text();
+    throw new Error(`Brevo mail hatasi (${response.status}): ${responseText}`);
+}
+
+async function checkPriceAlarms() {
+    if (isAlarmJobRunning) {
+        console.log('[CRON] Fiyat alarmi kontrolu zaten calisiyor, yeni tur atlandi.');
+        return;
+    }
+
+    if (!db) {
+        console.log('[CRON] DB baglantisi yok, islem iptal.');
+        return;
+    }
+
+    isAlarmJobRunning = true;
+
+    try {
+        const alarms = await db.collection('alarms').find().toArray();
+
+        if (alarms.length === 0) {
+            console.log('[CRON] Aktif alarm bulunamadi.');
+            return;
+        }
+
+        for (const alarm of alarms) {
+            const cihazData = piyasaVeritabani[alarm.model];
+            const currentPrice = parsePriceValue(cihazData?.TR_IkinciEl);
+
+            if (!currentPrice) {
+                continue;
+            }
+
+            console.log(
+                `[CRON] Kontrol: ${alarm.model} | Piyasa: ${currentPrice} TL | Hedef: ${alarm.targetPrice} TL`
+            );
+
+            if (currentPrice > Number(alarm.targetPrice)) {
+                continue;
+            }
+
+            try {
+                await sendBrevoEmail({
+                    to: alarm.email,
+                    subject: `Hedef Vuruldu: ${alarm.model} Fiyati Dustu!`,
+                    htmlContent: buildAlarmEmailHtml(alarm, currentPrice)
+                });
+
+                console.log(`[CRON] Mail basariyla gonderildi: ${alarm.email}`);
+                await db.collection('alarms').deleteOne({ _id: alarm._id });
+            } catch (error) {
+                console.error(`[CRON] Mail gonderim hatasi (${alarm.email}):`, error.message);
+            }
+        }
+    } catch (error) {
+        console.error('[CRON] Genel hata:', error);
+    } finally {
+        isAlarmJobRunning = false;
+    }
+}
 
 async function connectDB() {
     try {
         await client.connect();
-        db = client.db("PiyasaAI");
-        statsCollection = db.collection("stats");
-        feedCollection = db.collection("feed");
-        console.log("✅ MongoDB (Fil Hafızası) Bağlantısı BAŞARILI!");
+        db = client.db('PiyasaAI');
+        statsCollection = db.collection('stats');
+        feedCollection = db.collection('feed');
+        console.log('MongoDB baglantisi basarili.');
 
-        const stats = await statsCollection.findOne({ id: "global" });
+        const stats = await statsCollection.findOne({ id: 'global' });
         if (!stats) {
-            await statsCollection.insertOne({ id: "global", globalScans: 0, globalFrauds: 0 });
+            await statsCollection.insertOne({ id: 'global', globalScans: 0, globalFrauds: 0 });
         } else {
             globalScans = stats.globalScans;
             globalFrauds = stats.globalFrauds;
@@ -60,172 +181,191 @@ async function connectDB() {
 
         recentFeed = await feedCollection.find().sort({ time: -1 }).limit(10).toArray();
     } catch (err) {
-        console.error("❌ MongoDB Bağlantı Hatası:", err);
+        console.error('MongoDB baglanti hatasi:', err);
     }
 }
+
 connectDB();
 
-// YENİ: Yapay Zeka Suistimal Koruması (Rate Limiter)
 const analyzeLimiter = rateLimit({
-    windowMs: 1 * 60 * 1000, // 1 dakika (60.000 milisaniye)
-    max: 3, // Aynı IP adresinden 1 dakikada en fazla 3 analiz izni
-    message: { error: "Çok fazla analiz isteği gönderdiniz. Güvenlik gereği lütfen 1 dakika bekleyip tekrar deneyin." },
-    standardHeaders: true, // Rate limit bilgisini `RateLimit-*` başlıklarında gönderir
-    legacyHeaders: false, // Eski `X-RateLimit-*` başlıklarını devre dışı bırakır
+    windowMs: 1 * 60 * 1000,
+    max: 3,
+    message: { error: 'Cok fazla analiz istegi gonderdiniz. Lutfen 1 dakika sonra tekrar deneyin.' },
+    standardHeaders: true,
+    legacyHeaders: false
 });
 
 app.get('/stats', (req, res) => {
     res.json({
         totalScans: globalScans,
         fraudCount: globalFrauds,
-        recentFeed: recentFeed
+        recentFeed
     });
 });
 
-// YENİ: Frontend'in güncel fiyat listesini çekeceği ana API rotası
 app.get('/api/database', (req, res) => {
     res.json(piyasaVeritabani);
 });
 
-// Google Kullanıcı Girişini Karşılayan ve MongoDB'ye Kaydeden Bölüm
 app.post('/auth/google', async (req, res) => {
     const { token } = req.body;
+
     try {
         const ticket = await googleClient.verifyIdToken({
             idToken: token,
-            audience: "104508083781-2ib50lt8k0ud027375q9k3aja7gd8403.apps.googleusercontent.com",
+            audience: '104508083781-2ib50lt8k0ud027375q9k3aja7gd8403.apps.googleusercontent.com'
         });
         const payload = ticket.getPayload();
 
-        // MongoDB'de "users" (Kullanıcılar) koleksiyonuna bağlanıyoruz
-        if (db) {
-            const usersCollection = db.collection("users");
-            await usersCollection.updateOne(
-                { email: payload.email },
-                {
-                    $set: {
-                        name: payload.name,
-                        picture: payload.picture,
-                        lastLogin: Date.now()
-                    }
-                },
-                { upsert: true } // Kayıt varsa güncelle, yoksa yeni kayıt oluştur
-            );
-            res.json({ success: true, message: "Kullanıcı MongoDB'ye (Fil Hafızasına) başarıyla kaydedildi!" });
-        } else {
-            res.status(500).json({ success: false, error: "Veritabanı bağlantısı henüz hazır değil." });
+        if (!db) {
+            return res.status(500).json({ success: false, error: 'Veritabani baglantisi henuz hazir degil.' });
         }
-    } catch (error) {
-        console.error("Google Doğrulama Hatası:", error);
-        res.status(400).json({ success: false, error: "Google kimliği doğrulanamadı!" });
-    }
-});
 
-// Yeni Alarm Kaydetme Çekmecesi (Route)
-app.post('/add-alarm', async (req, res) => {
-    // Paketin içinden adamın mailini, modeli ve fiyatı çıkarıyoruz
-    const { email, model, targetPrice } = req.body;
-
-    if (!db) return res.status(500).json({ success: false, error: "Veritabanı bağlantısı kurulamadı." });
-    if (!email || !model || !targetPrice) return res.status(400).json({ success: false, error: "Eksik bilgi gönderdin!" });
-
-    try {
-        const alarmsCollection = db.collection("alarms"); // "alarms" diye yepyeni bir çekmece açıyoruz
-
-        // MongoDB'ye "Bu adamın bu model için alarmı varsa güncelle, yoksa yeni oluştur" diyoruz (Buna yazılımda Upsert denir)
-        await alarmsCollection.updateOne(
-            { email: email, model: model },
-            { $set: { targetPrice: targetPrice, createdAt: Date.now() } },
+        const usersCollection = db.collection('users');
+        await usersCollection.updateOne(
+            { email: payload.email },
+            {
+                $set: {
+                    name: payload.name,
+                    picture: payload.picture,
+                    lastLogin: Date.now()
+                }
+            },
             { upsert: true }
         );
 
-        res.json({ success: true, message: "Alarm kusursuz bir şekilde kaydedildi!" });
+        res.json({ success: true, message: "Kullanici MongoDB'ye basariyla kaydedildi." });
     } catch (error) {
-        console.error("Alarm kayıt hatası:", error);
+        console.error('Google dogrulama hatasi:', error);
+        res.status(400).json({ success: false, error: 'Google kimligi dogrulanamadi.' });
+    }
+});
+
+app.post('/add-alarm', async (req, res) => {
+    const { email, model, targetPrice } = req.body;
+
+    if (!db) {
+        return res.status(500).json({ success: false, error: 'Veritabani baglantisi kurulamadı.' });
+    }
+
+    if (!email || !model || !targetPrice) {
+        return res.status(400).json({ success: false, error: 'Eksik bilgi gonderdin.' });
+    }
+
+    try {
+        const alarmsCollection = db.collection('alarms');
+        await alarmsCollection.updateOne(
+            { email, model },
+            { $set: { targetPrice: Number(targetPrice), createdAt: Date.now() } },
+            { upsert: true }
+        );
+
+        res.json({ success: true, message: 'Alarm basariyla kaydedildi.' });
+    } catch (error) {
+        console.error('Alarm kayit hatasi:', error);
         res.status(500).json({ success: false, error: "Alarm MongoDB'ye kaydedilemedi." });
     }
 });
 
 app.get('/my-alarms', async (req, res) => {
     const email = req.query.email;
-    if (!db) return res.status(500).json({ success: false, error: "Veritabanı bağlantısı kurulamadı." });
-    if (!email) return res.status(400).json({ success: false, error: "E-posta adresi belirtilmedi." });
+
+    if (!db) {
+        return res.status(500).json({ success: false, error: 'Veritabani baglantisi kurulamadı.' });
+    }
+
+    if (!email) {
+        return res.status(400).json({ success: false, error: 'E-posta adresi belirtilmedi.' });
+    }
 
     try {
-        const alarmsCollection = db.collection("alarms");
-        const userAlarmlari = await alarmsCollection.find({ email: email }).toArray();
+        const alarmsCollection = db.collection('alarms');
+        const userAlarmlari = await alarmsCollection.find({ email }).toArray();
         res.json({ success: true, alarmlar: userAlarmlari });
     } catch (error) {
-        res.status(500).json({ success: false, error: "Alarmlar getirilemedi." });
+        res.status(500).json({ success: false, error: 'Alarmlar getirilemedi.' });
     }
 });
 
 app.delete('/delete-alarm', async (req, res) => {
     const { email, model } = req.body;
-    if (!db) return res.status(500).json({ success: false, error: "Veritabanı bağlantısı yok." });
+
+    if (!db) {
+        return res.status(500).json({ success: false, error: 'Veritabani baglantisi yok.' });
+    }
 
     try {
-        const alarmsCollection = db.collection("alarms");
-        await alarmsCollection.deleteOne({ email: email, model: model });
-        res.json({ success: true, message: "Alarm silindi." });
+        const alarmsCollection = db.collection('alarms');
+        await alarmsCollection.deleteOne({ email, model });
+        res.json({ success: true, message: 'Alarm silindi.' });
     } catch (error) {
-        res.status(500).json({ success: false, error: "Silme işlemi başarısız." });
+        res.status(500).json({ success: false, error: 'Silme islemi basarisiz.' });
     }
 });
 
 app.post('/report-fraud', async (req, res) => {
     try {
-        globalFrauds++; 
+        globalFrauds += 1;
+
         if (statsCollection) {
             await statsCollection.updateOne(
-                { id: "global" },
-                { $set: { globalFrauds: globalFrauds } },
+                { id: 'global' },
+                { $set: { globalFrauds } },
                 { upsert: true }
             );
         }
+
         res.json({ success: true, newFraudCount: globalFrauds });
     } catch (error) {
-        res.status(500).json({ success: false, error: "Sayaç güncellenemedi." });
+        res.status(500).json({ success: false, error: 'Sayac guncellenemedi.' });
     }
 });
 
 app.post('/analyze', analyzeLimiter, upload.array('images', 3), async (req, res) => {
-    console.log("\n--- GÖRSEL ANALİZ BAŞLADI ---");
+    console.log('\n--- GORSEL ANALIZ BASLADI ---');
 
     let imageParts = [];
-    let finalImageUrl = "";
+    let finalImageUrl = '';
 
     try {
-        console.log("1. Görsel(ler) hazırlanıyor...");
+        console.log('1. Gorseller hazirlaniyor...');
 
         if (req.files && req.files.length > 0) {
-            // Sadece ilk fotoğrafı canlı akış (Live Feed) için Cloudinary'e yükle
             if (process.env.CLOUD_NAME) {
                 try {
                     const uploadResult = await new Promise((resolve, reject) => {
-                        const stream = cloudinary.uploader.upload_stream({ folder: "piyasa_ai" }, (error, result) => {
-                            if (error) reject(error); else resolve(result);
+                        const stream = cloudinary.uploader.upload_stream({ folder: 'piyasa_ai' }, (error, result) => {
+                            if (error) {
+                                reject(error);
+                            } else {
+                                resolve(result);
+                            }
                         });
+
                         stream.end(req.files[0].buffer);
                     });
+
                     finalImageUrl = uploadResult.secure_url;
-                } catch (e) { console.log("Bulut yükleme hatası:", e.message); }
+                } catch (error) {
+                    console.log('Bulut yukleme hatasi:', error.message);
+                }
             }
 
-            // Gemini AI için tüm fotoğrafları Base64'e çevir ve hazırla
-            for (let file of req.files) {
+            for (const file of req.files) {
                 imageParts.push({
                     inlineData: {
-                        data: file.buffer.toString("base64"),
+                        data: file.buffer.toString('base64'),
                         mimeType: file.mimetype
                     }
                 });
             }
-        }
-        else if (req.body.imageUrl) {
+        } else if (req.body.imageUrl) {
             console.log("URL'den resim indiriliyor...");
             const fetchRes = await fetch(req.body.imageUrl);
-            if (!fetchRes.ok) throw new Error("Linkteki resme ulaşılamadı.");
+
+            if (!fetchRes.ok) {
+                throw new Error('Linkteki resme ulasilamadi.');
+            }
 
             const arrayBuffer = await fetchRes.arrayBuffer();
             imageParts.push({
@@ -236,56 +376,56 @@ app.post('/analyze', analyzeLimiter, upload.array('images', 3), async (req, res)
             });
             finalImageUrl = req.body.imageUrl;
         } else {
-            return res.json({ error: 'Resim veya resim linki bulunamadı!' });
+            return res.json({ error: 'Resim veya resim linki bulunamadi.' });
         }
 
-        const bugun = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+        const bugun = new Date().toLocaleDateString('tr-TR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
         const dbMetni = JSON.stringify(piyasaVeritabani, null, 2);
 
-        // YENİ PROMPT: Yapay Zekaya özel ayar çekildi ve kurallar katılaştırıldı
-        const prompt = `Sen Türkiye'nin en iyi ve en kurt ikinci el telefon piyasası uzmanısın. Bugünün tarihi: ${bugun}. 
-        Sana bir ilana ait 1'den fazla ekran görüntüsü göndermiş olabilirim. Lütfen gönderdiğim TÜM fotoğrafları inceleyerek, oradaki bilgileri (fiyat, açıklama, kapasite, garanti durumu vb.) birleştirip tam bir analiz yap.
+        const prompt = `Sen Turkiye'nin en iyi ikinci el telefon piyasasi uzmansin. Bugunun tarihi: ${bugun}.
+Sana bir ilana ait birden fazla ekran goruntusu gondermis olabilirim. Gonderdigim tum fotograflari inceleyerek fiyat, aciklama, kapasite ve garanti durumunu birlestirip analiz et.
 
-        İLK VE EN ÖNEMLİ KURAL (GÜVENLİK DUVARI): Yüklenen görseller SATILIK BİR TELEFON VEYA CİHAZ İLANI DEĞİLSE veya görselde NET BİR SATIŞ FİYATI YAZMIYORSA (örneğin kedi, manzara, YouTube kutu açılışı, rastgele insan), analizi DERHAL DURDUR ve SADECE ŞU JSON'u döndür:
-        {"isListing": false, "error": "Geçersiz görsel. Lütfen geçerli bir cihaz ilanı yükleyin."}
+ILK VE EN ONEMLI KURAL: Yuklenen gorseller satilik bir telefon veya cihaz ilani degilse ya da gorselde net bir satis fiyati yazmiyorsa analizi durdur ve sadece su JSON'u don:
+{"isListing": false, "error": "Gecersiz gorsel. Lutfen gecerli bir cihaz ilani yukleyin."}
 
-        EĞER GÖRSEL GERÇEKTEN BİR İLAN İSE, analiz yap ve AŞAĞIDAKİ KURALLARA GÖRE DEVAM ET.
-        
-        KULLANMAN GEREKEN GÜNCEL PİYASA REFERANS FİYATLARI (VERİTABANI):
-        ${dbMetni}
-        
-        GÖREVİN (ÇOK KRİTİK VE DİKKATLİ OL):
-        1. Model Tespiti: İlanın modelini KESİNLİKLE yukarıdaki veritabanında yazan isimle birebir aynı olacak şekilde yaz (Örn: 'Apple iPhone 17 Pro Max' değil, sadece 'iPhone 17 Pro Max' yaz).
-        2. İlandaki ana fiyatı gör. DİKKAT: '23.00' veya '19:00' gibi saat ibarelerini fiyat sanma.
-        
-        3. Cihazın Durumu (ÇOK ÖNEMLİ KURAL): 
-           - İlanın açıklamasında veya başlığında "yd", "yurtdışı", "yurt dışı", "kayıtsız", "server kayıtlı", "çift hatlı", "pasaport kayıtlı" gibi kelimeler geçiyorsa, ilandaki teknik özellikler tablosunda 'Alındığı Yer: Yurt İçi' yazsa BİLE BU CİHAZ KESİNLİKLE YURT DIŞIDIR! Başlık ve açıklama, tablodan her zaman üstündür.
-           - Bu kurala göre JSON içindeki 'condition' değerine SADECE VE KESİNLİKLE şu 4 koddan birini yazmalısın:
-             * "TR_Sifir" (Türkiye garantili, kapalı kutu)
-             * "TR_IkinciEl" (Türkiye garantili/garantisi bitmiş ikinci el)
-             * "YurtDisi_Sifir" (Yurt dışı, kapalı kutu/sıfır vb.)
-             * "YurtDisi_IkinciEl" (Yurt dışı ikinci el)
-             
-        4. FİYAT ANALİZİ: İlandaki istenen fiyatı, seçtiğin "condition" kategorisindeki piyasa fiyatıyla karşılaştır. 
-        
-        !!! ÇOK ÖNEMLİ OLTALAMA (SCAM) KURALI !!!
-        Eğer istenen fiyat, veritabanındaki fiyattan YÜKSEKSE veya piyasasına göre normalden biraz daha PAHALIYSA, bu genellikle oltalama DEĞİLDİR. Satıcı tok satıcıdır, buna yüksek risk puanı VERME. 
-        Oltalama (Scam) asıl fiyat piyasanın İNANILMAZ ALTINDA olduğunda olur. Bu ayrımı mükemmel yapmalısın!
-        
-        PUANLAMA:
-        - 0-20 arası: DÜŞÜK RİSK (Fiyat normal veya biraz pahalı).
-        - 20-50 arası: ORTA RİSK.
-        - 50-100 arası: YÜKSEK RİSK (Fiyat şüpheli şekilde çok çok altında).
+EGER GORSEL GERCEKTEN BIR ILAN ISE, asagidaki kurallara gore devam et.
 
-        SADECE JSON FORMATINDA CEVAP VER, EK AÇIKLAMA YAZMA. GÖRSEL GEÇERLİ BİR İLAN İSE FORMAT ŞU ŞEKİLDE OLMALIDIR:
-        {"isListing": true, "score": 10, "reason": "Fiyat yurtdışı sıfır piyasasına uygun.", "model": "iPhone 17 Pro Max", "fiyat": "74.999 TL", "condition": "YurtDisi_Sifir"}
-        `;
+KULLANMAN GEREKEN GUNCEL PIYASA REFERANS FIYATLARI:
+${dbMetni}
 
-        let MAX_RETRIES = 3;
+GOREVIN:
+1. Model tespiti: Ilanin modelini veritabanindaki isimle birebir ayni yaz.
+2. Ilandaki ana fiyati gor. "23.00" veya "19:00" gibi saat ibarelerini fiyat sanma.
+3. Cihazin durumu:
+   - Aciklama veya baslikta "yd", "yurtdisi", "yurt disi", "kayitsiz", "server kayitli", "cift hatli", "pasaport kayitli" gibi kelimeler geciyorsa teknik tabloda "Alindigi Yer: Yurt Ici" yazsa bile cihaz yurt disidir.
+   - JSON icindeki "condition" degerine sadece su kodlardan birini yaz:
+     * "TR_Sifir"
+     * "TR_IkinciEl"
+     * "YurtDisi_Sifir"
+     * "YurtDisi_IkinciEl"
+4. Fiyat analizi: Ilan fiyatini sectigin "condition" kategorisindeki piyasa fiyatiyla karsilastir.
+
+SCAM KURALI:
+Istenen fiyat veritabanindaki fiyattan yuksekse veya biraz pahaliysa bu genellikle scam degildir.
+Scam, asil olarak fiyat piyasanin inanilmaz altinda oldugunda olur.
+
+PUANLAMA:
+- 0-20: DUSUK RISK
+- 20-50: ORTA RISK
+- 50-100: YUKSEK RISK
+
+SADECE JSON FORMATINDA CEVAP VER. EK ACIKLAMA YAZMA.
+{"isListing": true, "score": 10, "reason": "Fiyat yurtdisi sifir piyasasina uygun.", "model": "iPhone 17 Pro Max", "fiyat": "74.999 TL", "condition": "YurtDisi_Sifir"}`;
+
+        const MAX_RETRIES = 3;
         let success = false;
-        let responseText = "";
+        let responseText = '';
 
-        for (let i = 0; i < MAX_RETRIES; i++) {
+        for (let i = 0; i < MAX_RETRIES; i += 1) {
             try {
                 const result = await model.generateContent([prompt, ...imageParts]);
                 responseText = result.response.text();
@@ -293,59 +433,74 @@ app.post('/analyze', analyzeLimiter, upload.array('images', 3), async (req, res)
                 break;
             } catch (apiError) {
                 if (apiError.message.includes('503') || apiError.message.toLowerCase().includes('demand')) {
-                    if (i < MAX_RETRIES - 1) await delay(3000);
-                    else throw new Error("Google yapay zeka sunucularında anlık bir yoğunluk var. Lütfen 15-20 saniye bekleyip tekrar deneyin.");
+                    if (i < MAX_RETRIES - 1) {
+                        await delay(3000);
+                    } else {
+                        throw new Error(
+                            'Google yapay zeka sunucularinda anlik bir yogunluk var. Lutfen 15-20 saniye bekleyip tekrar deneyin.'
+                        );
+                    }
                 } else if (apiError.message.includes('429')) {
-                    throw new Error("Günlük veya dakikalık ücretsiz analiz limitine ulaşıldı. Lütfen bir süre sonra tekrar deneyin.");
-                } else throw new Error("Analiz sırasında bir sorun oluştu: " + apiError.message);
+                    throw new Error(
+                        'Gunluk veya dakikalik ucretsiz analiz limitine ulasildi. Lutfen bir sure sonra tekrar deneyin.'
+                    );
+                } else {
+                    throw new Error(`Analiz sirasinda bir sorun olustu: ${apiError.message}`);
+                }
             }
         }
 
-        if (!success) throw new Error("Analiz tamamlanamadı.");
+        if (!success) {
+            throw new Error('Analiz tamamlanamadi.');
+        }
 
-        // 1. JSON Çıkarma ve Çözümleme (Kayıp kod eklendi)
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);
         if (!jsonMatch) {
-            return res.json({ error: "Yapay zeka görseli tanımlayamadı. Lütfen net bir ilan fotoğrafı yükleyin." });
+            return res.json({ error: 'Yapay zeka gorseli tanimlayamadi. Lutfen net bir ilan fotografi yukleyin.' });
         }
-        const aiAnalysis = JSON.parse(jsonMatch[0]);
 
-        // 2. KÖKÜNDEN ENGELLEME (AŞILAMAZ JAVASCRIPT DUVARI)
-        const algilananModel = (aiAnalysis.model || "").toLowerCase();
-        const fiyatMetni = String(aiAnalysis.fiyat || "").toLowerCase(); // Sayı bile gelse metne çevirir
-        
-        const uydurmaModeller = ["belirsiz", "bilinmiyor", "tespit", "bilgi yok", "bilinmeyen", "yok", "bulunamadı", "diğer"];
-        const trollMu = uydurmaModeller.some(kelime => algilananModel.includes(kelime));
-        
-        // MURATABİGF ENGELİ: Eğer görselden bir "Fiyat (Rakam + TL/Lira)" çıkmıyorsa, KESİNLİKLE İLAN DEĞİLDİR!
-        const gercekFiyatMi = /\d/.test(fiyatMetni) && (fiyatMetni.includes('tl') || fiyatMetni.includes('lira') || fiyatMetni.includes('₺'));
+        const aiAnalysis = JSON.parse(jsonMatch[0]);
+        const algilananModel = String(aiAnalysis.model || '').toLowerCase();
+        const fiyatMetni = String(aiAnalysis.fiyat || '').toLowerCase();
+        const uydurmaModeller = ['belirsiz', 'bilinmiyor', 'tespit', 'bilgi yok', 'bilinmeyen', 'yok', 'bulunamadi', 'diger'];
+        const trollMu = uydurmaModeller.some((kelime) => algilananModel.includes(kelime));
+        const gercekFiyatMi =
+            /\d/.test(fiyatMetni) &&
+            (fiyatMetni.includes('tl') || fiyatMetni.includes('lira') || fiyatMetni.includes('₺'));
 
         if (aiAnalysis.isListing === false || trollMu || !gercekFiyatMi) {
-            return res.json({ error: "Geçersiz görsel. Sistem bu görselde net bir fiyat veya teknolojik cihaz ilanı tespit edemedi." });
+            return res.json({
+                error: 'Gecersiz gorsel. Sistem bu gorselde net bir fiyat veya teknolojik cihaz ilani tespit edemedi.'
+            });
         }
 
-        // Eğer buraya kadar gelebildiyse görselde Fiyat ve Model vardır (GERÇEK BİR İLANDIR)
-        globalScans++;
-        if (aiAnalysis.score >= 75) globalFrauds++;
+        globalScans += 1;
+        if (aiAnalysis.score >= 75) {
+            globalFrauds += 1;
+        }
 
         if (statsCollection) {
             await statsCollection.updateOne(
-                { id: "global" },
-                { $set: { globalScans: globalScans, globalFrauds: globalFrauds } },
+                { id: 'global' },
+                { $set: { globalScans, globalFrauds } },
                 { upsert: true }
             );
         }
 
-        if (!aiAnalysis.condition || aiAnalysis.condition === "Bilinmiyor") {
-            return res.json({ success: true, riskScore: aiAnalysis.score, reason: "Cihaz durumu tespit edilemediği için radara eklenmedi." });
+        if (!aiAnalysis.condition || aiAnalysis.condition === 'Bilinmiyor') {
+            return res.json({
+                success: true,
+                riskScore: aiAnalysis.score,
+                reason: 'Cihaz durumu tespit edilemedigi icin radara eklenmedi.'
+            });
         }
 
         const newFeedItem = {
-            model: aiAnalysis.model || "Bilinmeyen Cihaz",
-            condition: aiAnalysis.condition || "TR_IkinciEl",
+            model: aiAnalysis.model || 'Bilinmeyen Cihaz',
+            condition: aiAnalysis.condition || 'TR_IkinciEl',
             riskScore: aiAnalysis.score,
-            fiyat: aiAnalysis.fiyat || "Belirtilmemiş",
-            reason: aiAnalysis.reason || "Belirtilmedi", // Rapor detayını da DB'ye ekledik
+            fiyat: aiAnalysis.fiyat || 'Belirtilmemis',
+            reason: aiAnalysis.reason || 'Belirtilmedi',
             imageUrl: finalImageUrl,
             time: Date.now()
         };
@@ -353,141 +508,79 @@ app.post('/analyze', analyzeLimiter, upload.array('images', 3), async (req, res)
         let insertedId = null;
         if (feedCollection) {
             const result = await feedCollection.insertOne(newFeedItem);
-            insertedId = result.insertedId; // MongoDB'nin atadığı eşsiz ID'yi yakaladık
+            insertedId = result.insertedId;
             recentFeed = await feedCollection.find().sort({ time: -1 }).limit(10).toArray();
         } else {
             recentFeed.unshift(newFeedItem);
-            if (recentFeed.length > 10) recentFeed.pop();
+            if (recentFeed.length > 10) {
+                recentFeed.pop();
+            }
         }
 
         res.json({
             success: true,
-            analysisId: insertedId, // Frontend'e paylaşım için ID'yi gönderiyoruz
+            analysisId: insertedId,
             riskScore: aiAnalysis.score,
             reason: aiAnalysis.reason,
-            model: aiAnalysis.model || "Bilinmeyen Cihaz",
-            fiyat: aiAnalysis.fiyat || "Belirtilmemiş",
+            model: aiAnalysis.model || 'Bilinmeyen Cihaz',
+            fiyat: aiAnalysis.fiyat || 'Belirtilmemis',
             totalScans: globalScans,
             fraudCount: globalFrauds
         });
-
     } catch (err) {
-        console.error("KRİTİK HATA:", err.message);
+        console.error('KRITIK HATA:', err.message);
         res.json({ error: err.message });
     }
 });
 
-// Paylaşılan Analiz URL'sini Karşılayan Rota
 app.get('/analysis/:id', async (req, res) => {
-    if (!feedCollection) return res.status(500).json({ error: "Veritabanı hazır değil." });
+    if (!feedCollection) {
+        return res.status(500).json({ error: 'Veritabani hazir degil.' });
+    }
+
     try {
         const item = await feedCollection.findOne({ _id: new ObjectId(req.params.id) });
-        if (!item) return res.status(404).json({ error: "Analiz bulunamadı veya silinmiş." });
+        if (!item) {
+            return res.status(404).json({ error: 'Analiz bulunamadi veya silinmis.' });
+        }
+
         res.json({ success: true, data: item });
     } catch (err) {
-        res.status(400).json({ error: "Geçersiz analiz kimliği." });
+        res.status(400).json({ error: 'Gecersiz analiz kimligi.' });
     }
 });
 
-// GİZLİ TEMİZLİK ROTASI (Siteyi temizlemek için tarayıcıdan bu linke gireceksin)
 app.get('/temizlik-yap', async (req, res) => {
     try {
-        if (!feedCollection || !statsCollection) return res.send("DB Bağlanamadı.");
+        if (!feedCollection || !statsCollection) {
+            return res.send('DB baglanamadi.');
+        }
 
-        // 1. Troll ilanları veritabanından KESİN OLARAK sil (Büyük/Küçük harf duyarlılığını kaldırdık)
         await feedCollection.deleteMany({
             model: { $regex: /bilinmiyor|tespit|belirlenemedi|bilgi yok|bilinmeyen|belirsiz/i }
         });
 
-        // 2. Dolandırıcı sayacını 5'e eşitle
         globalFrauds = 5;
         await statsCollection.updateOne(
-            { id: "global" },
+            { id: 'global' },
             { $set: { globalFrauds: 5 } },
             { upsert: true }
         );
 
-        // 3. Son 10 listesini güncelle
         recentFeed = await feedCollection.find().sort({ time: -1 }).limit(10).toArray();
 
-        res.send("<h1 style='color:green;'>Temizlik Başarılı!</h1><p>Troll ilanlar silindi, Dolandırıcı sayısı 2 yapıldı. Kendi siteni yenileyebilirsin.</p>");
-    } catch(e) {
-        res.send("Hata: " + e.message);
+        res.send(
+            "<h1 style='color:green;'>Temizlik Basarili!</h1><p>Troll ilanlar silindi, dolandirici sayisi 5 yapildi. Kendi siteni yenileyebilirsin.</p>"
+        );
+    } catch (error) {
+        res.send(`Hata: ${error.message}`);
     }
 });
 
 const PORT = process.env.PORT || 3000;
 
-// OTONOM FİYAT ALARMI MOTORU (API Tabanlı, Port Engeli Aşılmış Sürüm)
-cron.schedule('* * * * *', async () => {
-    console.log("⏰ [CRON] Fiyat alarmı kontrolü başlatıldı...");
-    if (!db) return console.log("❌ DB bağlantısı yok, işlem iptal.");
+cron.schedule('* * * * *', checkPriceAlarms);
 
-    try {
-        const alarms = await db.collection("alarms").find().toArray();
-        if (alarms.length === 0) return console.log("ℹ️ Aktif alarm bulunamadı.");
-
-        for (let alarm of alarms) {
-            // Veritabanından (piyasaVeritabani) cihaz bilgisini çekiyoruz
-            const cihazData = piyasaVeritabani[alarm.model];
-            if (!cihazData || !cihazData["TR_IkinciEl"]) continue;
-
-            // Fiyatı ayrıştırma ve tolerans (Regex)
-            let stringFiyat = String(cihazData["TR_IkinciEl"]);
-            let piyasaSayilari = stringFiyat.split('-').map(val => parseInt(val.replace(/[^0-9]/g, '')) || 0);
-            let guncelFiyat = 0;
-
-            if (piyasaSayilari.length === 2 && piyasaSayilari[0] > 0 && piyasaSayilari[1] > 0) {
-                guncelFiyat = (piyasaSayilari[0] + piyasaSayilari[1]) / 2;
-            } else if (piyasaSayilari.length > 0 && piyasaSayilari[0] > 0) {
-                guncelFiyat = piyasaSayilari[0];
-            }
-
-            console.log(`🔍 Kontrol: ${alarm.model} | Piyasa: ${guncelFiyat} TL | Hedef: ${alarm.targetPrice} TL`);
-
-            if (guncelFiyat > 0 && guncelFiyat <= alarm.targetPrice) {
-                const htmlContent = `
-                    <div style="font-family: Arial; padding: 30px; background: #000; color: #fff; border: 1px solid #333; max-width: 500px; border-radius: 12px;">
-                        <h2 style="color: #30D158;">Fiyat Radara Takıldı!</h2>
-                        <p>${alarm.model} için beklediğin fırsat geldi.</p>
-                        <div style="background: #111; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                            <strong>Güncel Piyasa:</strong> ${guncelFiyat.toLocaleString('tr-TR')} TL<br>
-                            <strong>Senin Hedefin:</strong> ${alarm.targetPrice.toLocaleString('tr-TR')} TL
-                        </div>
-                        <a href="https://piyasai.com.tr" style="background: #fff; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">İlanlara Git</a>
-                    </div>`;
-
-                // Render SMTP engeli HTTP (fetch) ile aşılıyor
-                try {
-                    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-                        method: 'POST',
-                        headers: {
-                            'accept': 'application/json',
-                            'api-key': process.env.BREVO_API_KEY,
-                            'content-type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            sender: { name: "Piyasa.ai Radar", email: process.env.EMAIL_USER },
-                            to: [{ email: alarm.email }],
-                            subject: `🚀 Hedef Vuruldu: ${alarm.model} Fiyatı Düştü!`,
-                            htmlContent: htmlContent
-                        })
-                    });
-
-                    // Başarılı olursa dönecek yanıt boş olabilir, hatalıysa JSON döner.
-                    if (response.ok) {
-                        console.log(`✅ Mail HTTP API ile başarıyla gönderildi: ${alarm.email}`);
-                        await db.collection("alarms").deleteOne({ _id: alarm._id });
-                    } else {
-                        const errorResult = await response.json();
-                        console.error(`❌ Mail API Hatası (${alarm.email}):`, errorResult);
-                    }
-                } catch (fetchErr) {
-                    console.error(`❌ Fetch/Ağ Hatası (${alarm.email}):`, fetchErr.message);
-                }
-            }
-        }
-    } catch (err) {
-        console.error("❌ Cron Job Genel Hatası:", err);
-    }
+app.listen(PORT, () => {
+    console.log(`Sunucu aktif: ${PORT}`);
 });
