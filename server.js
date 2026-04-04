@@ -1,4 +1,6 @@
 const express = require('express');
+const cron = require('node-cron');
+const nodemailer = require('nodemailer');
 const cors = require('cors');
 const multer = require('multer');
 const rateLimit = require('express-rate-limit');
@@ -8,6 +10,15 @@ const { MongoClient, ObjectId } = require('mongodb');
 const piyasaVeritabani = require('./database.js');
 const { OAuth2Client } = require('google-auth-library');
 const googleClient = new OAuth2Client("104508083781-2ib50lt8k0ud027375q9k3aja7gd8403.apps.googleusercontent.com");
+
+// YENİ: E-posta Gönderici Motoru
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
 
 const app = express();
 app.use(cors({ origin: '*' }));
@@ -80,6 +91,12 @@ app.get('/stats', (req, res) => {
         recentFeed: recentFeed
     });
 });
+
+// YENİ: Frontend'in güncel fiyat listesini çekeceği ana API rotası
+app.get('/api/database', (req, res) => {
+    res.json(piyasaVeritabani);
+});
+
 // Google Kullanıcı Girişini Karşılayan ve MongoDB'ye Kaydeden Bölüm
 app.post('/auth/google', async (req, res) => {
     const { token } = req.body;
@@ -410,6 +427,69 @@ app.get('/temizlik-yap', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+
+// ==========================================
+// OTONOM FİYAT ALARMI MOTORU (CRON JOB)
+// Her gün sabah 10:00'da çalışır ('0 10 * * *')
+// ==========================================
+cron.schedule('* * * * *', async () => {
+    console.log("⏰ [CRON] Fiyat alarmı kontrolü başlatıldı...");
+    if (!db) return;
+
+    try {
+        const alarms = await db.collection("alarms").find().toArray();
+        if (alarms.length === 0) return console.log("Aktif alarm bulunamadı.");
+
+        for (let alarm of alarms) {
+            const cihazData = piyasaVeritabani[alarm.model];
+            // Cihaz veritabanında yoksa veya TR_IkinciEl fiyatı girilmemişse atla
+            if (!cihazData || !cihazData["TR_IkinciEl"]) continue;
+
+            // Fiyat metninden ortalama matematiksel değeri (integer) çıkarıyoruz
+            const numbers = cihazData["TR_IkinciEl"].match(/\d+\.\d+/g);
+            let guncelFiyat = 0;
+            if (numbers && numbers.length === 2) {
+                guncelFiyat = (parseInt(numbers[0].replace('.', '')) + parseInt(numbers[1].replace('.', ''))) / 2;
+            } else if (numbers && numbers.length === 1) {
+                guncelFiyat = parseInt(numbers[0].replace('.', ''));
+            }
+
+            // MANTIK: Eğer güncel piyasa fiyatı, adamın hedeflediği fiyata eşit veya altındaysa VUR!
+            if (guncelFiyat > 0 && guncelFiyat <= alarm.targetPrice) {
+                const mailOptions = {
+                    from: '"Piyasa.ai Radar" <' + process.env.EMAIL_USER + '>',
+                    to: alarm.email,
+                    subject: '🚀 Hedef Vuruldu: ' + alarm.model + ' Fiyatı Düştü!',
+                    html: `
+                        <div style="font-family: Arial, sans-serif; padding: 30px; background-color: #000000; color: #ffffff; border-radius: 12px; border: 1px solid #333333; max-width: 500px; margin: 0 auto; text-align: center;">
+                            <h2 style="color: #30D158; margin-bottom: 10px;">Fiyat Radara Takıldı!</h2>
+                            <p style="color: #8E8E93; font-size: 14px; margin-bottom: 25px;">Takip ettiğin cihaz istediğin seviyeye geriledi.</p>
+                            
+                            <div style="background: #121212; border: 1px solid #333; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                                <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">${alarm.model}</div>
+                                <div style="color: #8E8E93; font-size: 12px;">Güncel Piyasa Ortalaması</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #ffffff;">${guncelFiyat.toLocaleString('tr-TR')} TL</div>
+                                <div style="color: #8E8E93; font-size: 12px; margin-top: 10px;">Senin Hedefin: ${alarm.targetPrice.toLocaleString('tr-TR')} TL</div>
+                            </div>
+                            
+                            <a href="https://piyasai.com.tr" style="background-color: #ffffff; color: #000000; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">Hemen İlanlara Bak</a>
+                        </div>
+                    `
+                };
+
+                // Maili Gönder
+                await transporter.sendMail(mailOptions);
+                console.log(`📧 E-posta başarıyla gönderildi: ${alarm.email} -> ${alarm.model}`);
+
+                // Adamı her gün spamllememek için hedefine ulaşan alarmı veritabanından siliyoruz
+                await db.collection("alarms").deleteOne({ _id: alarm._id });
+            }
+        }
+    } catch (err) {
+        console.error("❌ Cron Job Hatası:", err);
+    }
+});
+
 app.listen(PORT, () => {
     console.log("Piyasa.ai SISTEM AKTIF! 🚀");
 });
