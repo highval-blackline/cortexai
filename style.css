@@ -898,49 +898,50 @@ button:focus, input:focus, select:focus {
 /* ARAMA VE SELECT MENÜLERİ İÇİN SCROLL (KAYDIRMA) ÇÖZÜMÜ   */
 /* ======================================================== */
 
-/* Sorunun Sebebi: Tarayıcılarda (Chrome/Edge vb.) "backdrop-filter" (cam efekti) 
-   ile "overflow-y" aynı elementte kullanıldığında mouse tekerleği bug'a girip donar.
-   Çözüm: transform: translateZ(0) ile donanımsal hızlandırmayı zorluyoruz.
-*/
 #modelDropdownList, 
 #wizardDropdownList, 
 #headerDropdownList, 
 .apple-select-menu {
     max-height: 240px !important;
     overflow-y: auto !important;
-    overscroll-behavior: contain !important; /* Mouse tekerleğinin arkadaki ana sayfayı kaydırmasını engeller */
-    transform: translateZ(0) !important; /* Scroll donma bug'ının kesin ve donanımsal çözümü */
-    -webkit-overflow-scrolling: touch !important; /* Mobilde parmakla kaydırmayı akıcı yapar */
-    pointer-events: auto !important;
+    overscroll-behavior: contain !important;
+    transform: translateZ(0) !important; 
+    -webkit-overflow-scrolling: touch !important; 
+    padding-right: 2px !important; /* Scrollbar'ın köşeye yapışıp ezilmesini önler */
 }
 
-/* Kaydırma çubuğunu (Scrollbar) görünür yapıp Apple estetiğine uyduruyoruz */
+/* Kaydırma Çubuğu Genişliği */
 #modelDropdownList::-webkit-scrollbar, 
 #wizardDropdownList::-webkit-scrollbar, 
 #headerDropdownList::-webkit-scrollbar, 
 .apple-select-menu::-webkit-scrollbar {
-    width: 6px !important;
+    width: 10px !important; /* Daha rahat tutulması için biraz kalınlaştırıldı */
 }
 
+/* Kaydırma Çubuğu Arka Planı (Track) */
 #modelDropdownList::-webkit-scrollbar-track, 
 #wizardDropdownList::-webkit-scrollbar-track, 
 #headerDropdownList::-webkit-scrollbar-track, 
 .apple-select-menu::-webkit-scrollbar-track {
     background: transparent !important;
-    border-radius: 0 0 10px 0 !important;
+    margin: 6px 0 !important; /* Kapsülün en üst ve en alta çarpmasını engeller */
 }
 
+/* Kaydırma Çubuğu Tutamacı (Thumb) - KAYBOLMA BUG'ININ ÇÖZÜLDÜĞÜ YER */
 #modelDropdownList::-webkit-scrollbar-thumb, 
 #wizardDropdownList::-webkit-scrollbar-thumb, 
 #headerDropdownList::-webkit-scrollbar-thumb, 
 .apple-select-menu::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.25) !important;
-    border-radius: 4px !important;
+    background-color: rgba(255, 255, 255, 0.25) !important;
+    border-radius: 10px !important;
+    border: 3px solid transparent !important; /* Çubuğun etrafına görünmez bir zırh örer */
+    background-clip: padding-box !important; /* Arka plan rengini zırhın içine hapseder, cam efektinde kaybolmasını KESİN engeller */
 }
 
+/* Tutamaca Hover (Üzerine Gelme) Durumu */
 #modelDropdownList::-webkit-scrollbar-thumb:hover, 
 #wizardDropdownList::-webkit-scrollbar-thumb:hover, 
 #headerDropdownList::-webkit-scrollbar-thumb:hover, 
 .apple-select-menu::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.45) !important;
+    background-color: rgba(255, 255, 255, 0.45) !important;
 }
