@@ -11,18 +11,18 @@ const piyasaVeritabani = require('./database.js');
 const { OAuth2Client } = require('google-auth-library');
 const googleClient = new OAuth2Client("104508083781-2ib50lt8k0ud027375q9k3aja7gd8403.apps.googleusercontent.com");
 
-// YENİ: Ağ hatalarına karşı dayanıklı e-posta motoru
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
-    secure: false, // 587 portu için her zaman false olmalıdır
+    secure: false, // 587 için her zaman false
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     },
     tls: {
-        // Bulut sunuculardaki bağlantı reddetme sorunlarını aşmak için kritik ayar
-        rejectUnauthorized: false
+        // Render ve benzeri bulut platformlarındaki ağ engellerini aşar
+        rejectUnauthorized: false,
+        minVersion: "TLSv1.2"
     }
 });
 
