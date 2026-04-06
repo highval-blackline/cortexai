@@ -816,7 +816,9 @@ button:focus, input:focus, select:focus {
     position: relative;
     width: 100%;
     display: block;
+    z-index: 1;
     isolation: isolate;
+    overflow: visible;
 }
 
 .apple-select-btn {
@@ -867,11 +869,12 @@ button:focus, input:focus, select:focus {
 
 .apple-select-menu {
     position: absolute;
-    top: calc(100% + 8px);
+    top: 100%;
     left: 0;
     right: 0;
-    z-index: 9999;
+    z-index: 99999;
     display: none;
+    margin-top: 8px;
     padding: 8px;
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -902,6 +905,7 @@ button:focus, input:focus, select:focus {
     font-size: 14px;
     line-height: 1.2;
     text-align: left;
+    cursor: pointer;
     transition: background-color 0.18s ease, color 0.18s ease;
 }
 

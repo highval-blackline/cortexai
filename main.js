@@ -809,7 +809,7 @@ function copyShareUrl() {
 // ==========================================
 // KESİN ÇÖZÜM: NATIVE SELECT'LERİ APPLE TARZI ÖZEL MENÜYE ÇEVİRİR
 // ==========================================
-function upgradeSelectsToAppleStyle() {
+function upgradeSelectsToAppleStyleLegacy() {
     const selects = document.querySelectorAll('#wizardSection select');
     selects.forEach(select => {
         // Eğer zaten dönüştürülmüşse bir daha dokunma
@@ -914,7 +914,7 @@ function closeAppleSelectMenus(exceptMenu = null) {
     });
 }
 
-function upgradeSelectsToAppleStyleFixed() {
+function upgradeSelectsToAppleStyle() {
     const selects = document.querySelectorAll('#wizardSection select');
 
     selects.forEach(select => {
@@ -990,8 +990,8 @@ function upgradeSelectsToAppleStyleFixed() {
     }
 }
 
-function upgradeSelectsToAppleStyle() {
-    return upgradeSelectsToAppleStyleFixed();
+function upgradeSelectsToAppleStyleFixed() {
+    return upgradeSelectsToAppleStyle();
 }
 
 document.addEventListener('DOMContentLoaded', upgradeSelectsToAppleStyle);
