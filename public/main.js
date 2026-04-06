@@ -19,26 +19,29 @@ function showImage(url) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    // 1. VERİ ÇEKME: Sunucudan güncel fiyatları al
-    fetch('/api/database')
-        .then(response => response.json())
-        .then(data => {
+// 1. VERİ ÇEKME: Sunucudan güncel fiyatları al
+    async function setupDatabase() {
+        try {
+            const response = await fetch('/api/database');
+            if (!response.ok) throw new Error('Sunucu hatası');
+            const data = await response.json();
             frontEndDB = data;
             console.log("✅ Piyasa.ai: Veritabanı senkronize edildi.");
             
-            // Veri gelince açık olan arama kutularını tetikle (UI Güncelleme)
-            const inputs = ['modelSearchInput', 'wizardModelInput', 'headerSearchInput'];
-            inputs.forEach(id => {
+            // Arama kutularını tetikle
+            ['modelSearchInput', 'wizardModelInput', 'headerSearchInput'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el && el.offsetParent !== null) { // Eğer element görünürse
-                    el.dispatchEvent(new Event('input'));
-                }
+                if (el && el.offsetParent !== null) el.dispatchEvent(new Event('input'));
             });
-        })
-        .catch(err => {
-            console.error("❌ Kritik Hata:", err);
-            alert("Fiyat listesi yüklenemedi. Lütfen sayfayı yenileyin.");
-        });
+        } catch (err) {
+            console.error("❌ Veritabanı Hatası:", err);
+            // Hata durumunda yerel bir boş obje oluştur ki sistem çökmesin
+            frontEndDB = frontEndDB || {};
+            const loader = document.getElementById('feedLoading');
+            if(loader) loader.innerText = "Veriler şu an alınamıyor, lütfen biraz bekleyin...";
+        }
+    }
+    setupDatabase();
 
     // 2. PAYLAŞIM KONTROLÜ: URL'de analiz ID'si varsa otomatik aç
     const urlParams = new URLSearchParams(window.location.search);
