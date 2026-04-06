@@ -894,6 +894,106 @@ function upgradeSelectsToAppleStyle() {
 }
 
 // Sayfa yüklendiğinde eski kutuları yok et ve yenilerini çiz
+// ==========================================
+// CLEAN APPLE STYLE SELECT UPGRADE
+// ==========================================
+let appleSelectOutsideClickBound = false;
+
+function closeAppleSelectMenus(exceptMenu = null) {
+    document.querySelectorAll('#wizardSection .apple-select-menu.show').forEach(menu => {
+        if (menu === exceptMenu) return;
+
+        menu.classList.remove('show');
+        const btn = menu.previousElementSibling;
+        if (btn && btn.classList.contains('apple-select-btn')) {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-expanded', 'false');
+            const icon = btn.querySelector('i');
+            if (icon) icon.style.transform = 'rotate(0deg)';
+        }
+    });
+}
+
+function upgradeSelectsToAppleStyleFixed() {
+    const selects = document.querySelectorAll('#wizardSection select');
+
+    selects.forEach(select => {
+        if (select.dataset.appleSelectUpgraded === 'true') return;
+        select.dataset.appleSelectUpgraded = 'true';
+
+        select.classList.add('apple-select-hidden');
+        select.style.display = 'none';
+        select.setAttribute('aria-hidden', 'true');
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'apple-select-wrapper';
+
+        const displayBtn = document.createElement('button');
+        displayBtn.type = 'button';
+        displayBtn.className = 'apple-select-btn';
+        displayBtn.setAttribute('aria-expanded', 'false');
+        displayBtn.innerHTML = `<span>${select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : ''}</span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i>`;
+
+        const menu = document.createElement('div');
+        menu.className = 'apple-select-menu';
+
+        Array.from(select.options).forEach(option => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'apple-select-item';
+            if (option.selected) item.classList.add('selected');
+            item.innerHTML = `<span>${option.text}</span><i class="fa-solid fa-check check-icon" aria-hidden="true"></i>`;
+
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                select.value = option.value;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+
+                const label = displayBtn.querySelector('span');
+                if (label) label.innerText = option.text;
+
+                menu.querySelectorAll('.apple-select-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+
+                closeAppleSelectMenus();
+            });
+
+            menu.appendChild(item);
+        });
+
+        displayBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const isOpen = menu.classList.contains('show');
+            closeAppleSelectMenus();
+
+            if (!isOpen) {
+                menu.classList.add('show');
+                displayBtn.classList.add('active');
+                displayBtn.setAttribute('aria-expanded', 'true');
+                const icon = displayBtn.querySelector('i');
+                if (icon) icon.style.transform = 'rotate(180deg)';
+            }
+        });
+
+        wrapper.appendChild(displayBtn);
+        wrapper.appendChild(menu);
+        select.insertAdjacentElement('afterend', wrapper);
+    });
+
+    if (!appleSelectOutsideClickBound) {
+        document.addEventListener('click', () => closeAppleSelectMenus());
+        appleSelectOutsideClickBound = true;
+    }
+}
+
+function upgradeSelectsToAppleStyle() {
+    return upgradeSelectsToAppleStyleFixed();
+}
+
 document.addEventListener('DOMContentLoaded', upgradeSelectsToAppleStyle);
 setTimeout(upgradeSelectsToAppleStyle, 500);
 
