@@ -1051,7 +1051,8 @@ select.apple-select-hidden {
 .gemini-spinner {
     width: 15px; 
     height: 15px;
-    animation: geminiRotate 2s linear infinite;
+    /* Tam 1 saniyede 1 tur atar */
+    animation: geminiRotate 1s linear infinite;
     display: inline-block;
     vertical-align: middle;
     margin-right: 6px;
@@ -1063,8 +1064,9 @@ select.apple-select-hidden {
     stroke-width: 5;
     stroke-dasharray: 1, 200;
     stroke-dashoffset: 0;
-    animation: geminiDash 1.5s ease-in-out infinite;
-    stroke-linecap: round; /* Senin istediğin o uçların yuvarlak olma detayı */
+    /* Kuyruk uzayıp kısalmasını tam 2 saniyede bitirir */
+    animation: geminiDash 2s ease-in-out infinite;
+    stroke-linecap: round;
     fill: none;
 }
 

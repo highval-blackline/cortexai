@@ -286,11 +286,9 @@ function runGlobalScan() {
     const icon = document.getElementById('scanIcon'); 
     const btn = icon.closest('.btn-outline');
 
-    // Buton esnemesi
     btn.classList.add('clicked-effect');
     setTimeout(() => btn.classList.remove('clicked-effect'), 150);
 
-    // Orijinal ikonu gizle ve Gemini animasyonunu enjekte et
     icon.style.display = 'none';
     
     const tempDiv = document.createElement('div');
@@ -298,13 +296,15 @@ function runGlobalScan() {
     const spinnerSvg = tempDiv.firstChild;
     btn.insertBefore(spinnerSvg, icon);
 
-    // Animasyon süresi dolduğunda her şeyi eski haline getir
+    // MATEMATİK: Süre tam 2000ms (2 saniye).
+    // CSS'teki dönüş 1 saniye (2 tur atacak), kuyruk 2 saniye (1 tur atacak).
+    // Her ikisi de tam bu milisaniyede "0" noktasına dönüp kusursuzca kaybolacak.
     setTimeout(() => { 
         const activeSpinner = document.getElementById('geminiSvg');
         if (activeSpinner) activeSpinner.remove();
         icon.style.display = 'inline-block';
         alert('Ağ taraması tamamlandı, sistem güncel!'); 
-    }, 1800); // Yılan efektinin tam kapanma anına denk getirilmiş süre
+    }, 2000); 
 }
 
 let pastedFiles = [];
