@@ -144,131 +144,67 @@ function calculatePrice() {
 
 async function fetchGlobalStats() {
     try {
-        const res = await fetch('/api/stats');
-        const data = await res.json();
-        document.getElementById('totalListings').innerText = data.totalScans;
-        document.getElementById('fraudCount').innerText = data.fraudCount;
+        // 1. Verileri iki farklı uç noktadan paralel çek
+        const [statsRes, feedRes] = await Promise.all([
+            fetch('/api/global-stats'),
+            fetch('/api/recent-feed')
+        ]);
 
+        const stats = await statsRes.json();
+        const recentFeed = await feedRes.json();
+
+        // 2. UI Elemanlarını bul
         const feedList = document.getElementById('liveFeedList');
         const tableBody = document.getElementById('tableBody');
-
         const feedLoader = document.getElementById('feedLoading');
+
+        // Yükleme animasyonunu gizle, listeyi göster
         if (feedLoader) feedLoader.style.display = 'none';
         if (feedList) feedList.style.display = 'flex';
 
-        if (data.recentFeed && data.recentFeed.length > 0) {
-            // YENİ: Eğer gelen veri eskisiyle aynıysa listeyi yenileme (Animasyon bozulmasın diye)
-            const currentFeedJSON = JSON.stringify(data.recentFeed);
-            if (currentFeedJSON === lastFeedJSON) return; 
-            lastFeedJSON = currentFeedJSON;
+        // 3. İstatistikleri Güncelle
+        // Backend'den 'globalFrauds' geliyor, frontend 'fraudCount' bekliyor
+        document.getElementById('totalListings').innerText = recentFeed.length > 0 ? "10+" : "0";
+        document.getElementById('fraudCount').innerText = stats.globalFrauds || 0;
 
-            feedList.innerHTML = '';
-            if (tableBody) tableBody.innerHTML = '';
+        // 4. Canlı Akışı Güncelle (Eğer yeni veri varsa)
+        const currentFeedJSON = JSON.stringify(recentFeed);
+        if (currentFeedJSON === lastFeedJSON) return; 
+        lastFeedJSON = currentFeedJSON;
 
-            data.recentFeed.forEach(item => {
-                const timeDiff = Math.floor((Date.now() - item.time) / 60000);
-                let timeText = "Şimdi";
-                
-                if (timeDiff > 0 && timeDiff < 60) {
-                    timeText = timeDiff + " dk önce";
-                } else if (timeDiff >= 60 && timeDiff < 1440) {
-                    const diffHour = Math.floor(timeDiff / 60);
-                    timeText = diffHour + " saat önce";
-                } else if (timeDiff >= 1440) {
-                    const diffDay = Math.floor(timeDiff / 1440);
-                    timeText = diffDay + " gün önce";
-                }
-                const isHighRisk = item.riskScore >= 50;
-                const isMedRisk = item.riskScore >= 20 && item.riskScore < 50;
-                const borderColor = isHighRisk ? 'var(--risk-high)' : (isMedRisk ? 'var(--risk-med)' : 'var(--risk-low)');
+        feedList.innerHTML = '';
+        if (tableBody) tableBody.innerHTML = '';
 
-                // 1. PİYASA ÖZETİ (Canlı Akış) KARTI
-                feedList.innerHTML += `
-                    <div class="feed-item" onclick="showImage('${item.imageUrl}')" style="background: var(--bg-absolute); padding: 12px; border-radius: 8px; border-left: 4px solid ${borderColor}; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                        <div><span style="font-weight: 600;">${item.model}</span> <span style="font-size: 12px; color: var(--text-muted); margin-left: 10px;">${timeText}</span></div>
-                        <div style="color: ${borderColor}; font-weight: 600;">%${item.riskScore} Risk <i class="fa-solid fa-camera" style="margin-left:8px; color:var(--text-muted);"></i></div>
-                    </div>
-                `;
+        recentFeed.forEach(item => {
+            // Zaman hesaplama
+            const timeDiff = Math.floor((Date.now() - new Date(item.time).getTime()) / 60000);
+            let timeText = timeDiff <= 0 ? "Şimdi" : (timeDiff < 60 ? timeDiff + " dk önce" : Math.floor(timeDiff/60) + " saat önce");
+            
+            const borderColor = item.riskScore >= 50 ? 'var(--risk-high)' : (item.riskScore >= 20 ? 'var(--risk-med)' : 'var(--risk-low)');
 
-                // 2. CANLI RADAR İÇİN TABLO SATIRI
-                // 1. Temel Veri Çekme (Hatalara karşı korumalı)
-                let ilanFiyati = item.fiyat || "Bilinmiyor";
-                let piyasaDegeri = "Bulunamadı";
-                let durumEtiketi = `<span class="badge" style="background: #374151; color: white; padding: 4px 8px; border-radius: 4px;">İnceleniyor</span>`;
+            // Sol taraftaki Akış Kartı
+            feedList.innerHTML += `
+                <div class="feed-item" onclick="showImage('${item.imageUrl}')" style="background: var(--bg-absolute); padding: 12px; border-radius: 8px; border-left: 4px solid ${borderColor}; display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom:10px;">
+                    <div><span style="font-weight: 600;">${item.model}</span> <span style="font-size: 12px; color: var(--text-muted); margin-left: 10px;">${timeText}</span></div>
+                    <div style="color: ${borderColor}; font-weight: 600;">%${item.riskScore} Risk <i class="fa-solid fa-camera" style="margin-left:8px; color:var(--text-muted);"></i></div>
+                </div>`;
 
-                // 2. Veritabanı (frontEndDB) Kontrolü
-                if (item.model && frontEndDB[item.model]) {
-                    const modelData = frontEndDB[item.model];
-
-                    // Durum bilgisi varsa onu, yoksa varsayılan olarak ikinci eli al
-                    if (item.condition && modelData[item.condition]) {
-                        piyasaDegeri = modelData[item.condition];
-                    } else if (modelData["TR_IkinciEl"]) {
-                        piyasaDegeri = modelData["TR_IkinciEl"];
-                    }
-                }
-
-                // 3. Matematiksel Yüzde Hesaplama (Kâr/Zarar)
-                let ilanSayi = parseInt(String(ilanFiyati).replace(/[^0-9]/g, '')) || 0;
-                let piyasaSayilari = String(piyasaDegeri).split('-').map(val => parseInt(val.replace(/[^0-9]/g, '')) || 0);
-                let piyasaOrtalama = 0;
-
-                if (piyasaSayilari.length === 2 && piyasaSayilari[0] > 0 && piyasaSayilari[1] > 0) {
-                    piyasaOrtalama = (piyasaSayilari[0] + piyasaSayilari[1]) / 2;
-                } else if (piyasaSayilari.length > 0) {
-                    piyasaOrtalama = piyasaSayilari[0];
-                }
-
-                // Risk Kontrolü (Değişken çakışmasını önlemek için doğrudan skorları kontrol ediyoruz)
-                if (item.riskScore >= 75) {
-                    // 1. Öncelik: Kritik Risk - KOYU KIRMIZI ZEMİN / BEYAZ YAZI
-                    durumEtiketi = `<span class="badge" style="background: #C92A2A; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Dolandırıcı Riski!</span>`;
-                } else if (item.riskScore >= 40 && item.riskScore < 75) {
-                    // 2. Öncelik: Orta/Yüksek Risk - KOYU TURUNCU ZEMİN / BEYAZ YAZI
-                    durumEtiketi = `<span class="badge" style="background: #D97706; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Şüpheli İlan (%${item.riskScore} Risk)</span>`;
-                } else if (ilanSayi > 0 && piyasaOrtalama > 0) {
-                    // 3. Öncelik: Risk düşükse fiyat analizi yap
-                    let karYuzdesi = ((piyasaOrtalama - ilanSayi) / piyasaOrtalama) * 100;
-
-                    if (karYuzdesi >= 15) {
-                        // ÇOK UCUZ - KOYU MAVİ ZEMİN / BEYAZ YAZI
-                        durumEtiketi = `<span class="badge" style="background: #0056B3; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">FIRSAT 🚀</span>`;
-                    } else if (karYuzdesi >= 10 && karYuzdesi < 15) {
-                        // UCUZ - KOYU YEŞİL ZEMİN / BEYAZ YAZI (Alt sınır %5'ten %10'a çıkarıldı)
-                        durumEtiketi = `<span class="badge" style="background: #248A3D; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Uygun Fiyat</span>`;
-                    } else if (karYuzdesi > -10 && karYuzdesi < 10) {
-                        // NORMAL - KOYU GRİ ZEMİN / BEYAZ YAZI (Nötr alanı genişletildi)
-                        durumEtiketi = `<span class="badge" style="background: #636366; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Nötr (Değerinde)</span>`;
-                    } else if (karYuzdesi <= -10 && karYuzdesi > -15) {
-                        // BİRAZ PAHALI - KOYU TURUNCU ZEMİN / BEYAZ YAZI
-                        durumEtiketi = `<span class="badge" style="background: #D97706; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Biraz Pahalı</span>`;
-                    } else if (karYuzdesi <= -15) {
-                        // ÇOK PAHALI - KOYU KIRMIZI ZEMİN / BEYAZ YAZI
-                        durumEtiketi = `<span class="badge" style="background: #C92A2A; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Çok Pahalı</span>`;
-                    }
-                } else {
-                    // VERİ YOK - SİYAHIMSI GRİ ZEMİN / BEYAZ YAZI
-                    durumEtiketi = `<span class="badge" style="background: #3A3A3C; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Fiyat Analizi Yapılamadı</span>`;
-                }
-
-                // 4. Tabloya Yazdırma
-                if (tableBody) {
-                    let durumMetni = "";
-                    if (item.condition === 'TR_Sifir') durumMetni = " (Sıfır)";
-                    else if (item.condition === 'TR_IkinciEl') durumMetni = " (İkinci El)";
-
-                    tableBody.innerHTML += `
-        <tr onclick="showImage('${item.imageUrl}')" style="cursor:pointer;" class="feed-item">
-            <td>${item.model}${durumMetni}</td>
-            <td style="color: var(--brand-accent); font-weight: 600;">${ilanFiyati}</td>
-            <td>${piyasaDegeri}</td>
-            <td>${durumEtiketi}</td>
-        </tr>
-    `;
-                }
-            });
-        }
-    } catch (e) { console.log("Sayaçlara ulaşılamadı."); }
+            // Sağ taraftaki Canlı Radar Tablosu
+            if (tableBody) {
+                tableBody.innerHTML += `
+                    <tr onclick="showImage('${item.imageUrl}')" style="cursor:pointer;" class="feed-item">
+                        <td>${item.model}</td>
+                        <td style="color: var(--brand-accent); font-weight: 600;">${item.price} TL</td>
+                        <td>Piyasa Analizi...</td>
+                        <td><span class="badge" style="background: ${borderColor}; color: white; padding: 4px 8px; border-radius: 4px;">%${item.riskScore} Risk</span></td>
+                    </tr>`;
+            }
+        });
+    } catch (e) { 
+        console.error("Veri senkronizasyon hatası:", e); 
+        const feedLoader = document.getElementById('feedLoading');
+        if (feedLoader) feedLoader.innerText = "Sunucuya ulaşılamıyor...";
+    }
 }
 
 function switchTab(tabId, element) {
