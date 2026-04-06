@@ -19,26 +19,28 @@ function showImage(url) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    // YENİ: Başlangıçta güncel fiyatları API'den (Single Source of Truth) çek
+    // 1. VERİ ÇEKME: Sunucudan güncel fiyatları al
     fetch('/api/database')
         .then(response => response.json())
         .then(data => {
             frontEndDB = data;
-            console.log("✅ Güncel fiyatlar sunucudan başarıyla çekildi!");
+            console.log("✅ Piyasa.ai: Veritabanı senkronize edildi.");
             
-            // YENİ: Veri geldiğinde açık olan arama kutusu varsa anında otomatik yenile
-            if (document.getElementById('modelDropdownList')?.style.display === 'block') {
-                document.getElementById('modelSearchInput').dispatchEvent(new Event('input'));
-            }
-            if (document.getElementById('wizardDropdownList')?.style.display === 'block') {
-                document.getElementById('wizardModelInput').dispatchEvent(new Event('input'));
-            }
-            if (document.getElementById('headerDropdownList')?.style.display === 'block') {
-                document.getElementById('headerSearchInput').dispatchEvent(new Event('input'));
-            }
+            // Veri gelince açık olan arama kutularını tetikle (UI Güncelleme)
+            const inputs = ['modelSearchInput', 'wizardModelInput', 'headerSearchInput'];
+            inputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.offsetParent !== null) { // Eğer element görünürse
+                    el.dispatchEvent(new Event('input'));
+                }
+            });
         })
-        .catch(err => console.error("❌ Fiyat listesi çekilirken hata oluştu:", err));
-    // Eğer URL'de bir ID varsa (paylaşılan linke tıklandıysa) direkt o analizi aç
+        .catch(err => {
+            console.error("❌ Kritik Hata:", err);
+            alert("Fiyat listesi yüklenemedi. Lütfen sayfayı yenileyin.");
+        });
+
+    // 2. PAYLAŞIM KONTROLÜ: URL'de analiz ID'si varsa otomatik aç
     const urlParams = new URLSearchParams(window.location.search);
     const sharedId = urlParams.get('id');
     if (sharedId) {
