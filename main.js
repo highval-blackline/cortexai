@@ -283,10 +283,22 @@ function switchTab(tabId, element) {
 }
 
 function runGlobalScan() {
-    const icon = document.getElementById('scanIcon'); icon.classList.add('fa-spin');
-    setTimeout(() => { icon.classList.remove('fa-spin'); alert('Ağ taraması tamamlandı, sistem güncel!'); }, 1000);
-}
+    const icon = document.getElementById('scanIcon'); 
+    const btn = icon.closest('.btn-outline');
 
+    // Apple tarzı basılma esnemesi
+    btn.classList.add('clicked-effect');
+    setTimeout(() => btn.classList.remove('clicked-effect'), 150);
+
+    // Hantal fa-spin yerine akıcı ios-spin sınıfını ekle
+    icon.classList.remove('fa-spin');
+    icon.classList.add('ios-spin'); 
+
+    setTimeout(() => { 
+        icon.classList.remove('ios-spin'); 
+        alert('Ağ taraması tamamlandı, sistem güncel!'); 
+    }, 1200);
+}
 let pastedFiles = [];
 
 document.addEventListener('paste', function (e) {
