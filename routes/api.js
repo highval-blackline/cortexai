@@ -1,6 +1,7 @@
-const { addAlarm, getMyAlarms, deleteAlarm } = require('../controllers/alarmController');
-const { analyzeProduct, getAnalysisById, reportFraud } = require('../controllers/analyzeController');
-const { getRecentFeed, getGlobalStats } = require('../controllers/feedController');
+const express = require('express');
+const router = express.Router();
+const multer = require('multer');
+const piyasaVeritabani = require('../database.js'); // Fiyat listesini ana dizinden çek
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -10,6 +11,11 @@ const upload = multer({
 const { addAlarm, getMyAlarms, deleteAlarm } = require('../controllers/alarmController');
 const { analyzeProduct, getAnalysisById, reportFraud } = require('../controllers/analyzeController');
 const { getRecentFeed, getGlobalStats } = require('../controllers/feedController');
+
+// --- VERİTABANI (Fiyat Listesi) ---
+router.get('/database', (req, res) => {
+    res.json(piyasaVeritabani);
+});
 
 // --- ANALİZ VE RADAR ---
 router.post('/analyze', upload.single('image'), analyzeProduct);
