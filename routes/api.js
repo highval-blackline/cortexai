@@ -2,23 +2,25 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 
-// Resim yükleme ayarı (Hafıza limitini 10MB yaptık)
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 10 * 1024 * 1024 }
 });
 
-// Controller bağlantıları (Az önce oluşturduğumuz dosyalar)
 const { addAlarm, getMyAlarms, deleteAlarm } = require('../controllers/alarmController');
 const { analyzeProduct } = require('../controllers/analyzeController');
 
-// --- ANALİZ ROTASI ---
-// 'image' etiketiyle gelen dosyayı multer ile yakalayıp analyzeProduct'a gönderir
+// --- ANALİZ VE RAPOR ---
 router.post('/analyze', upload.single('image'), analyzeProduct);
+router.get('/analysis/:id', (req, res) => { /* Analiz detayını getir */ }); 
+router.post('/report-fraud', (req, res) => { res.json({ success: true }); });
 
-// --- ALARM ROTARI ---
+// --- ALARMLAR ---
 router.post('/add-alarm', addAlarm);
 router.get('/my-alarms', getMyAlarms);
 router.post('/delete-alarm', deleteAlarm);
+
+// --- AUTH (Google Giriş) ---
+router.post('/auth/google', (req, res) => { /* Google login işlemini buraya taşıyacağız */ });
 
 module.exports = router;

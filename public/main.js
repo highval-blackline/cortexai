@@ -20,7 +20,7 @@ function showImage(url) {
 
 document.addEventListener("DOMContentLoaded", function () {
     // YENİ: Başlangıçta güncel fiyatları API'den (Single Source of Truth) çek
-    fetch('https://piyasa-ai.onrender.com/api/database')
+    fetch('/api/database')
         .then(response => response.json())
         .then(data => {
             frontEndDB = data;
@@ -142,7 +142,7 @@ function calculatePrice() {
 
 async function fetchGlobalStats() {
     try {
-        const res = await fetch('https://piyasa-ai.onrender.com/stats');
+        const res = await fetch('/api/stats');
         const data = await res.json();
         document.getElementById('totalListings').innerText = data.totalScans;
         document.getElementById('fraudCount').innerText = data.fraudCount;
@@ -394,7 +394,7 @@ async function startAnalysis() {
     }
 
     try {
-        const response = await fetch(`https://piyasa-ai.onrender.com/analyze`, { method: 'POST', body: formData });
+        const response = await fetch(`/api/analyze`, { method: 'POST', body: formData });
         const data = await response.json();
 
         if (data.error) { alert("Analiz Hatası: " + data.error); resetAnalysis(); return; }
@@ -524,7 +524,7 @@ function handleCredentialResponse(response) {
 }
 async function saveUserToDatabase(idToken) {
     try {
-        const response = await fetch('https://piyasa-ai.onrender.com/auth/google', {
+        const response = await fetch('/api/auth/google', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token: idToken })
@@ -577,7 +577,7 @@ async function saveAlarm() {
         btn.innerText = "Kaydediliyor... ⏳";
 
         // Paketi Render sunucusuna fırlatıyoruz!
-        const response = await fetch('https://piyasa-ai.onrender.com/add-alarm', {
+        const response = await fetch('/api/add-alarm', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -611,7 +611,7 @@ async function loadMyAlarms() {
     }
 
     try {
-        const response = await fetch(`https://piyasa-ai.onrender.com/my-alarms?email=${window.currentUserEmail}`);
+        const response = await fetch(`/api/my-alarms?email=${window.currentUserEmail}`);
         const data = await response.json();
 
         if (data.alarmlar && data.alarmlar.length > 0) {
@@ -649,7 +649,7 @@ function deleteAlarm(modelName) {
     document.getElementById('customConfirmOk').onclick = async function() {
         confirmBox.style.display = 'none';
         try {
-            const response = await fetch('https://piyasa-ai.onrender.com/delete-alarm', {
+            const response = await fetch('/api/delete-alarm', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: window.currentUserEmail, model: modelName })
@@ -668,7 +668,7 @@ async function sendFeedback(isCorrect) {
     
     if (isCorrect && window.lastAnalyzedScore >= 75) {
         try {
-            await fetch('https://piyasa-ai.onrender.com/report-fraud', { method: 'POST' });
+            await fetch('/api/report-fraud', { method: 'POST' });
             setTimeout(fetchGlobalStats, 1000); 
         } catch (e) { console.log("Geri bildirim gönderilemedi."); }
     }
@@ -780,7 +780,7 @@ async function loadSharedAnalysis(id) {
     document.getElementById('aiDecision').innerHTML = `<strong>Analiz Yükleniyor...</strong>`;
 
     try {
-        const response = await fetch(`https://piyasa-ai.onrender.com/analysis/${id}`);
+        const response = await fetch(`/api/analysis/${id}`);
         const result = await response.json();
 
         if (result.success) {
