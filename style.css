@@ -1049,8 +1049,8 @@ select.apple-select-hidden {
 /* PREMIUM YENİLEME (REFRESH) ANİMASYONU                    */
 /* ======================================================== */
 .ios-spin {
-    /* İvmeli değil, tamamen sabit hızlı (linear) ve pürüzsüz akış */
-    animation: smoothLinearSpin 0.9s linear infinite !important;
+    /* 0.5 saniyede 1 tam tur atar (Çok daha hızlı ve akıcı) */
+    animation: smoothLinearSpin 0.5s linear infinite !important;
     display: inline-block;
     transform-origin: center center;
     will-change: transform;

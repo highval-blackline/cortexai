@@ -290,15 +290,18 @@ function runGlobalScan() {
     btn.classList.add('clicked-effect');
     setTimeout(() => btn.classList.remove('clicked-effect'), 150);
 
-    // Hantal fa-spin yerine akıcı ios-spin sınıfını ekle
+    // Akıcı ios-spin sınıfını ekle
     icon.classList.remove('fa-spin');
     icon.classList.add('ios-spin'); 
 
+    // MATEMATİK: 0.5 saniyelik hız x 3 tam tur = Kusursuz 1500ms.
+    // Animasyon tam başladığı 0 noktasında milimetrik olarak durur.
     setTimeout(() => { 
         icon.classList.remove('ios-spin'); 
         alert('Ağ taraması tamamlandı, sistem güncel!'); 
-    }, 1200);
+    }, 1500);
 }
+
 let pastedFiles = [];
 
 document.addEventListener('paste', function (e) {
