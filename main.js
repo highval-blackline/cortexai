@@ -900,7 +900,7 @@ function upgradeSelectsToAppleStyleLegacy() {
 let appleSelectOutsideClickBound = false;
 
 function closeAppleSelectMenus(exceptMenu = null) {
-    document.querySelectorAll('#wizardSection .apple-select-menu.show').forEach(menu => {
+    document.querySelectorAll('.apple-select-menu.show').forEach(menu => {
         if (menu === exceptMenu) return;
 
         menu.classList.remove('show');
@@ -915,7 +915,7 @@ function closeAppleSelectMenus(exceptMenu = null) {
 }
 
 function upgradeSelectsToAppleStyle() {
-    const selects = document.querySelectorAll('#wizardSection select');
+    const selects = document.querySelectorAll('select');
 
     selects.forEach(select => {
         if (select.dataset.appleSelectUpgraded === 'true') return;

@@ -1035,7 +1035,7 @@ button:focus, input:focus, select:focus {
 }
 
 /* Orijinal çirkin select'leri tamamen KESİN olarak gizle */
-#wizardSection select.apple-select-hidden {
+select.apple-select-hidden {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
