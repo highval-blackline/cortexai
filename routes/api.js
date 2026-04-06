@@ -7,15 +7,14 @@ const upload = multer({
     limits: { fileSize: 10 * 1024 * 1024 }
 });
 
-// Tüm Controllerlar
 const { addAlarm, getMyAlarms, deleteAlarm } = require('../controllers/alarmController');
-const { analyzeProduct } = require('../controllers/analyzeController');
+const { analyzeProduct, getAnalysisById, reportFraud } = require('../controllers/analyzeController');
 const { getRecentFeed, getGlobalStats } = require('../controllers/feedController');
 
-// --- ANALİZ ---
+// --- ANALİZ VE RADAR ---
 router.post('/analyze', upload.single('image'), analyzeProduct);
-
-// --- RADAR & İSTATİSTİK ---
+router.get('/analysis/:id', getAnalysisById);
+router.post('/report-fraud', reportFraud);
 router.get('/recent-feed', getRecentFeed);
 router.get('/global-stats', getGlobalStats);
 

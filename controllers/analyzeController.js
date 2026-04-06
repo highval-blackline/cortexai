@@ -74,4 +74,21 @@ const analyzeProduct = async (req, res) => {
     }
 };
 
-module.exports = { analyzeProduct };
+const getAnalysisById = async (req, res) => {
+    const db = getDB().db;
+    try {
+        const { ObjectId } = require('mongodb');
+        const item = await db.collection('feed').findOne({ _id: new ObjectId(req.params.id) });
+        if (!item) return res.status(404).json({ error: 'Analiz bulunamadı.' });
+        res.json({ success: true, data: item });
+    } catch (err) {
+        res.status(400).json({ error: 'Geçersiz kimlik.' });
+    }
+};
+
+const reportFraud = async (req, res) => {
+    // Şimdilik sadece başarılı dönelim, istersen buraya mail atma kodu ekleriz
+    res.json({ success: true, message: "Bildirim alındı." });
+};
+
+module.exports = { analyzeProduct, getAnalysisById, reportFraud };
