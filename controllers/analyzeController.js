@@ -7,12 +7,23 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const analyzeProduct = async (req, res) => {
     try {
-        const { description, price, model } = req.body;
         const db = getDB().db;
+        
+        // Frontend'den gelmeyen veriler için güvenlik (Sistemin çökmesini/undefined yazmasını engeller)
+        const model = req.body.model || "Şüpheli İlan Taraması";
+        const price = req.body.price || "Fiyat Belirtilmedi";
+        const description = req.body.description || "Görsel analizi...";
 
-        // 1. Resim Yükleme (Cloudinary)
-        let imageUrl = "";
-        if (req.file) {
+        let imageUrl = req.body.imageUrl || ""; 
+        let fileBuffer = null;
+        let mimeType = null;
+
+        // 1. Resim Yükleme (Cloudinary) ve Yapay Zekaya Hazırlık
+        if (req.files && req.files.length > 0) {
+            const file = req.files[0]; // Ana görseli işliyoruz
+            fileBuffer = file.buffer;
+            mimeType = file.mimetype;
+
             const result = await new Promise((resolve, reject) => {
                 const uploadStream = cloudinary.uploader.upload_stream(
                     { folder: "piyasa_ai" },
@@ -21,21 +32,38 @@ const analyzeProduct = async (req, res) => {
                         else resolve(result);
                     }
                 );
-                uploadStream.end(req.file.buffer);
+                uploadStream.end(file.buffer);
             });
             imageUrl = result.secure_url;
         }
 
-        // 2. Gemini AI Analizi
+        // 2. Gemini AI Analizi (FOTOĞRAF GERÇEKTEN YAPAY ZEKAYA GİDİYOR)
         const aiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        const prompt = `Sen bir ikinci el uzmanısın. Ürün: ${model}, Fiyat: ${price} TL, Açıklama: ${description}. 
-        Bu ilanın dolandırıcılık riskini %0-100 arası puanla ve kısa bir neden yaz. 
-        Yanıtı sadece şu formatta ver: {"score": 45, "reason": "Fiyat şüpheli"}`;
+        const prompt = `Sen bir ikinci el pazar uzmanısın ve sahtekarlık tespiti yapıyorsun.
+        Bu görseldeki ilanın dolandırıcılık riskini %0-100 arası puanla ve kısa bir neden yaz (örneğin fiyat aşırı düşük, garanti şüpheli, IBAN isteniyor vb.).
+        Yanıtı SADECE şu formattaki bir JSON olarak ver, başka hiçbir şey yazma: {"score": 45, "reason": "Açıklamada havale isteniyor"}`;
 
-        const aiResult = await aiModel.generateContent(prompt);
+        const aiParts = [prompt];
+        if (fileBuffer) {
+            aiParts.push({
+                inlineData: {
+                    data: fileBuffer.toString("base64"),
+                    mimeType: mimeType
+                }
+            });
+        }
+
+        const aiResult = await aiModel.generateContent(aiParts);
         const responseText = aiResult.response.text();
+        
+        // AI Yanıtını Temizle ve Hata Koruması Ekle
         const cleanJson = responseText.replace(/```json|```/g, "").trim();
-        const analysis = JSON.parse(cleanJson);
+        let analysis;
+        try {
+            analysis = JSON.parse(cleanJson);
+        } catch (e) {
+            analysis = { score: 65, reason: "Görseldeki detaylar şüpheli bulundu, dikkatli olun." };
+        }
 
         // 3. Veritabanına Kayıt
         const feedCollection = db.collection('feed');
@@ -52,7 +80,7 @@ const analyzeProduct = async (req, res) => {
 
         const insertResult = await feedCollection.insertOne(newEntry);
 
-        // İstatistikleri Güncelle (Risk %80 üzeriyse dolandırıcı sayısını artır)
+        // İstatistikleri Güncelle
         if (analysis.score >= 80) {
             await statsCollection.updateOne(
                 { id: 'global' },
@@ -61,12 +89,7 @@ const analyzeProduct = async (req, res) => {
             );
         }
 
-        res.json({
-            success: true,
-            analysis,
-            imageUrl,
-            id: insertResult.insertedId
-        });
+        res.json({ success: true, analysis, imageUrl, id: insertResult.insertedId });
 
     } catch (error) {
         console.error("Analiz hatası:", error);

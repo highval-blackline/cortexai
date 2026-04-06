@@ -18,7 +18,7 @@ router.get('/database', (req, res) => {
 });
 
 // --- ANALİZ VE RADAR ---
-router.post('/analyze', upload.single('image'), analyzeProduct);
+router.post('/analyze', upload.array('images', 3), analyzeProduct);
 router.get('/analysis/:id', getAnalysisById);
 router.post('/report-fraud', reportFraud);
 router.get('/recent-feed', getRecentFeed);

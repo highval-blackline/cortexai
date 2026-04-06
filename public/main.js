@@ -178,6 +178,13 @@ async function fetchGlobalStats() {
         feedList.innerHTML = '';
         if (tableBody) tableBody.innerHTML = '';
 
+        // EĞER VERİTABANI BOŞSA BOŞLUK YERİNE BİLGİ MESAJI GÖSTER
+        if (recentFeed.length === 0) {
+            feedList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted); width: 100%; font-size: 13px;">Sistemde henüz hiç analiz yapılmadı. İlk taramayı sen yap!</div>';
+            if (tableBody) tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 15px;">Radarda şüpheli işlem bulunmuyor...</td></tr>';
+            return;
+        }
+
         recentFeed.forEach(item => {
             // Zaman hesaplama
             const timeDiff = Math.floor((Date.now() - new Date(item.time).getTime()) / 60000);
