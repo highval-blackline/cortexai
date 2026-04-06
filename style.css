@@ -1049,23 +1049,21 @@ select.apple-select-hidden {
 /* PREMIUM YENİLEME (REFRESH) ANİMASYONU                    */
 /* ======================================================== */
 .ios-spin {
-    /* Tam bir Apple Spring (Yay) hissiyatı veren özel bezier eğrisi */
-    animation: appleSpringSpin 1.2s cubic-bezier(0.4, 0.0, 0.2, 1) infinite !important;
+    /* İvmeli değil, tamamen sabit hızlı (linear) ve pürüzsüz akış */
+    animation: smoothLinearSpin 0.9s linear infinite !important;
     display: inline-block;
     transform-origin: center center;
-    will-change: transform, opacity;
+    will-change: transform;
 }
 
-@keyframes appleSpringSpin {
-    0% { transform: rotate(0deg) translateZ(0); opacity: 0.8; }
-    50% { transform: rotate(180deg) translateZ(0); opacity: 1; }
-    100% { transform: rotate(360deg) translateZ(0); opacity: 0.8; }
+@keyframes smoothLinearSpin {
+    0% { transform: rotate(0deg) translateZ(0); }
+    100% { transform: rotate(360deg) translateZ(0); }
 }
 
-/* Tıklanma anında butonun Apple tarzı elastik esnemesi (Haptic Feedback Hissiyatı) */
+/* Tıklanma anında butonun Apple tarzı hafif esnemesi */
 .btn-outline.clicked-effect {
-    transform: scale(0.93) !important;
+    transform: scale(0.95) !important;
     background: rgba(255, 255, 255, 0.1) !important;
-    opacity: 0.9;
-    transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.15s ease !important;
+    transition: transform 0.1s ease-out, background 0.1s ease !important;
 }
