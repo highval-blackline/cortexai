@@ -25,11 +25,6 @@ connectDB();
 // Tüm API istekleri artık /api ile başlayacak (Örn: /api/analyze)
 app.use('/api', apiRoutes);
 
-// Statik fiyat listesini veren eski endpoint'i buraya kısa yol olarak ekleyelim
-app.get('/api/database', (req, res) => {
-    res.json(piyasaVeritabani);
-});
-
 // --- ANA SAYFA YÖNLENDİRMESİ ---
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
