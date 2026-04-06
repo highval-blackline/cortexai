@@ -1046,19 +1046,36 @@ select.apple-select-hidden {
 }
 
 /* ======================================================== */
-/* PREMIUM YENİLEME (REFRESH) ANİMASYONU                    */
+/* GEMINI TARZI (YILAN) YÜKLEME ANİMASYONU                  */
 /* ======================================================== */
-.ios-spin {
-    /* 0.5 saniyede 1 tam tur atar (Çok daha hızlı ve akıcı) */
-    animation: smoothLinearSpin 0.5s linear infinite !important;
+.gemini-spinner {
+    width: 15px; 
+    height: 15px;
+    animation: geminiRotate 2s linear infinite;
     display: inline-block;
-    transform-origin: center center;
-    will-change: transform;
+    vertical-align: middle;
+    margin-right: 6px;
+    margin-bottom: 2px;
 }
 
-@keyframes smoothLinearSpin {
-    0% { transform: rotate(0deg) translateZ(0); }
-    100% { transform: rotate(360deg) translateZ(0); }
+.gemini-spinner circle {
+    stroke: currentColor;
+    stroke-width: 5;
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+    animation: geminiDash 1.5s ease-in-out infinite;
+    stroke-linecap: round; /* Senin istediğin o uçların yuvarlak olma detayı */
+    fill: none;
+}
+
+@keyframes geminiRotate {
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes geminiDash {
+    0% { stroke-dasharray: 1, 200; stroke-dashoffset: 0; }
+    50% { stroke-dasharray: 89, 200; stroke-dashoffset: -35px; }
+    100% { stroke-dasharray: 89, 200; stroke-dashoffset: -124px; }
 }
 
 /* Tıklanma anında butonun Apple tarzı hafif esnemesi */

@@ -286,20 +286,25 @@ function runGlobalScan() {
     const icon = document.getElementById('scanIcon'); 
     const btn = icon.closest('.btn-outline');
 
-    // Apple tarzı basılma esnemesi
+    // Buton esnemesi
     btn.classList.add('clicked-effect');
     setTimeout(() => btn.classList.remove('clicked-effect'), 150);
 
-    // Akıcı ios-spin sınıfını ekle
-    icon.classList.remove('fa-spin');
-    icon.classList.add('ios-spin'); 
+    // Orijinal ikonu gizle ve Gemini animasyonunu enjekte et
+    icon.style.display = 'none';
+    
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = '<svg class="gemini-spinner" id="geminiSvg" viewBox="25 25 50 50"><circle cx="50" cy="50" r="20"></circle></svg>';
+    const spinnerSvg = tempDiv.firstChild;
+    btn.insertBefore(spinnerSvg, icon);
 
-    // MATEMATİK: 0.5 saniyelik hız x 3 tam tur = Kusursuz 1500ms.
-    // Animasyon tam başladığı 0 noktasında milimetrik olarak durur.
+    // Animasyon süresi dolduğunda her şeyi eski haline getir
     setTimeout(() => { 
-        icon.classList.remove('ios-spin'); 
+        const activeSpinner = document.getElementById('geminiSvg');
+        if (activeSpinner) activeSpinner.remove();
+        icon.style.display = 'inline-block';
         alert('Ağ taraması tamamlandı, sistem güncel!'); 
-    }, 1500);
+    }, 1800); // Yılan efektinin tam kapanma anına denk getirilmiş süre
 }
 
 let pastedFiles = [];
