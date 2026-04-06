@@ -31,9 +31,6 @@ app.get('*', (req, res) => {
 });
 
 if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => {
-        console.log(`🚀 Yerel sunucu ${PORT} portunda çalışıyor.`);
-    });
+    app.listen(PORT, () => console.log(`🚀 Sunucu ${PORT} portunda aktif.`));
 }
-
 module.exports = app;
