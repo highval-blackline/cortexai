@@ -1,6 +1,6 @@
-const express = require('express');
-const router = express.Router();
-const multer = require('multer');
+const { addAlarm, getMyAlarms, deleteAlarm } = require('../controllers/alarmController');
+const { analyzeProduct, getAnalysisById, reportFraud } = require('../controllers/analyzeController');
+const { getRecentFeed, getGlobalStats } = require('../controllers/feedController');
 
 const upload = multer({
     storage: multer.memoryStorage(),
