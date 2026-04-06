@@ -1,7 +1,7 @@
+const piyasaVeritabani = require('../database.js');
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const piyasaVeritabani = require('../database.js'); // Fiyat listesini ana dizinden çek
 
 const upload = multer({
     storage: multer.memoryStorage(),
