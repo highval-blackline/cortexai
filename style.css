@@ -929,40 +929,34 @@ button:focus, input:focus, select:focus {
 
 /* Deger Hesapla formu: grup araliklari ve dropdown katmanlama */
 #wizardSection .panel > div:first-child {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 18px !important;
-    margin-bottom: 20px !important;
-    position: relative;
-    overflow: visible !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 24px !important;
+    margin-bottom: 24px !important;
 }
 
 #wizardSection .panel > div:first-child > div {
     position: relative;
-    display: block;
     width: 100%;
-    margin-bottom: 0 !important;
-    z-index: 1;
 }
+
+/* Z-Index Çakışmasına Kesin Çözüm: Üstteki her zaman üstte kalır */
+#wizardSection .panel > div:first-child > div:nth-child(1) { z-index: 40; }
+#wizardSection .panel > div:first-child > div:nth-child(2) { z-index: 30; }
+#wizardSection .panel > div:first-child > div:nth-child(3) { z-index: 20; }
+#wizardSection .panel > div:first-child > div:nth-child(4) { z-index: 10; }
 
 #wizardSection .panel > div:first-child > div label {
     display: block !important;
     margin-bottom: 8px !important;
-    line-height: 1.4;
+    color: var(--text-muted);
 }
 
 #wizardSection .panel > div:first-child > div input,
 #wizardSection .panel > div:first-child > div select,
-#wizardSection .panel > div:first-child > div .apple-select-wrapper,
-#wizardSection .panel > div:first-child > div .apple-select-btn {
+#wizardSection .panel > div:first-child > div .apple-select-wrapper {
     width: 100% !important;
     display: block !important;
-}
-
-#wizardSection .panel > div:first-child > div .apple-select-wrapper {
-    position: relative !important;
-    z-index: 20 !important;
-    overflow: visible !important;
 }
 
 #wizardSection .panel > div:first-child > div .apple-select-menu,
@@ -971,7 +965,6 @@ button:focus, input:focus, select:focus {
     top: calc(100% + 8px) !important;
     left: 0 !important;
     right: 0 !important;
-    z-index: 99999 !important;
 }
 
 @media (max-width: 768px) {
