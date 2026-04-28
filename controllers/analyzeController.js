@@ -156,7 +156,6 @@ const analyzeProduct = async (req, res) => {
             time: new Date().toISOString()
         };
 
-        const db = getDB().db;
         await db.collection('feed').insertOne(newEntry);
 
         if (finalScore >= 50) {
