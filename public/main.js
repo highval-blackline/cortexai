@@ -304,6 +304,10 @@ function updateFileName() {
 }
 
 async function startAnalysis() {
+    if (typeof imageCompression === 'undefined') {
+        alert("Sıkıştırma kütüphanesi yüklenemedi, lütfen sayfayı yenileyin.");
+        return;
+    }
     const fileInput = document.getElementById('imageInput');
     const urlInput = document.getElementById('imageUrlInput').value.trim();
     const errorMsg = document.getElementById('errorMsg');
