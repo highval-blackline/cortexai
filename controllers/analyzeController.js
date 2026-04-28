@@ -53,7 +53,7 @@ const getMinPrice = (dbEntry) => {
 
 const getMarketValue = (dbEntry) => {
     if (!dbEntry) return "Veri Yok";
-    return Object.values(dbEntry)[0] || "Veri Yok";
+    return dbEntry.TR_IkinciEl || Object.values(dbEntry)[0] || "Veri Yok";
 };
 
 // API CONFIG (Çökme koruması için env kontrolü)
@@ -108,15 +108,19 @@ const analyzeProduct = async (req, res) => {
         }
 
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-        const prompt = `Bugün 28 Nisan 2026. Tarih analizini tamamen kapat.
-        İlandan model ismini ve fiyatı kesin olarak ayıkla.
+        const prompt = `Sen Profesyonel bir Piyasa Analisti modundasın. 
+        Bugün 28 Nisan 2026. Tarih analizini tamamen kapat, "tarih gelecekten" gibi hatalı uyarılar verme.
+        
+        GÖREVLER:
+        1. Model Tespiti: İlandaki modeli KESİN olarak belirle (Örn: "iPhone 17 Pro Max"). "Belirlenemedi" ifadesi yasaktır.
+        2. Fiyat Çekme: İlandaki fiyatı (kuruşu kuruşuna) KESİN olarak ayıkla (Örn: "72.500 TL").
         
         REFERANS: ${JSON.stringify(staticDatabase)}
 
         Yanıtı SADECE şu formatta ver: 
         {
           "modelName": "iPhone 17 Pro Max", 
-          "price": "110.000 TL",
+          "price": "72.500 TL",
           "reason": "..."
         }`;
 
@@ -143,16 +147,23 @@ const analyzeProduct = async (req, res) => {
         }
         
         // MATEMATİKSEL KESİNLİK
-        const finalModelName = analysis.modelName || model;
+        const finalModelName = (analysis.modelName || model).replace(/Analiz:\s*/i, "").replace(/Taraması:\s*/i, "").trim();
         const dbEntry = staticDatabase[finalModelName];
         const vMin = getMinPrice(dbEntry);
         const pVal = parsePrice(analysis.price || price);
         const marketVal = getMarketValue(dbEntry);
 
-        let finalScore = 60; 
+        let finalScore = 10; 
+        let finalReason = "Fiyat piyasa değerleriyle uyumlu, diğer detayları inceleyin";
+
         if (vMin > 0) {
-            if (pVal < (vMin * 0.80)) finalScore = 95;
-            else if (pVal >= (vMin * 0.94)) finalScore = 10;
+            if (pVal < (vMin * 0.80)) {
+                finalScore = 95;
+                finalReason = "Piyasa değerinin çok altında, dolandırıcılık riski yüksek";
+            } else if (pVal < vMin * 0.94) {
+                finalScore = 60;
+                finalReason = "Fiyat piyasa ortalamasının altında, dikkatli olmanız önerilir";
+            }
         }
 
         const finalStatus = finalScore >= 90 ? "Dolandırıcı Riski!" : (finalScore >= 40 ? "Şüpheli İlan" : "Güvenli / Uygun");
@@ -163,7 +174,7 @@ const analyzeProduct = async (req, res) => {
             marketValue: marketVal,
             riskScore: finalScore,
             status: finalStatus,
-            reason: analysis.reason || "Piyasa analizi yapıldı.",
+            reason: finalReason,
             imageUrl,
             time: new Date().toISOString()
         };
