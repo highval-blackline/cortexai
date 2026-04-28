@@ -2,10 +2,256 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const cloudinary = require('cloudinary').v2;
 const { getDB } = require('../config/db');
 const { ObjectId } = require('mongodb');
-const piyasaVeritabani = require('../database.js');
 
-// Gemini ve Cloudinary Yapılandırması
-const geminiKey = (process.env.GEMINI_API_KEY || "").trim();
+// STATİK VERİ ENJEKSİYONU (KRİTİK: Vercel/Dosya Okuma Hatalarını Engeller)
+const staticDatabase = {
+    "iPhone 17 Pro Max": { "TR_Sifir": "120.000 TL - 135.000 TL", "TR_IkinciEl": "105.000 TL - 115.000 TL", "YurtDisi_Sifir": "65.000 TL - 75.000 TL", "YurtDisi_IkinciEl": "55.000 TL - 60.000 TL" },
+    "iPhone 17 Pro": { "TR_Sifir": "105.000 TL - 115.000 TL", "TR_IkinciEl": "90.000 TL - 100.000 TL", "YurtDisi_Sifir": "55.000 TL - 65.000 TL", "YurtDisi_IkinciEl": "48.000 TL - 53.000 TL" },
+    "iPhone 17 Plus": { "TR_Sifir": "95.000 TL - 105.000 TL", "TR_IkinciEl": "80.000 TL - 90.000 TL", "YurtDisi_Sifir": "50.000 TL - 55.000 TL", "YurtDisi_IkinciEl": "43.000 TL - 48.000 TL" },
+    "iPhone Air": { "TR_Sifir": "68.500 TL - 86.500 TL", "TR_IkinciEl": "55.000 TL - 62.000 TL", "YurtDisi_Sifir": "38.000 TL - 45.000 TL", "YurtDisi_IkinciEl": "30.000 TL - 35.000 TL" },
+    "iPhone 17": { "TR_Sifir": "85.000 TL - 95.000 TL", "TR_IkinciEl": "75.000 TL - 80.000 TL", "YurtDisi_Sifir": "45.000 TL - 50.000 TL", "YurtDisi_IkinciEl": "38.000 TL - 43.000 TL" },
+    "iPhone 16 Pro Max": { "TR_Sifir": "105.000 TL - 110.000 TL", "TR_IkinciEl": "85.000 TL - 95.000 TL", "YurtDisi_Sifir": "55.000 TL - 60.000 TL", "YurtDisi_IkinciEl": "45.000 TL - 50.000 TL" },
+    "iPhone 16 Pro": { "TR_Sifir": "95.000 TL - 100.000 TL", "TR_IkinciEl": "75.000 TL - 85.000 TL", "YurtDisi_Sifir": "48.000 TL - 53.000 TL", "YurtDisi_IkinciEl": "40.000 TL - 45.000 TL" },
+    "iPhone 16 Plus": { "TR_Sifir": "85.000 TL - 90.000 TL", "TR_IkinciEl": "65.000 TL - 75.000 TL", "YurtDisi_Sifir": "43.000 TL - 48.000 TL", "YurtDisi_IkinciEl": "35.000 TL - 40.000 TL" },
+    "iPhone 16": { "TR_Sifir": "75.000 TL - 80.000 TL", "TR_IkinciEl": "60.000 TL - 65.000 TL", "YurtDisi_Sifir": "40.000 TL - 45.000 TL", "YurtDisi_IkinciEl": "32.000 TL - 36.000 TL" },
+    "iPhone 15 Pro Max": { "TR_Sifir": "90.000 TL - 95.000 TL", "TR_IkinciEl": "70.000 TL - 80.000 TL", "YurtDisi_Sifir": "48.000 TL - 52.000 TL", "YurtDisi_IkinciEl": "38.000 TL - 42.000 TL" },
+    "iPhone 15 Pro": { "TR_Sifir": "80.000 TL - 85.000 TL", "TR_IkinciEl": "60.000 TL - 70.000 TL", "YurtDisi_Sifir": "42.000 TL - 46.000 TL", "YurtDisi_IkinciEl": "32.000 TL - 36.000 TL" },
+    "iPhone 15 Plus": { "TR_Sifir": "70.000 TL - 75.000 TL", "TR_IkinciEl": "55.000 TL - 60.000 TL", "YurtDisi_Sifir": "36.000 TL - 40.000 TL", "YurtDisi_IkinciEl": "28.000 TL - 32.000 TL" },
+    "iPhone 15": { "TR_Sifir": "60.000 TL - 65.000 TL", "TR_IkinciEl": "48.000 TL - 55.000 TL", "YurtDisi_Sifir": "32.000 TL - 36.000 TL", "YurtDisi_IkinciEl": "25.000 TL - 28.000 TL" },
+    "iPhone 14 Pro Max": { "TR_Sifir": "80.000 TL", "TR_IkinciEl": "55.000 TL - 65.000 TL", "YurtDisi_Sifir": "45.000 TL", "YurtDisi_IkinciEl": "35.000 TL - 42.000 TL" },
+    "iPhone 14 Pro": { "TR_Sifir": "72.000 TL", "TR_IkinciEl": "48.000 TL - 55.000 TL", "YurtDisi_Sifir": "40.000 TL", "YurtDisi_IkinciEl": "30.000 TL - 35.000 TL" },
+    "iPhone 14 Plus": { "TR_Sifir": "60.000 TL", "TR_IkinciEl": "40.000 TL - 46.000 TL", "YurtDisi_Sifir": "32.000 TL", "YurtDisi_IkinciEl": "22.000 TL - 26.000 TL" },
+    "iPhone 14": { "TR_Sifir": "45.000 TL - 50.000 TL", "TR_IkinciEl": "35.000 TL - 42.000 TL", "YurtDisi_Sifir": "25.000 TL", "YurtDisi_IkinciEl": "18.000 TL - 22.000 TL" },
+    "iPhone 13 Pro Max": { "TR_IkinciEl": "42.000 TL - 48.000 TL", "YurtDisi_IkinciEl": "25.000 TL - 28.000 TL" },
+    "iPhone 13 Pro": { "TR_IkinciEl": "35.000 TL - 40.000 TL", "YurtDisi_IkinciEl": "20.000 TL - 24.000 TL" },
+    "iPhone 13": { "TR_Sifir": "36.000 TL - 39.000 TL", "TR_IkinciEl": "28.000 TL - 33.000 TL", "YurtDisi_Sifir": "15.000 TL - 18.000 TL" },
+    "iPhone 13 Mini": { "TR_IkinciEl": "24.000 TL - 28.000 TL", "YurtDisi_IkinciEl": "12.000 TL - 15.000 TL" },
+    "iPhone 12 Pro Max": { "TR_IkinciEl": "24.000 TL - 28.000 TL", "YurtDisi_Sifir": "12.000 TL - 15.000 TL" },
+    "iPhone 12 Pro": { "TR_IkinciEl": "20.000 TL - 25.000 TL", "YurtDisi_IkinciEl": "10.000 TL - 13.000 TL" },
+    "iPhone 12": { "TR_IkinciEl": "16.000 TL - 20.000 TL", "YurtDisi_IkinciEl": "8.000 TL - 11.000 TL" },
+    "iPhone 12 Mini": { "TR_IkinciEl": "14.000 TL - 17.000 TL", "YurtDisi_IkinciEl": "7.000 TL - 9.000 TL" },
+    "iPhone 11 Pro Max": { "TR_IkinciEl": "15.000 TL - 18.000 TL", "YurtDisi_IkinciEl": "7.000 TL - 9.000 TL" },
+    "iPhone 11 Pro": { "TR_IkinciEl": "13.000 TL - 16.000 TL", "YurtDisi_IkinciEl": "6.000 TL - 8.000 TL" },
+    "iPhone 11": { "TR_Sifir": "28.000 TL - 38.000 TL", "TR_IkinciEl": "10.000 TL - 14.000 TL", "YurtDisi_IkinciEl": "5.000 TL - 7.000 TL" },
+    "iPhone XS Max": { "TR_IkinciEl": "8.000 TL - 11.000 TL", "YurtDisi_IkinciEl": "4.000 TL - 6.000 TL" },
+    "iPhone XS": { "TR_IkinciEl": "7.000 TL - 10.000 TL", "YurtDisi_IkinciEl": "3.500 TL - 5.000 TL" },
+    "iPhone XR": { "TR_IkinciEl": "7.000 TL - 9.500 TL", "YurtDisi_IkinciEl": "3.000 TL - 4.500 TL" },
+    "iPhone X": { "TR_IkinciEl": "6.000 TL - 8.000 TL", "YurtDisi_IkinciEl": "3.000 TL - 4.000 TL" },
+    "iPhone 8 Plus": { "TR_IkinciEl": "4.000 TL - 6.000 TL", "YurtDisi_IkinciEl": "2.000 TL - 3.000 TL" },
+    "iPhone 8": { "TR_IkinciEl": "3.000 TL - 4.500 TL", "YurtDisi_IkinciEl": "1.500 TL - 2.000 TL" },
+    "iPhone 7 Plus": { "TR_IkinciEl": "3.000 TL - 4.500 TL", "YurtDisi_IkinciEl": "1.500 TL - 2.000 TL" },
+    "iPhone 7": { "TR_IkinciEl": "2.000 TL - 3.500 TL", "YurtDisi_IkinciEl": "1.000 TL - 1.500 TL" },
+    "iPhone SE 4 (2025)": { "TR_Sifir": "35.000 TL - 40.000 TL", "TR_IkinciEl": "28.000 TL - 32.000 TL", "YurtDisi_Sifir": "18.000 TL - 22.000 TL", "YurtDisi_IkinciEl": "14.000 TL - 17.000 TL" },
+    "iPhone SE 3 (2022)": { "TR_IkinciEl": "15.000 TL - 20.000 TL", "YurtDisi_IkinciEl": "7.000 TL - 10.000 TL" },
+    "iPhone SE 2 (2020)": { "TR_IkinciEl": "8.000 TL - 12.000 TL", "YurtDisi_IkinciEl": "4.000 TL - 6.000 TL" },
+    "iPhone SE 1 (2016)": { "TR_IkinciEl": "1.500 TL - 3.000 TL", "YurtDisi_IkinciEl": "500 TL - 1.000 TL" },
+    "iPhone 6s Plus": { "TR_IkinciEl": "1.500 TL - 2.500 TL" },
+    "iPhone 6s": { "TR_IkinciEl": "1.000 TL - 2.000 TL" },
+    "iPhone 6 Plus": { "TR_IkinciEl": "1.000 TL - 1.800 TL" },
+    "iPhone 6": { "TR_IkinciEl": "800 TL - 1.500 TL" },
+    "iPhone 5s": { "TR_IkinciEl": "500 TL - 1.000 TL" },
+    "iPhone 5c": { "TR_IkinciEl": "400 TL - 800 TL" },
+    "iPhone 5": { "TR_IkinciEl": "400 TL - 800 TL" },
+    "Samsung Galaxy S26 Ultra": { "TR_Sifir": "105.000 TL - 115.000 TL", "TR_IkinciEl": "95.000 TL - 100.000 TL", "YurtDisi_Sifir": "55.000 TL - 62.000 TL", "YurtDisi_IkinciEl": "48.000 TL - 53.000 TL" },
+    "Samsung Galaxy S26+": { "TR_Sifir": "85.000 TL - 92.000 TL", "TR_IkinciEl": "75.000 TL - 80.000 TL", "YurtDisi_Sifir": "45.000 TL - 50.000 TL", "YurtDisi_IkinciEl": "38.000 TL - 42.000 TL" },
+    "Samsung Galaxy S26": { "TR_Sifir": "72.000 TL - 78.000 TL", "TR_IkinciEl": "62.000 TL - 68.000 TL", "YurtDisi_Sifir": "38.000 TL - 42.000 TL", "YurtDisi_IkinciEl": "32.000 TL - 36.000 TL" },
+    "Samsung Galaxy S25 Ultra": { "TR_Sifir": "90.000 TL - 98.000 TL", "TR_IkinciEl": "78.000 TL - 85.000 TL", "YurtDisi_Sifir": "45.000 TL - 50.000 TL", "YurtDisi_IkinciEl": "38.000 TL - 43.000 TL" },
+    "Samsung Galaxy S25+": { "TR_Sifir": "70.000 TL - 76.000 TL", "TR_IkinciEl": "60.000 TL - 66.000 TL", "YurtDisi_Sifir": "36.000 TL - 40.000 TL", "YurtDisi_IkinciEl": "30.000 TL - 34.000 TL" },
+    "Samsung Galaxy S25": { "TR_Sifir": "60.000 TL - 66.000 TL", "TR_IkinciEl": "50.000 TL - 56.000 TL", "YurtDisi_Sifir": "30.000 TL - 34.000 TL", "YurtDisi_IkinciEl": "26.000 TL - 29.000 TL" },
+    "Samsung Galaxy S24 Ultra": { "TR_Sifir": "70.000 TL - 76.000 TL", "TR_IkinciEl": "58.000 TL - 65.000 TL", "YurtDisi_Sifir": "35.000 TL - 40.000 TL", "YurtDisi_IkinciEl": "28.000 TL - 33.000 TL" },
+    "Samsung Galaxy S24+": { "TR_Sifir": "55.000 TL - 60.000 TL", "TR_IkinciEl": "44.000 TL - 50.000 TL", "YurtDisi_Sifir": "28.000 TL - 32.000 TL", "YurtDisi_IkinciEl": "22.000 TL - 26.000 TL" },
+    "Samsung Galaxy S24": { "TR_Sifir": "48.000 TL - 53.000 TL", "TR_IkinciEl": "38.000 TL - 44.000 TL", "YurtDisi_Sifir": "24.000 TL - 28.000 TL", "YurtDisi_IkinciEl": "19.000 TL - 23.000 TL" },
+    "Samsung Galaxy S24 FE": { "TR_Sifir": "34.000 TL - 38.000 TL", "TR_IkinciEl": "26.000 TL - 31.000 TL", "YurtDisi_Sifir": "18.000 TL - 22.000 TL", "YurtDisi_IkinciEl": "14.000 TL - 17.000 TL" },
+    "Samsung Galaxy S23 Ultra": { "TR_IkinciEl": "45.000 TL - 52.000 TL" },
+    "Samsung Galaxy S23+": { "TR_IkinciEl": "34.000 TL - 39.000 TL" },
+    "Samsung Galaxy S23": { "TR_IkinciEl": "28.000 TL - 33.000 TL" },
+    "Samsung Galaxy S23 FE": { "TR_IkinciEl": "20.000 TL - 24.000 TL" },
+    "Samsung Galaxy S22 Ultra": { "TR_IkinciEl": "32.000 TL - 38.000 TL" },
+    "Samsung Galaxy S22+": { "TR_IkinciEl": "22.000 TL - 26.000 TL" },
+    "Samsung Galaxy S22": { "TR_IkinciEl": "17.000 TL - 21.000 TL" },
+    "Samsung Galaxy S21 Ultra": { "TR_IkinciEl": "22.000 TL - 27.000 TL" },
+    "Samsung Galaxy S21+": { "TR_IkinciEl": "15.000 TL - 18.000 TL" },
+    "Samsung Galaxy S21": { "TR_IkinciEl": "12.000 TL - 15.000 TL" },
+    "Samsung Galaxy S21 FE": { "TR_IkinciEl": "13.000 TL - 16.000 TL" },
+    "Samsung Galaxy S20 Ultra": { "TR_IkinciEl": "15.000 TL - 18.000 TL" },
+    "Samsung Galaxy S20+": { "TR_IkinciEl": "10.000 TL - 13.000 TL" },
+    "Samsung Galaxy S20": { "TR_IkinciEl": "8.500 TL - 11.000 TL" },
+    "Samsung Galaxy S20 FE": { "TR_IkinciEl": "9.000 TL - 12.000 TL" },
+    "Samsung Galaxy S10+": { "TR_IkinciEl": "6.500 TL - 8.500 TL" },
+    "Samsung Galaxy S10": { "TR_IkinciEl": "5.500 TL - 7.500 TL" },
+    "Samsung Galaxy S10e": { "TR_IkinciEl": "4.500 TL - 6.000 TL" },
+    "Samsung Galaxy S10 Lite": { "TR_IkinciEl": "5.000 TL - 7.000 TL" },
+    "Samsung Galaxy S9+": { "TR_IkinciEl": "4.000 TL - 5.500 TL" },
+    "Samsung Galaxy S9": { "TR_IkinciEl": "3.200 TL - 4.500 TL" },
+    "Samsung Galaxy S8+": { "TR_IkinciEl": "2.800 TL - 3.800 TL" },
+    "Samsung Galaxy S8": { "TR_IkinciEl": "2.200 TL - 3.200 TL" },
+    "Samsung Galaxy S7 Edge": { "TR_IkinciEl": "1.500 TL - 2.200 TL" },
+    "Samsung Galaxy S7": { "TR_IkinciEl": "1.000 TL - 1.600 TL" },
+    "Samsung Galaxy Z Fold 7": { "TR_Sifir": "95.000 TL - 105.000 TL", "TR_IkinciEl": "80.000 TL - 88.000 TL", "YurtDisi_Sifir": "50.000 TL - 58.000 TL", "YurtDisi_IkinciEl": "42.000 TL - 48.000 TL" },
+    "Samsung Galaxy Z Flip 7": { "TR_Sifir": "60.000 TL - 68.000 TL", "TR_IkinciEl": "48.000 TL - 55.000 TL", "YurtDisi_Sifir": "35.000 TL - 40.000 TL", "YurtDisi_IkinciEl": "28.000 TL - 32.000 TL" },
+    "Samsung Galaxy Z Fold Special Edition": { "TR_Sifir": "Özel İthalat (Ort: 110.000 TL)", "TR_IkinciEl": "85.000 TL - 95.000 TL", "YurtDisi_Sifir": "60.000 TL - 68.000 TL", "YurtDisi_IkinciEl": "50.000 TL - 55.000 TL" },
+    "Samsung Galaxy Z Fold 6": { "TR_Sifir": "80.000 TL - 88.000 TL", "TR_IkinciEl": "65.000 TL - 72.000 TL", "YurtDisi_Sifir": "42.000 TL - 48.000 TL", "YurtDisi_IkinciEl": "34.000 TL - 39.000 TL" },
+    "Samsung Galaxy Z Flip 6": { "TR_Sifir": "52.000 TL - 58.000 TL", "TR_IkinciEl": "40.000 TL - 46.000 TL", "YurtDisi_Sifir": "28.000 TL - 33.000 TL", "YurtDisi_IkinciEl": "22.000 TL - 26.000 TL" },
+    "Samsung Galaxy Z Fold 5": { "TR_IkinciEl": "45.000 TL - 52.000 TL" },
+    "Samsung Galaxy Z Flip 5": { "TR_IkinciEl": "28.000 TL - 34.000 TL" },
+    "Samsung Galaxy Z Fold 4": { "TR_IkinciEl": "30.000 TL - 36.000 TL" },
+    "Samsung Galaxy Z Flip 4": { "TR_IkinciEl": "18.000 TL - 23.000 TL" },
+    "Samsung Galaxy Z Fold 3": { "TR_IkinciEl": "20.000 TL - 25.000 TL" },
+    "Samsung Galaxy Z Flip 3": { "TR_IkinciEl": "12.000 TL - 16.000 TL" },
+    "Samsung Galaxy Z Fold 2": { "TR_IkinciEl": "14.000 TL - 18.000 TL" },
+    "Samsung Galaxy Z Flip": { "TR_IkinciEl": "8.000 TL - 11.000 TL" },
+    "Samsung Galaxy Fold": { "TR_IkinciEl": "9.000 TL - 13.000 TL" },
+    "Samsung Galaxy Note 20 Ultra": { "TR_IkinciEl": "20.000 TL - 25.000 TL" },
+    "Samsung Galaxy Note 20": { "TR_IkinciEl": "15.000 TL - 19.000 TL" },
+    "Samsung Galaxy Note 10+": { "TR_IkinciEl": "11.000 TL - 14.000 TL" },
+    "Samsung Galaxy Note 10": { "TR_IkinciEl": "8.500 TL - 11.000 TL" },
+    "Samsung Galaxy Note 10 Lite": { "TR_IkinciEl": "7.500 TL - 9.500 TL" },
+    "Samsung Galaxy Note 9": { "TR_IkinciEl": "5.500 TL - 7.500 TL" },
+    "Samsung Galaxy Note 8": { "TR_IkinciEl": "4.000 TL - 5.500 TL" },
+    "Samsung Galaxy Note FE": { "TR_IkinciEl": "2.500 TL - 3.500 TL" },
+    "Samsung Galaxy A56": { "TR_Sifir": "30.000 TL - 34.000 TL", "TR_IkinciEl": "24.000 TL - 28.000 TL", "YurtDisi_Sifir": "15.000 TL - 18.000 TL", "YurtDisi_IkinciEl": "11.000 TL - 14.000 TL" },
+    "Samsung Galaxy A36": { "TR_Sifir": "24.000 TL - 28.000 TL", "TR_IkinciEl": "19.000 TL - 23.000 TL", "YurtDisi_Sifir": "12.000 TL - 15.000 TL", "YurtDisi_IkinciEl": "9.000 TL - 11.000 TL" },
+    "Samsung Galaxy A26": { "TR_Sifir": "18.000 TL - 22.000 TL", "TR_IkinciEl": "14.000 TL - 17.000 TL", "YurtDisi_Sifir": "9.500 TL - 12.000 TL", "YurtDisi_IkinciEl": "7.500 TL - 9.000 TL" },
+    "Samsung Galaxy A16": { "TR_Sifir": "13.000 TL - 16.000 TL", "TR_IkinciEl": "10.000 TL - 13.000 TL", "YurtDisi_Sifir": "7.000 TL - 9.000 TL", "YurtDisi_IkinciEl": "5.500 TL - 7.000 TL" },
+    "Samsung Galaxy A55 5G": { "TR_Sifir": "22.000 TL - 25.000 TL", "TR_IkinciEl": "17.000 TL - 21.000 TL", "YurtDisi_Sifir": "11.000 TL - 14.000 TL", "YurtDisi_IkinciEl": "8.500 TL - 10.500 TL" },
+    "Samsung Galaxy A35 5G": { "TR_Sifir": "17.000 TL - 20.000 TL", "TR_IkinciEl": "13.000 TL - 16.000 TL", "YurtDisi_Sifir": "9.000 TL - 11.000 TL", "YurtDisi_IkinciEl": "7.000 TL - 8.500 TL" },
+    "Samsung Galaxy A25 5G": { "TR_Sifir": "13.000 TL - 16.000 TL", "TR_IkinciEl": "10.000 TL - 13.000 TL", "YurtDisi_Sifir": "7.500 TL - 9.500 TL", "YurtDisi_IkinciEl": "5.500 TL - 7.000 TL" },
+    "Samsung Galaxy A15": { "TR_Sifir": "10.000 TL - 12.000 TL", "TR_IkinciEl": "7.500 TL - 9.500 TL", "YurtDisi_Sifir": "5.500 TL - 7.000 TL", "YurtDisi_IkinciEl": "4.000 TL - 5.500 TL" },
+    "Samsung Galaxy A05s": { "TR_Sifir": "8.500 TL - 10.500 TL", "TR_IkinciEl": "6.000 TL - 8.000 TL", "YurtDisi_Sifir": "4.500 TL - 6.000 TL", "YurtDisi_IkinciEl": "3.500 TL - 4.500 TL" },
+    "Samsung Galaxy A05": { "TR_Sifir": "7.000 TL - 8.500 TL", "TR_IkinciEl": "5.000 TL - 6.500 TL", "YurtDisi_Sifir": "4.000 TL - 5.000 TL", "YurtDisi_IkinciEl": "3.000 TL - 4.000 TL" },
+    "Samsung Galaxy A54 5G": { "TR_IkinciEl": "13.000 TL - 16.000 TL" },
+    "Samsung Galaxy A34 5G": { "TR_IkinciEl": "10.000 TL - 13.000 TL" },
+    "Samsung Galaxy A24": { "TR_IkinciEl": "8.000 TL - 10.000 TL" },
+    "Samsung Galaxy A14": { "TR_IkinciEl": "6.000 TL - 8.000 TL" },
+    "Samsung Galaxy A04s": { "TR_IkinciEl": "4.500 TL - 6.000 TL" },
+    "Samsung Galaxy A04e": { "TR_IkinciEl": "3.500 TL - 5.000 TL" },
+    "Samsung Galaxy A04": { "TR_IkinciEl": "4.000 TL - 5.500 TL" },
+    "Samsung Galaxy A73 5G": { "TR_IkinciEl": "14.000 TL - 17.000 TL" },
+    "Samsung Galaxy A53 5G": { "TR_IkinciEl": "10.000 TL - 13.000 TL" },
+    "Samsung Galaxy A33 5G": { "TR_IkinciEl": "8.000 TL - 10.500 TL" },
+    "Samsung Galaxy A23": { "TR_IkinciEl": "6.500 TL - 8.500 TL" },
+    "Samsung Galaxy A13": { "TR_IkinciEl": "5.000 TL - 6.500 TL" },
+    "Samsung Galaxy A03s": { "TR_IkinciEl": "3.500 TL - 4.500 TL" },
+    "Samsung Galaxy A03": { "TR_IkinciEl": "3.000 TL - 4.200 TL" },
+    "Samsung Galaxy A03 Core": { "TR_IkinciEl": "2.500 TL - 3.500 TL" },
+    "Samsung Galaxy A72": { "TR_IkinciEl": "9.000 TL - 12.000 TL" },
+    "Samsung Galaxy A52s 5G": { "TR_IkinciEl": "8.500 TL - 11.500 TL" },
+    "Samsung Galaxy A52": { "TR_IkinciEl": "7.500 TL - 9.500 TL" },
+    "Samsung Galaxy A32": { "TR_IkinciEl": "6.000 TL - 8.000 TL" },
+    "Samsung Galaxy A22": { "TR_IkinciEl": "5.500 TL - 7.500 TL" },
+    "Samsung Galaxy A12": { "TR_IkinciEl": "4.500 TL - 6.000 TL" },
+    "Samsung Galaxy A02s": { "TR_IkinciEl": "3.200 TL - 4.500 TL" },
+    "Samsung Galaxy A02": { "TR_IkinciEl": "2.800 TL - 3.800 TL" },
+    "Samsung Galaxy A71": { "TR_IkinciEl": "7.000 TL - 9.000 TL" },
+    "Samsung Galaxy A51": { "TR_IkinciEl": "5.500 TL - 7.500 TL" },
+    "Samsung Galaxy A31": { "TR_IkinciEl": "4.500 TL - 6.000 TL" },
+    "Samsung Galaxy A21s": { "TR_IkinciEl": "4.000 TL - 5.500 TL" },
+    "Samsung Galaxy A11": { "TR_IkinciEl": "3.000 TL - 4.200 TL" },
+    "Samsung Galaxy A01": { "TR_IkinciEl": "2.000 TL - 3.000 TL" },
+    "Samsung Galaxy A01 Core": { "TR_IkinciEl": "1.500 TL - 2.500 TL" },
+    "Samsung Galaxy A80": { "TR_IkinciEl": "6.000 TL - 8.000 TL" },
+    "Samsung Galaxy A70": { "TR_IkinciEl": "4.500 TL - 6.500 TL" },
+    "Samsung Galaxy A50": { "TR_IkinciEl": "3.500 TL - 5.000 TL" },
+    "Samsung Galaxy A40": { "TR_IkinciEl": "3.000 TL - 4.200 TL" },
+    "Samsung Galaxy A30s": { "TR_IkinciEl": "3.200 TL - 4.500 TL" },
+    "Samsung Galaxy A30": { "TR_IkinciEl": "2.800 TL - 4.000 TL" },
+    "Samsung Galaxy A20s": { "TR_IkinciEl": "2.600 TL - 3.800 TL" },
+    "Samsung Galaxy A20": { "TR_IkinciEl": "2.400 TL - 3.500 TL" },
+    "Samsung Galaxy A10s": { "TR_IkinciEl": "2.200 TL - 3.200 TL" },
+    "Samsung Galaxy A10": { "TR_IkinciEl": "2.000 TL - 2.800 TL" },
+    "Samsung Galaxy A9 (2018)": { "TR_IkinciEl": "3.000 TL - 4.500 TL" },
+    "Samsung Galaxy A8+ (2018)": { "TR_IkinciEl": "2.500 TL - 3.500 TL" },
+    "Samsung Galaxy A8 (2018)": { "TR_IkinciEl": "2.200 TL - 3.200 TL" },
+    "Samsung Galaxy A7 (2018)": { "TR_IkinciEl": "2.000 TL - 3.000 TL" },
+    "Samsung Galaxy A6+": { "TR_IkinciEl": "1.800 TL - 2.600 TL" },
+    "Samsung Galaxy A6": { "TR_IkinciEl": "1.500 TL - 2.200 TL" },
+    "Samsung Galaxy A7 (2017)": { "TR_IkinciEl": "1.200 TL - 1.800 TL" },
+    "Samsung Galaxy A5 (2017)": { "TR_IkinciEl": "1.000 TL - 1.500 TL" },
+    "Samsung Galaxy A3 (2017)": { "TR_IkinciEl": "800 TL - 1.200 TL" },
+    "Samsung Galaxy A7 (2016)": { "TR_IkinciEl": "800 TL - 1.200 TL" },
+    "Samsung Galaxy A5 (2016)": { "TR_IkinciEl": "700 TL - 1.000 TL" },
+    "Samsung Galaxy A3 (2016)": { "TR_IkinciEl": "500 TL - 800 TL" },
+    "Samsung Galaxy XCover 7": { "TR_Sifir": "18.000 TL - 22.000 TL", "TR_IkinciEl": "14.000 TL - 17.000 TL", "YurtDisi_Sifir": "10.000 TL - 13.000 TL", "YurtDisi_IkinciEl": "7.500 TL - 9.500 TL" },
+    "Samsung Galaxy XCover 5": { "TR_IkinciEl": "4.000 TL - 6.000 TL" },
+    "Samsung Galaxy XCover 4": { "TR_IkinciEl": "1.500 TL - 2.500 TL" },
+    "Samsung Galaxy C9 Pro": { "TR_IkinciEl": "1.800 TL - 2.600 TL" },
+    "Samsung Galaxy C7": { "TR_IkinciEl": "1.200 TL - 1.800 TL" },
+    "Samsung Galaxy C5": { "TR_IkinciEl": "900 TL - 1.400 TL" },
+    "Xiaomi 17 Ultra": { "TR_Sifir": "90.000 TL", "TR_IkinciEl": "65.000 TL", "YurtDisi_Sifir": "40.000 TL", "YurtDisi_IkinciEl": "33.000 TL" },
+    "Xiaomi 17 Pro Max": { "TR_Sifir": "85.000 TL", "TR_IkinciEl": "62.000 TL", "YurtDisi_Sifir": "38.000 TL", "YurtDisi_IkinciEl": "31.000 TL" },
+    "Xiaomi 17 Pro": { "TR_Sifir": "75.000 TL", "TR_IkinciEl": "55.000 TL", "YurtDisi_Sifir": "33.000 TL", "YurtDisi_IkinciEl": "27.000 TL" },
+    "Xiaomi 17": { "TR_Sifir": "65.000 TL", "TR_IkinciEl": "48.000 TL", "YurtDisi_Sifir": "28.000 TL", "YurtDisi_IkinciEl": "23.000 TL" },
+    "Xiaomi 15 Ultra": { "TR_Sifir": "75.000 TL", "TR_IkinciEl": "55.000 TL", "YurtDisi_Sifir": "32.000 TL", "YurtDisi_IkinciEl": "26.000 TL" },
+    "Xiaomi 15": { "TR_Sifir": "55.000 TL", "TR_IkinciEl": "40.000 TL", "YurtDisi_Sifir": "24.000 TL", "YurtDisi_IkinciEl": "20.000 TL" },
+    "Xiaomi 15T Pro": { "TR_Sifir": "45.000 TL", "TR_IkinciEl": "33.000 TL", "YurtDisi_Sifir": "20.000 TL", "YurtDisi_IkinciEl": "16.000 TL" },
+    "Xiaomi 15T": { "TR_Sifir": "38.000 TL", "TR_IkinciEl": "28.000 TL", "YurtDisi_Sifir": "17.000 TL", "YurtDisi_IkinciEl": "14.000 TL" },
+    "Xiaomi 14 Ultra": { "TR_Sifir": "60.000 TL", "TR_IkinciEl": "45.000 TL", "YurtDisi_Sifir": "26.000 TL", "YurtDisi_IkinciEl": "21.000 TL" },
+    "Xiaomi 14": { "TR_Sifir": "42.000 TL", "TR_IkinciEl": "32.000 TL", "YurtDisi_Sifir": "19.000 TL", "YurtDisi_IkinciEl": "15.000 TL" },
+    "Xiaomi 14T Pro": { "TR_Sifir": "35.000 TL", "TR_IkinciEl": "26.000 TL", "YurtDisi_Sifir": "16.000 TL", "YurtDisi_IkinciEl": "13.000 TL" },
+    "Xiaomi 14T": { "TR_Sifir": "28.000 TL", "TR_IkinciEl": "21.000 TL", "YurtDisi_Sifir": "13.000 TL", "YurtDisi_IkinciEl": "10.000 TL" },
+    "Redmi Note 15 Pro+": { "TR_Sifir": "30.000 TL", "TR_IkinciEl": "22.000 TL", "YurtDisi_Sifir": "13.000 TL", "YurtDisi_IkinciEl": "10.500 TL" },
+    "Redmi Note 15 Pro": { "TR_Sifir": "25.000 TL", "TR_IkinciEl": "18.000 TL", "YurtDisi_Sifir": "11.000 TL", "YurtDisi_IkinciEl": "9.000 TL" },
+    "Redmi Note 15": { "TR_Sifir": "18.000 TL", "TR_IkinciEl": "13.000 TL", "YurtDisi_Sifir": "8.000 TL", "YurtDisi_IkinciEl": "6.500 TL" },
+    "Redmi Note 14 Pro+": { "TR_Sifir": "27.000 TL", "TR_IkinciEl": "20.000 TL", "YurtDisi_Sifir": "12.000 TL", "YurtDisi_IkinciEl": "9.500 TL" },
+    "Redmi Note 14 Pro": { "TR_Sifir": "22.000 TL", "TR_IkinciEl": "16.000 TL", "YurtDisi_Sifir": "10.000 TL", "YurtDisi_IkinciEl": "8.000 TL" },
+    "Redmi Note 14": { "TR_Sifir": "15.000 TL", "TR_IkinciEl": "11.000 TL", "YurtDisi_Sifir": "7.000 TL", "YurtDisi_IkinciEl": "5.500 TL" },
+    "Redmi 14C": { "TR_Sifir": "9.000 TL", "TR_IkinciEl": "6.500 TL", "YurtDisi_Sifir": "4.500 TL", "YurtDisi_IkinciEl": "3.500 TL" },
+    "Redmi Note 13 Pro+": { "TR_Sifir": "23.000 TL", "TR_IkinciEl": "16.000 TL", "YurtDisi_Sifir": "10.500 TL", "YurtDisi_IkinciEl": "8.500 TL" },
+    "Redmi Note 13 Pro": { "TR_Sifir": "17.500 TL", "TR_IkinciEl": "12.000 TL", "YurtDisi_Sifir": "9.000 TL", "YurtDisi_IkinciEl": "7.000 TL" },
+    "Redmi Note 13": { "TR_Sifir": "11.500 TL", "TR_IkinciEl": "8.500 TL", "YurtDisi_Sifir": "6.000 TL", "YurtDisi_IkinciEl": "4.500 TL" },
+    "POCO F7 Pro": { "TR_Sifir": "45.000 TL", "TR_IkinciEl": "33.000 TL", "YurtDisi_Sifir": "20.000 TL", "YurtDisi_IkinciEl": "16.000 TL" },
+    "POCO F7": { "TR_Sifir": "36.000 TL", "TR_IkinciEl": "26.000 TL", "YurtDisi_Sifir": "16.000 TL", "YurtDisi_IkinciEl": "13.000 TL" },
+    "POCO X7 Pro": { "TR_Sifir": "23.500 TL", "TR_IkinciEl": "18.000 TL", "YurtDisi_Sifir": "10.500 TL", "YurtDisi_IkinciEl": "8.500 TL" },
+    "POCO X7": { "TR_Sifir": "19.000 TL", "TR_IkinciEl": "14.000 TL", "YurtDisi_Sifir": "8.500 TL", "YurtDisi_IkinciEl": "7.000 TL" },
+    "POCO F6 Pro": { "TR_Sifir": "35.000 TL", "TR_IkinciEl": "25.000 TL", "YurtDisi_Sifir": "16.000 TL", "YurtDisi_IkinciEl": "13.000 TL" },
+    "POCO F6": { "TR_Sifir": "24.500 TL", "TR_IkinciEl": "18.000 TL", "YurtDisi_Sifir": "11.000 TL", "YurtDisi_IkinciEl": "9.000 TL" },
+    "POCO X6 Pro": { "TR_Sifir": "27.000 TL", "TR_IkinciEl": "19.000 TL", "YurtDisi_Sifir": "10.500 TL", "YurtDisi_IkinciEl": "8.500 TL" },
+    "POCO X6": { "TR_Sifir": "15.000 TL", "TR_IkinciEl": "11.000 TL", "YurtDisi_Sifir": "7.500 TL", "YurtDisi_IkinciEl": "6.000 TL" },
+    "Xiaomi 13 Ultra": { "TR_IkinciEl": "40.000 TL" },
+    "Xiaomi 13 Pro": { "TR_IkinciEl": "35.000 TL" },
+    "Xiaomi 13 / 13T Pro": { "TR_IkinciEl": "25.000 TL - 28.000 TL" },
+    "Xiaomi 12T Pro / 12 Pro": { "TR_IkinciEl": "18.000 TL - 20.000 TL" },
+    "Xiaomi 11T Pro / Mi 11": { "TR_IkinciEl": "8.000 TL - 12.500 TL" },
+    "Mi 10T Pro / Mi 10": { "TR_IkinciEl": "6.500 TL - 7.500 TL" },
+    "Mi 9T Pro / Mi 9": { "TR_IkinciEl": "4.000 TL - 5.000 TL" },
+    "Mi Note 10 / Note 10 Lite": { "TR_IkinciEl": "5.000 TL" },
+    "Redmi Note 12 Pro+ / Pro": { "TR_IkinciEl": "10.000 TL - 13.000 TL" },
+    "Redmi Note 11 Pro+ / Pro": { "TR_IkinciEl": "7.500 TL - 9.000 TL" },
+    "Redmi Note 10 Pro / 10S": { "TR_IkinciEl": "4.500 TL - 6.000 TL" },
+    "Redmi Note 9 Pro / 9S": { "TR_IkinciEl": "3.500 TL - 4.500 TL" },
+    "Redmi Note 8 Pro / Note 8": { "TR_IkinciEl": "2.500 TL - 3.500 TL" },
+    "Redmi Note 7": { "TR_IkinciEl": "2.000 TL" },
+    "POCO F5 Pro / F5": { "TR_IkinciEl": "18.000 TL - 22.000 TL" },
+    "POCO X5 Pro / X5": { "TR_IkinciEl": "9.000 TL - 12.000 TL" },
+    "POCO F4 GT / F4": { "TR_IkinciEl": "11.000 TL" },
+    "POCO X4 Pro / X4 GT": { "TR_IkinciEl": "8.500 TL" },
+    "POCO X3 Pro / X3 NFC": { "TR_IkinciEl": "4.500 TL - 6.500 TL" },
+    "POCO F3 / F2 Pro": { "TR_IkinciEl": "5.500 TL - 7.000 TL" }
+};
+
+// Yardımcı Fonksiyon: Fiyat stringinden sayısal değeri ayıkla
+const parsePrice = (str) => {
+    if (!str || typeof str !== 'string') return 0;
+    const match = str.replace(/\./g, '').match(/\d+/);
+    return match ? parseInt(match[0]) : 0;
+};
+
+// Yardımcı Fonksiyon: Database değerinden Min fiyatı bul
+const getMinPrice = (dbEntry) => {
+    if (!dbEntry) return 0;
+    const values = Object.values(dbEntry).map(v => {
+        const parts = v.split('-');
+        return parsePrice(parts[0]);
+    }).filter(p => p > 0);
+    return values.length > 0 ? Math.min(...values) : 0;
+};
+
+// Yardımcı Fonksiyon: Database değerinden aralık stringini getir
+const getMarketValue = (dbEntry) => {
+    if (!dbEntry) return "Veri Yok";
+    return Object.values(dbEntry)[0] || "Veri Yok";
+};
+
 const genAI = new GoogleGenerativeAI(geminiKey);
 
 cloudinary.config({
@@ -19,19 +265,16 @@ const analyzeProduct = async (req, res) => {
     try {
         const db = getDB().db;
         
-        // Frontend'den gelmeyen veriler için güvenlik (Sistemin çökmesini/undefined yazmasını engeller)
-        // UI Çıktısı: "Analiz:" veya "Taraması" eklerini siliyoruz
         let model = req.body.title || req.body.model || "Bilinmeyen Cihaz";
-        const price = req.body.price || "Fiyat Belirtilmedi";
+        const price = req.body.price || "Belirtilmedi";
         const description = req.body.description || "Görsel analizi...";
 
         let imageUrl = req.body.imageUrl || ""; 
         let fileBuffer = null;
         let mimeType = null;
 
-        // 1. Resim Yükleme (Cloudinary) ve Yapay Zekaya Hazırlık
         if (req.files && req.files.length > 0) {
-            const file = req.files[0]; // Ana görseli işliyoruz
+            const file = req.files[0];
             fileBuffer = file.buffer;
             mimeType = file.mimetype;
 
@@ -48,33 +291,23 @@ const analyzeProduct = async (req, res) => {
             imageUrl = result.secure_url;
         }
 
-        // 2. Gemini AI Analizi (FOTOĞRAF GERÇEKTEN YAPAY ZEKAYA GİDİYOR)
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-        const prompt = `Sen bir veri işlemci (data processor) modundasın. 
-        Bugün 28 Nisan 2026. İlan tarihlerini analiz dışı bırak ve görmezden gel.
-        iPhone 17 ve sağlanan listedeki tüm cihazlar mevcuttur.
+        const prompt = `Sen bir veri işlemci modundasın. Bugün 28 Nisan 2026. Tarih analizini tamamen kapat.
+        Görev: İlandan model ismini ve fiyatı kesin olarak ayıkla.
         
-        REFERANS FİYAT LİSTESİ (JSON):
-        ${JSON.stringify(piyasaVeritabani)}
+        STATİK REFERANS (JSON):
+        ${JSON.stringify(staticDatabase)}
 
         PROTOKOL:
-        1. Başlık Temizliği: Cihazı SADECE yukarıdaki listedeki anahtar isimle eşleştir (Örn: "iPhone 17 Pro Max"). "Analiz:", "Taraması:" gibi ifadeleri asla kullanma. Eşleşme yoksa "Bilinmeyen Cihaz" kullan.
-        2. Fiyat Ayıklama: İlan fiyatını (P) görselden veya metinden rakamsal olarak ayıkla (Örn: "115.000 TL").
-        3. Matematiksel Risk Algoritması: 
-           - Vmin = Database Alt Limit (İkinci El veya Sıfır farketmez, en düşük olanı baz al).
-           - P < (Vmin * 0.80) ise score: 95, status: "Dolandırıcı Riski!".
-           - P >= (Vmin * 0.94) ise score: 10, status: "Güvenli / Uygun".
-           - Aradaki değerler için score: 60, status: "Şüpheli İlan".
-        4. Piyasa Değeri (Market Value): SADECE listedeki fiyat aralığını yaz (Örn: "105.000 TL - 115.000 TL"). Cümle kurma, yorum yapma.
+        1. Model İsmi (modelName): İlan başlığından yakaladığın modeli yukarıdaki statik referans anahtarlarıyla BİREBİR eşleştir.
+        2. Fiyat (price): İlandaki rakamı ayıkla (Örn: "110.000 TL").
+        3. Analiz Notu (reason): Sadece fiyatın riskli olup olmadığını ve ilan detaylarını incele.
         
-        Yanıtı SADECE şu JSON formatında ver, başka hiçbir şey yazma: 
+        Yanıtı SADECE şu JSON formatında ver: 
         {
-          "score": 95, 
-          "status": "Dolandırıcı Riski!",
-          "reason": "Fiyat piyasanın %20'den fazla altında", 
-          "detected_model": "iPhone 17 Pro Max", 
-          "extracted_price": "85.000 TL", 
-          "market_value": "105.000 TL - 115.000 TL"
+          "modelName": "iPhone 17 Pro Max", 
+          "price": "110.000 TL",
+          "reason": "..."
         }`;
 
         const aiParts = [prompt];
@@ -91,57 +324,63 @@ const analyzeProduct = async (req, res) => {
         const response = await aiResult.response;
         const responseText = response.text();
         
-        // AI Yanıtını Temizle ve Hata Koruması Ekle (JSON Formatını garantileyelim)
         const cleanJson = responseText.replace(/```json|```/g, "").replace(/JSON/i, "").trim();
         let analysis;
         try {
             analysis = JSON.parse(cleanJson);
         } catch (e) {
-            // Eğer JSON parse edilemezse, text'ten sayı ve string ayıklamaya çalışalım
-            const scoreMatch = responseText.match(/score["']?\s*:\s*(\d+)/i);
-            const reasonMatch = responseText.match(/reason["']?\s*:\s*["']([^"']+)["']/i);
-            analysis = { 
-                score: scoreMatch ? parseInt(scoreMatch[1]) : 65, 
-                reason: reasonMatch ? reasonMatch[1] : "Görseldeki detaylar şüpheli bulundu, dikkatli olun." 
-            };
+            analysis = { modelName: model, price: price, reason: "Analiz tamamlandı." };
         }
         
+        // MATEMATİKSEL KESİNLİK PROTOKOLÜ (Kod Tarafında)
+        const finalModelName = analysis.modelName || model;
+        const dbEntry = staticDatabase[finalModelName];
+        const vMin = getMinPrice(dbEntry);
+        const pVal = parsePrice(analysis.price || price);
+        const marketVal = getMarketValue(dbEntry);
+
+        let finalScore = 60; // Default
+        if (vMin > 0) {
+            if (pVal < (vMin * 0.80)) finalScore = 95;
+            else if (pVal >= (vMin * 0.94)) finalScore = 10;
+        }
+
+        const finalStatus = finalScore >= 90 ? "Dolandırıcı Riski!" : (finalScore >= 40 ? "Şüpheli İlan" : "Güvenli / Uygun");
+
         const newEntry = {
-            model: analysis.detected_model || model,
-            price: analysis.extracted_price || price,
-            marketValue: analysis.market_value || "Veri Yok",
-            riskScore: analysis.score,
-            status: analysis.status || (analysis.score >= 90 ? "Dolandırıcı Riski!" : (analysis.score >= 40 ? "Şüpheli İlan" : "Güvenli / Uygun")),
-            reason: analysis.reason,
+            model: finalModelName,
+            price: analysis.price || price,
+            marketValue: marketVal,
+            riskScore: finalScore,
+            status: finalStatus,
+            reason: analysis.reason || "Piyasa analizi yapıldı.",
             imageUrl,
             time: new Date().toISOString()
         };
 
         const insertResult = await feedCollection.insertOne(newEntry);
 
-        // İstatistikleri Güncelle
-        if (analysis.score >= 50) {
-            await statsCollection.updateOne(
-                { id: 'global' },
-                { $inc: { globalFrauds: 1 } },
-                { upsert: true }
-            );
+        // İstatistikler
+        if (finalScore >= 50) {
+            const statsCollection = db.collection('stats');
+            await statsCollection.updateOne({ id: 'global' }, { $inc: { globalFrauds: 1 } }, { upsert: true });
         }
 
-        res.json({ success: true, riskScore: analysis.score, reason: analysis.reason, analysisId: insertResult.insertedId, imageUrl });
+        res.json({ 
+            success: true, 
+            riskScore: finalScore, 
+            status: finalStatus,
+            reason: newEntry.reason, 
+            modelName: finalModelName,
+            price: newEntry.price,
+            marketValue: marketVal,
+            analysisId: insertResult.insertedId, 
+            imageUrl 
+        });
 
     } catch (error) {
         console.error("Analiz hatası:", error);
-        
-        // Daha detaylı hata mesajı (Google API Key kontrolü için)
-        let errorMessage = "AI Analizi yapılamadı.";
-        if (error.message && error.message.includes("API_KEY_INVALID")) {
-            errorMessage = "Sistem Hatası: Google API Key geçersiz. Lütfen teknik ekiple iletişime geçin.";
-        } else if (!process.env.GEMINI_API_KEY) {
-            errorMessage = "Sistem Hatası: Gemini API Anahtarı eksik.";
-        }
-
-        res.status(500).json({ success: false, error: errorMessage });
+        res.status(500).json({ success: false, error: "Sistem Hatası." });
     }
 };
 
@@ -157,7 +396,6 @@ const getAnalysisById = async (req, res) => {
 };
 
 const reportFraud = async (req, res) => {
-    // Şimdilik sadece başarılı dönelim, istersen buraya mail atma kodu ekleriz
     res.json({ success: true, message: "Bildirim alındı." });
 };
 
