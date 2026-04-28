@@ -107,7 +107,16 @@ const analyzeProduct = async (req, res) => {
 
     } catch (error) {
         console.error("Analiz hatası:", error);
-        res.status(500).json({ success: false, error: "AI Analizi yapılamadı." });
+        
+        // Daha detaylı hata mesajı (Google API Key kontrolü için)
+        let errorMessage = "AI Analizi yapılamadı.";
+        if (error.message && error.message.includes("API_KEY_INVALID")) {
+            errorMessage = "Sistem Hatası: Google API Key geçersiz. Lütfen teknik ekiple iletişime geçin.";
+        } else if (!process.env.GEMINI_API_KEY) {
+            errorMessage = "Sistem Hatası: Gemini API Anahtarı eksik.";
+        }
+
+        res.status(500).json({ success: false, error: errorMessage });
     }
 };
 
