@@ -385,10 +385,9 @@ async function startAnalysis() {
         scoreBox.innerText = "%" + data.riskScore + " Risk";
         scoreBox.style.color = data.riskScore >= 90 ? 'var(--risk-high)' : (data.riskScore >= 40 ? 'var(--risk-med)' : 'var(--risk-low)');
         document.getElementById('keywordResult').innerHTML = `
-            <div style="margin-bottom: 10px;"><b>Model:</b> ${data.detected_model || 'Belirlenemedi'}</div>
-            <div style="margin-bottom: 10px;"><b>İlan Fiyatı:</b> ${data.extracted_price || 'Belirtilmedi'}</div>
-            <div style="margin-bottom: 10px;"><b>Piyasa Değeri:</b> ${data.market_value || 'Veri Yok'}</div>
-            <div><b>Analiz Notu:</b> ${data.reason || "Şüpheli bir duruma rastlanmadı."}</div>
+            <div style="font-size: 14px; line-height: 1.6; color: #e0e0e0; padding: 5px;">
+                ${data.analysisNote || data.reason || "Piyasa analizi başarıyla tamamlandı."}
+            </div>
         `;
 
         const decisionBox = document.getElementById('aiDecision');

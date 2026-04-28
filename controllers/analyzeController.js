@@ -104,23 +104,19 @@ const analyzeProduct = async (req, res) => {
         REFERANS VERİTABANI: ${JSON.stringify(phoneDB)}
 
         ANALİZ KURALLARI:
-        1. Model Tespiti: Görselden/metinden net modeli oku (Örn: iPhone 16 Pro). "Belirlenemedi" yasaktır.
-        2. Fiyat Tespiti: Görseldeki fiyatı tam çek (Örn: 49.100 TL).
-        3. Piyasa Karşılaştırması: Fiyat veritabanındaki "TR_IkinciEl" aralığındaysa "piyasa değerleriyle uyumlu" de. Alt limitin (Vmin) %15-20 altındaysa "şüpheli derecede düşük" de.
-        4. Risk Puanlama (Kümülatif): 
-           - "Param Güvende" kapalıysa veya havale isteniyorsa: +20 risk
-           - Açıklama çok kısa/yetersizse: +10 risk
-           - Fiyat piyasa değerinin (Vmin) %20 ve daha altındaysa: +50 risk
-        5. Analiz Dili: Akıcı, ikna edici ve profesyonel ol. 
-           Format: "İlandaki cihazın referans piyasa değeri [Piyasa Değeri] aralığında olup, istenen [Fiyat] fiyatı bu aralığa göre [Düşük/Normal/Yüksek] kalmaktadır. [Çelişki tespiti] bu durum risk teşkil etmektedir."
-
-        Yanıtı SADECE şu JSON formatında ver, başka hiçbir metin ekleme: 
+        1. ÇIKTI FORMATI (KRİTİK): Yanıtında "Model: ...", "İlan Fiyatı: ..." gibi başlıklar kullanma. Sadece ve sadece tek bir paragraftan oluşan, akıcı bir "Analiz Notu" yaz.
+        2. ANALİZ DİLİ: Matematiksel formülleri metne dökme. İnsani ve bilgilendirici terimler kullan. (Örn: "Piyasa gerçeklerinin çok altında", "Güven sarsıcı bir unsur" vb.)
+        3. Model Tespiti: Görselden/metinden net modeli oku.
+        4. Fiyat Tespiti: Görseldeki fiyatı tam çek (Örn: 49.100 TL).
+        5. Risk Puanlama (Arka Plan): "Param Güvende" kapalıysa +20, kısa açıklama +10, çok düşük fiyat +50 risk ekle.
+        
+        Yanıtı SADECE şu JSON formatında ver: 
         {
           "modelName": "iPhone 16 Pro", 
           "price": "49.100 TL",
           "marketValue": "60.000 TL - 65.000 TL",
           "riskScore": 85,
-          "reason": "..."
+          "analysisNote": "..."
         }`;
 
         const aiParts = [prompt];
@@ -167,7 +163,7 @@ const analyzeProduct = async (req, res) => {
         }
 
         const finalScore = analysis.riskScore || fallbackScore;
-        const finalReason = analysis.reason || fallbackNote;
+        const finalNote = analysis.analysisNote || analysis.reason || fallbackNote;
         const finalStatus = finalScore >= 90 ? "Dolandırıcı Riski!" : (finalScore >= 40 ? "Şüpheli İlan" : "Güvenli / Uygun");
 
         const newEntry = {
@@ -176,7 +172,7 @@ const analyzeProduct = async (req, res) => {
             marketValue: marketValueStr,
             riskScore: finalScore,
             status: finalStatus,
-            reason: finalReason,
+            reason: finalNote,
             imageUrl,
             time: new Date().toISOString()
         };
@@ -193,7 +189,7 @@ const analyzeProduct = async (req, res) => {
             success: true, 
             riskScore: finalScore, 
             status: finalStatus,
-            reason: finalReason, 
+            analysisNote: finalNote, 
             modelName: finalModelName,
             price: newEntry.price,
             marketValue: marketValueStr,
