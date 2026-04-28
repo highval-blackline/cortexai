@@ -81,7 +81,7 @@ const analyzeProduct = async (req, res) => {
         const insertResult = await feedCollection.insertOne(newEntry);
 
         // İstatistikleri Güncelle
-        if (analysis.score >= 80) {
+        if (analysis.score >= 50) {
             await statsCollection.updateOne(
                 { id: 'global' },
                 { $inc: { globalFrauds: 1 } },
@@ -89,7 +89,7 @@ const analyzeProduct = async (req, res) => {
             );
         }
 
-        res.json({ success: true, analysis, imageUrl, id: insertResult.insertedId });
+        res.json({ success: true, riskScore: analysis.score, reason: analysis.reason, analysisId: insertResult.insertedId, imageUrl });
 
     } catch (error) {
         console.error("Analiz hatası:", error);

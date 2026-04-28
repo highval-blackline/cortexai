@@ -201,12 +201,14 @@ async function fetchGlobalStats() {
 
             // Sağ taraftaki Canlı Radar Tablosu
             if (tableBody) {
+                let riskText = item.riskScore >= 50 ? "Dolandırıcı Riski!" : (item.riskScore >= 20 ? "Şüpheli İlan" : "Güvenli / Uygun");
+                let shortReason = item.reason ? (item.reason.length > 30 ? item.reason.substring(0,30) + '...' : item.reason) : "Piyasa Analizi...";
                 tableBody.innerHTML += `
                     <tr onclick="showImage('${item.imageUrl}')" style="cursor:pointer;" class="feed-item">
                         <td>${item.model}</td>
-                        <td style="color: var(--brand-accent); font-weight: 600;">${item.price} TL</td>
-                        <td>Piyasa Analizi...</td>
-                        <td><span class="badge" style="background: ${borderColor}; color: white; padding: 4px 8px; border-radius: 4px;">%${item.riskScore} Risk</span></td>
+                        <td style="color: var(--brand-accent); font-weight: 600;">${item.price}</td>
+                        <td style="font-size: 13px;">${shortReason}</td>
+                        <td><span class="badge" style="background: ${borderColor}; color: white; padding: 4px 8px; border-radius: 4px;">${riskText}</span></td>
                     </tr>`;
             }
         });

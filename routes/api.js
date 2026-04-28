@@ -11,6 +11,14 @@ const upload = multer({
 const { addAlarm, getMyAlarms, deleteAlarm } = require('../controllers/alarmController');
 const { analyzeProduct, getAnalysisById, reportFraud } = require('../controllers/analyzeController');
 const { getRecentFeed, getGlobalStats } = require('../controllers/feedController');
+const { connectDB } = require('../config/db');
+
+// Vercel cold boot DB connection middleware
+router.use(async (req, res, next) => {
+    await connectDB();
+    next();
+});
+
 
 // --- VERİTABANI (Fiyat Listesi) ---
 router.get('/database', (req, res) => {
