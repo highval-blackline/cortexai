@@ -19,7 +19,7 @@ const analyzeProduct = async (req, res) => {
         const db = getDB().db;
         
         // Frontend'den gelmeyen veriler için güvenlik (Sistemin çökmesini/undefined yazmasını engeller)
-        const model = "Analiz: " + (req.body.title || req.body.model || "Bilinmeyen Cihaz");
+        let model = "Analiz: " + (req.body.title || req.body.model || "Bilinmeyen Cihaz");
         const price = req.body.price || "Fiyat Belirtilmedi";
         const description = req.body.description || "Görsel analizi...";
 
@@ -50,8 +50,9 @@ const analyzeProduct = async (req, res) => {
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
         const prompt = `Sen bir ikinci el pazar uzmanısın ve sahtekarlık tespiti yapıyorsun. 
         Bugün 28 Nisan 2026. İlandaki tarihin "Nisan 2026" olması güncelliği gösterir ve GÜVENLİ/GÜNCEL bir işarettir, kesinlikle risk olarak puanlama.
+        Görsele veya metne bakarak cihazın marka ve modelini (Örn: "iPhone 13 Pro Max") kesin olarak tespit et.
         Bu görseldeki ilanın dolandırıcılık riskini %0-100 arası puanla ve kısa bir neden yaz (örneğin fiyat aşırı düşük, garanti şüpheli, IBAN isteniyor vb.).
-        Yanıtı SADECE şu formattaki bir JSON olarak ver, başka hiçbir şey yazma: {"score": 45, "reason": "Açıklamada havale isteniyor"}`;
+        Yanıtı SADECE şu formattaki bir JSON olarak ver, başka hiçbir şey yazma: {"score": 45, "reason": "Açıklamada havale isteniyor", "detected_model": "iPhone 13 Pro Max"}`;
 
         const aiParts = [prompt];
         if (fileBuffer) {
@@ -80,6 +81,11 @@ const analyzeProduct = async (req, res) => {
                 score: scoreMatch ? parseInt(scoreMatch[1]) : 65, 
                 reason: reasonMatch ? reasonMatch[1] : "Görseldeki detaylar şüpheli bulundu, dikkatli olun." 
             };
+        }
+        
+        // AI tarafından tespit edilen model ismini "Bilinmeyen Cihaz" yerine koy
+        if (analysis.detected_model && model.includes("Bilinmeyen Cihaz")) {
+            model = "Analiz: " + analysis.detected_model;
         }
 
         // 3. Veritabanına Kayıt
