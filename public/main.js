@@ -68,7 +68,24 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        const filteredModels = models.filter(model => model.toLowerCase().includes(filterText.toLowerCase()));
+        function flexibleMatch(query, target) {
+            const q = query.toLowerCase().trim();
+            const t = target.toLowerCase().trim();
+            if (!q) return true;
+
+            // Marka/Seri ön eklerini opsiyonel yapmak için temizlenmiş versiyonları hazırla
+            const commonPrefixes = ['samsung', 'galaxy', 'apple', 'iphone'];
+            const qParts = q.split(/\s+/).filter(p => !commonPrefixes.includes(p));
+            
+            // Eğer kullanıcı sadece marka yazdıysa (Örn: "Samsung"), düz aramaya dön
+            if (qParts.length === 0) return t.includes(q);
+
+            // Kullanıcının girdiği her bir kelime (ön ekler hariç) hedefte var mı?
+            // Örn: "S26 Ultra" -> "Samsung Galaxy S26 Ultra" (Her iki kelime de hedefte var)
+            return qParts.every(part => t.includes(part));
+        }
+
+        const filteredModels = models.filter(model => flexibleMatch(filterText, model));
 
         if (filteredModels.length === 0) {
             dropdownList.innerHTML = "<div style='padding: 10px 12px; color: var(--text-muted); font-size: 13px;'>Sonuç bulunamadı</div>";
@@ -1007,7 +1024,17 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        const matches = allModels.filter(m => m.toLowerCase().includes(term.toLowerCase()));
+        function flexibleMatch(query, target) {
+            const q = query.toLowerCase().trim();
+            const t = target.toLowerCase().trim();
+            if (!q) return true;
+            const commonPrefixes = ['samsung', 'galaxy', 'apple', 'iphone'];
+            const qParts = q.split(/\s+/).filter(p => !commonPrefixes.includes(p));
+            if (qParts.length === 0) return t.includes(q);
+            return qParts.every(part => t.includes(part));
+        }
+
+        const matches = allModels.filter(m => flexibleMatch(term, m));
 
         if (matches.length === 0) {
             headerDropdown.innerHTML = "<div style='padding: 12px; color: var(--text-muted); font-size: 13px;'>Cihaz bulunamadı...</div>";
