@@ -224,6 +224,11 @@ select {
     z-index: 5;
 }
 
+/* Kartların üst üste binme sırasında doğru katmanlanması */
+.stats-grid > div:nth-child(1) { z-index: 3; }
+.stats-grid > div:nth-child(2) { z-index: 4; } /* Arama kutusu olan kart en üstte olmalı */
+.stats-grid > div:nth-child(3) { z-index: 1; }
+
 .stat-card {
     background-color: var(--bg-panel);
     border: 1px solid var(--border-light);
@@ -231,6 +236,8 @@ select {
     padding: 20px;
     height: auto;
     min-height: 120px;
+    position: relative;
+    overflow: visible !important;
 }
 
 .stat-header {
@@ -255,6 +262,8 @@ select {
     padding: 20px;
     height: auto;
     min-height: fit-content;
+    position: relative;
+    overflow: visible !important;
 }
 
 .table-container {
@@ -1015,6 +1024,7 @@ button:focus, input:focus, select:focus {
     transform: translateZ(0) !important; /* Scroll donma bug'ının kesin ve donanımsal çözümü */
     -webkit-overflow-scrolling: touch !important; /* Mobilde parmakla kaydırmayı akıcı yapar */
     pointer-events: auto !important;
+    z-index: 9999 !important;
 }
 
 /* Kaydırma çubuğunu (Scrollbar) görünür yapıp Apple estetiğine uyduruyoruz */
