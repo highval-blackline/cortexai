@@ -72,14 +72,13 @@ const analyzeProduct = async (req, res) => {
         }
 
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-        const prompt = `Bugün 28 Nisan 2026. Sen Piyasa.ai için "Uzman Piyasa Analisti"sin. 
+        const prompt = `Bugün 28 Nisan 2026. Sen Piyasa.ai için "Gerçekçi Piyasa Denetçisi"sin. 
         
         GÖREVİN VE KESİN KURALLAR:
-        1. KOD TERİMLERİNİ YASAKLA: Analiz notunda ASLA "YurtDisi_IkinciEl", "Vmin", "isValid" veya "|" gibi teknik terimler kullanma. 
-        2. DOĞAL ANLATIM: Tespit edilen [Fiyat] ve [Piyasa Değeri] bilgilerini cümlenin akışına yedir. (Örn: "İlandaki [Fiyat] TL'lik bedel, [Aralık] TL seviyesindeki yurt dışı piyasa değerleriyle uyumludur.")
-        3. ANALİZ DİLİ: Robotik "Risk puanı düşük" yerine "Fiyat piyasa normlarında olduğu için güvenli bir profil çizmektedir" gibi profesyonel cümleler kur. 
-        4. KATEGORİ: İlan Yurt Dışı ise mutlaka yurt dışı fiyatlarıyla kıyasla. 
-        5. FORMAT: Sadece TEK BİR PARAGRAF yaz. Başlık veya liste kullanma.
+        1. TABAN RİSK: İkinci el piyasasında risk asla %0 olamaz. En güvenli ilana bile minimum %10-15 "Sektörel Risk" puanı ver.
+        2. MANTIKSAL ANALİZ: "Fiyat düşük olduğu için güvenli" gibi hatalı cümleler kurma. Fiyat düşükse dolandırıcılık riskine karşı uyar.
+        3. RİSK ARTIŞI: Param Güvende kapalıysa +%20, açıklama çok kısaysa +%10 risk ekle. Fiyat düştükçe risk agresif artar.
+        4. KOD TERİMLERİNİ YASAKLA: Analiz notunda ASLA "Vmin", "|" gibi terimler kullanma. Sadece tek bir profesyonel paragraf yaz.
 
         REFERANS VERİTABANI: ${JSON.stringify(phoneDB)}
 
@@ -89,7 +88,7 @@ const analyzeProduct = async (req, res) => {
           "modelName": "...", 
           "price": "...",
           "marketValue": "...",
-          "riskScore": 0,
+          "riskScore": 15,
           "analysisNote": "..."
         }`;
 
@@ -133,21 +132,21 @@ const analyzeProduct = async (req, res) => {
         const pVal = parsePrice(analysis.price || initialPrice);
 
         // Fallback Risk Hesaplama (AI Çuvallarsa)
-        let fallbackScore = 60;
+        let fallbackScore = 65;
         let pText = analysis.price || initialPrice;
-        let fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik fiyat, ${marketValueStr} bandındaki piyasa değerleriyle karşılaştırıldığında bir miktar düşük kalmaktadır. Bu durum, alıcıların cihazın detaylarını ve satıcı profilini daha dikkatli incelemesini gerektiren şüpheli bir profil çizmektedir.`;
+        let fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik fiyat, ${marketValueStr} bandındaki piyasa değerleriyle karşılaştırıldığında bir miktar düşük kalmaktadır. Bu durum alıcı için bir fırsat gibi görünse de, dolandırıcılık risklerine karşı dikkatli olunmalı ve işlem elden veya güvenli ödeme yöntemleriyle tamamlanmalıdır.`;
 
         if (vMin > 0) {
             if (pVal < (vMin * 0.80)) {
                 fallbackScore = 95;
-                fallbackNote = `İlandaki ${pText} TL'lik fiyat, ${marketValueStr} aralığındaki güncel piyasa değerlerinin çok altında kalarak yüksek bir risk profili oluşturmaktadır. Bu seviyedeki bir fiyatlandırma genellikle güven sarsıcı bir unsur olarak değerlendirilmeli ve elden teslim dışındaki yöntemlerden kaçınılmalıdır.`;
+                fallbackNote = `İlandaki ${pText} TL'lik fiyat, ${marketValueStr} aralığındaki güncel piyasa değerlerinin çok altında kalarak yüksek bir risk profili oluşturmaktadır. Bu seviyedeki bir fiyatlandırma şüpheli bir durumdur ve güvenli ödeme yöntemleri dışında işlem yapılmamalıdır.`;
             } else if (pVal >= (vMin * 0.94)) {
-                fallbackScore = 15;
-                fallbackNote = `Tespit edilen ${pText} TL'lik bedel, ${marketValueStr} bandındaki güncel piyasa değerleriyle tam uyum göstermektedir. Fiyatın piyasa normlarında olması nedeniyle cihaz, güven verici ve makul bir ilan profili çizmektedir.`;
+                fallbackScore = 15; // Taban Risk
+                fallbackNote = `Tespit edilen ${pText} TL'lik bedel, ${marketValueStr} bandındaki güncel piyasa değerleriyle tam uyum göstermektedir. Fiyatın piyasa normlarında olması nedeniyle cihaz güven verici bir profil çizse de, ikinci el piyasasındaki sektörel riskler nedeniyle işlemler kontrollü bir şekilde tamamlanmalıdır.`;
             }
         }
 
-        const finalScore = analysis.riskScore || fallbackScore;
+        const finalScore = Math.max(15, analysis.riskScore || fallbackScore);
         let finalNote = (analysis.analysisNote || fallbackNote)
             .replace(/Tespit Edilen Fiyat:/g, "İlandaki fiyat olan")
             .replace(/Referans Piyasa Değeri:/g, "seviyesindeki piyasa değerleri")
