@@ -19,7 +19,7 @@ const analyzeProduct = async (req, res) => {
         const db = getDB().db;
         
         // Frontend'den gelmeyen veriler için güvenlik (Sistemin çökmesini/undefined yazmasını engeller)
-        const model = req.body.model || "Şüpheli İlan Taraması";
+        const model = "Analiz: " + (req.body.title || req.body.model || "Bilinmeyen Cihaz");
         const price = req.body.price || "Fiyat Belirtilmedi";
         const description = req.body.description || "Görsel analizi...";
 
@@ -48,7 +48,8 @@ const analyzeProduct = async (req, res) => {
 
         // 2. Gemini AI Analizi (FOTOĞRAF GERÇEKTEN YAPAY ZEKAYA GİDİYOR)
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-        const prompt = `Sen bir ikinci el pazar uzmanısın ve sahtekarlık tespiti yapıyorsun.
+        const prompt = `Sen bir ikinci el pazar uzmanısın ve sahtekarlık tespiti yapıyorsun. 
+        Bugün 28 Nisan 2026. İlandaki tarihin "Nisan 2026" olması güncelliği gösterir ve GÜVENLİ/GÜNCEL bir işarettir, kesinlikle risk olarak puanlama.
         Bu görseldeki ilanın dolandırıcılık riskini %0-100 arası puanla ve kısa bir neden yaz (örneğin fiyat aşırı düşük, garanti şüpheli, IBAN isteniyor vb.).
         Yanıtı SADECE şu formattaki bir JSON olarak ver, başka hiçbir şey yazma: {"score": 45, "reason": "Açıklamada havale isteniyor"}`;
 
