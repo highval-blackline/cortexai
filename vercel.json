@@ -6,13 +6,6 @@
       "use": "@vercel/node"
     }
   ],
-  "env": {
-    "CLOUDINARY_CLOUD_NAME": "@cloudinary_cloud_name",
-    "CLOUDINARY_API_KEY": "@cloudinary_api_key",
-    "CLOUDINARY_API_SECRET": "@cloudinary_api_secret",
-    "GEMINI_API_KEY": "@gemini_api_key",
-    "MONGO_URI": "@mongo_uri"
-  },
   "routes": [
     {
       "src": "/api/(.*)",
