@@ -155,8 +155,9 @@ async function fetchGlobalStats() {
             fetch('/api/recent-feed')
         ]);
 
-        const stats = await statsRes.json();
-        const recentFeed = await feedRes.json();
+        // main.js içinde bu satırları bul ve yanlarına || ekle:
+const stats = await statsRes.json() || { globalFrauds: 0 };
+const recentFeed = await feedRes.json() || [];
 
         // 2. UI Elemanlarını bul
         const feedList = document.getElementById('liveFeedList');

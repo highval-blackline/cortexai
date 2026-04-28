@@ -23,13 +23,8 @@ router.get('/database', (req, res) => {
     res.json(piyasaVeritabani);
 });
 
-// --- ANALİZ (TEST MODE) ---
-router.post('/analyze', (req, res) => {
-  res.json({
-    success: true,
-    message: "test analiz çalıştı"
-  });
-});
+// --- ANALİZ (GERÇEK MOD) ---
+router.post('/analyze', upload.array('images', 3), analyzeProduct);
 
 // --- SABİT DATA ---
 router.get('/global-stats', (req, res) => {
