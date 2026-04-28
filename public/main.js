@@ -222,8 +222,8 @@ async function fetchGlobalStats() {
                     <tr onclick="showImage('${item.imageUrl}')" style="cursor:pointer;" class="feed-item">
                         <td>${item.model}</td>
                         <td style="color: var(--brand-accent); font-weight: 600;">${item.price}</td>
-                        <td style="font-size: 13px;">${shortReason}</td>
-                        <td><span class="badge" style="background: ${borderColor}; color: white; padding: 4px 8px; border-radius: 4px;">${riskText}</span></td>
+                        <td style="font-size: 13px;">${item.marketValue || 'Veri Yok'}</td>
+                        <td><span class="badge" style="background: ${borderColor}; color: white; padding: 4px 8px; border-radius: 4px;">${item.status || riskText}</span></td>
                     </tr>`;
             }
         });
@@ -384,7 +384,12 @@ async function startAnalysis() {
         const scoreBox = document.getElementById('scoreResult');
         scoreBox.innerText = "%" + data.riskScore + " Risk";
         scoreBox.style.color = data.riskScore >= 90 ? 'var(--risk-high)' : (data.riskScore >= 40 ? 'var(--risk-med)' : 'var(--risk-low)');
-        document.getElementById('keywordResult').innerText = data.reason || "Şüpheli bir duruma rastlanmadı.";
+        document.getElementById('keywordResult').innerHTML = `
+            <div style="margin-bottom: 10px;"><b>Model:</b> ${data.detected_model || 'Belirlenemedi'}</div>
+            <div style="margin-bottom: 10px;"><b>İlan Fiyatı:</b> ${data.extracted_price || 'Belirtilmedi'}</div>
+            <div style="margin-bottom: 10px;"><b>Piyasa Değeri:</b> ${data.market_value || 'Veri Yok'}</div>
+            <div><b>Analiz Notu:</b> ${data.reason || "Şüpheli bir duruma rastlanmadı."}</div>
+        `;
 
         const decisionBox = document.getElementById('aiDecision');
         if (data.riskScore >= 90) {

@@ -50,28 +50,32 @@ const analyzeProduct = async (req, res) => {
 
         // 2. Gemini AI Analizi (FOTOĞRAF GERÇEKTEN YAPAY ZEKAYA GİDİYOR)
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-        const prompt = `Sen bir ikinci el pazar uzmanısın ve sahtekarlık tespiti yapıyorsun. 
-        İlan tarihlerini kesinlikle bir risk faktörü olarak görme, Sahibinden sistemi bunları otomatik atar. Tarih verisini tamamen görmezden gel.
-        iPhone 17 serisi ve sağlanan listedeki tüm cihazlar piyasada mevcuttur.
+        const prompt = `Sen bir veri işlemci (data processor) modundasın. 
+        Bugün 28 Nisan 2026. İlan tarihlerini analiz dışı bırak ve görmezden gel.
+        iPhone 17 ve sağlanan listedeki tüm cihazlar mevcuttur.
         
         REFERANS FİYAT LİSTESİ (JSON):
         ${JSON.stringify(piyasaVeritabani)}
 
-        ANALİZ VE PUANLAMA PROTOKOLÜ (MATEMATİKSEL KESİNLİK):
-        1. Görseldeki veya metindeki cihazın marka/modelini bul ve SADECE yukarıdaki listedeki anahtar isimle eşleştir (Örn: "iPhone 17 Pro Max"). Eşleşme yoksa "Bilinmeyen Cihaz" yaz.
-        2. İlan fiyatını (P), listedeki Min (Vmin) ve Max (Vmax) değerleriyle kıyasla:
-           - P < (Vmin * 0.80) ise direkt +70 risk puanı ekle.
-           - P >= (Vmin * 0.94) ise bu fiyat için 0 risk ekle (Normal/Güvenli).
-           - P, Vmin'den %7-%20 daha düşükse veya Vmax'tan %25 daha yüksekse risk puanını buna göre artır (Şüpheli).
-        3. Diğer Risk Faktörleri:
-           - "Param Güvende Kapalı", "Havale", "EFT", "Önce ödeme" gibi ibareler varsa +25 risk puanı ekle.
-           - İlan "Sıfır" denilip açıklama "Yurt Dışı/Kayıtsız/Server Kayıtlı" ise +15 risk puanı ekle.
-        4. Sınıflandırma:
-           - %90 ve üzeri: "Dolandırıcı Riski!"
-           - %40-89: "Şüpheli İlan"
-           - %0-39: "Güvenli / Uygun"
+        PROTOKOL:
+        1. Başlık Temizliği: Cihazı SADECE yukarıdaki listedeki anahtar isimle eşleştir (Örn: "iPhone 17 Pro Max"). "Analiz:", "Taraması:" gibi ifadeleri asla kullanma. Eşleşme yoksa "Bilinmeyen Cihaz" kullan.
+        2. Fiyat Ayıklama: İlan fiyatını (P) görselden veya metinden rakamsal olarak ayıkla (Örn: "115.000 TL").
+        3. Matematiksel Risk Algoritması: 
+           - Vmin = Database Alt Limit (İkinci El veya Sıfır farketmez, en düşük olanı baz al).
+           - P < (Vmin * 0.80) ise score: 95, status: "Dolandırıcı Riski!".
+           - P >= (Vmin * 0.94) ise score: 10, status: "Güvenli / Uygun".
+           - Aradaki değerler için score: 60, status: "Şüpheli İlan".
+        4. Piyasa Değeri (Market Value): SADECE listedeki fiyat aralığını yaz (Örn: "105.000 TL - 115.000 TL"). Cümle kurma, yorum yapma.
         
-        Yanıtı SADECE şu formattaki bir JSON olarak ver, başka hiçbir şey yazma: {"score": 90, "reason": "Fiyat piyasanın %25 altında ve havale isteniyor", "detected_model": "iPhone 17 Pro Max"}`;
+        Yanıtı SADECE şu JSON formatında ver, başka hiçbir şey yazma: 
+        {
+          "score": 95, 
+          "status": "Dolandırıcı Riski!",
+          "reason": "Fiyat piyasanın %20'den fazla altında", 
+          "detected_model": "iPhone 17 Pro Max", 
+          "extracted_price": "85.000 TL", 
+          "market_value": "105.000 TL - 115.000 TL"
+        }`;
 
         const aiParts = [prompt];
         if (fileBuffer) {
@@ -102,19 +106,12 @@ const analyzeProduct = async (req, res) => {
             };
         }
         
-        // UI Çıktısı: Sadece database içindeki anahtar ismini kullan
-        if (analysis.detected_model) {
-            model = analysis.detected_model;
-        }
-
-        // 3. Veritabanına Kayıt
-        const feedCollection = db.collection('feed');
-        const statsCollection = db.collection('stats');
-
         const newEntry = {
-            model,
-            price,
+            model: analysis.detected_model || model,
+            price: analysis.extracted_price || price,
+            marketValue: analysis.market_value || "Veri Yok",
             riskScore: analysis.score,
+            status: analysis.status || (analysis.score >= 90 ? "Dolandırıcı Riski!" : (analysis.score >= 40 ? "Şüpheli İlan" : "Güvenli / Uygun")),
             reason: analysis.reason,
             imageUrl,
             time: new Date().toISOString()
