@@ -8,9 +8,29 @@ window.alert = function(message) {
     clearTimeout(alertTimeout);
     alertTimeout = setTimeout(() => { alertBox.style.display = 'none'; }, 7000);
 };
-let lastFeedJSON = ""; // Son gelen veriyi hafızada tutmak için
-
+let lastFeedJSON = null;
 let frontEndDB = {};
+
+// Sayı artış animasyonu (Count-Up)
+function animateValue(id, start, end, duration) {
+    const obj = document.getElementById(id);
+    if (!obj) return;
+    if (start === end) {
+        obj.innerText = end;
+        return;
+    }
+    const range = end - start;
+    let current = start;
+    const increment = end > start ? 1 : -1;
+    const stepTime = Math.abs(Math.floor(duration / range));
+    const timer = setInterval(() => {
+        current += increment;
+        obj.innerText = current;
+        if (current == end) {
+            clearInterval(timer);
+        }
+    }, stepTime > 0 ? stepTime : 1);
+}
 
 function showImage(url) {
     if (!url) return alert('Bu analizin resmi sisteme kaydedilmemiş veya gizli.');
@@ -197,10 +217,21 @@ async function fetchGlobalStats() {
         if (feedLoader) feedLoader.style.display = 'none';
         if (feedList) feedList.style.display = 'flex';
 
-        // 3. İstatistikleri Güncelle
-        // Backend'den 'globalFrauds' geliyor, frontend 'fraudCount' bekliyor
-        document.getElementById('totalListings').innerText = recentFeed.length > 0 ? "10+" : "0";
-        document.getElementById('fraudCount').innerText = stats.globalFrauds || 0;
+        // 3. İstatistikleri Güncelle (Count-Up Animasyonu ile)
+        const newAnalyses = stats.globalAnalyses || 0;
+        const newFrauds = stats.globalFrauds || 0;
+
+        // Taranan İlanlar (Global)
+        if (window.lastTotalAnalyses !== newAnalyses) {
+            animateValue("totalListings", window.lastTotalAnalyses || 0, newAnalyses, 1000);
+            window.lastTotalAnalyses = newAnalyses;
+        }
+
+        // Tespit Edilen Dolandırıcı
+        if (window.lastTotalFrauds !== newFrauds) {
+            animateValue("fraudCount", window.lastTotalFrauds || 0, newFrauds, 1000);
+            window.lastTotalFrauds = newFrauds;
+        }
 
         // 4. Canlı Akışı Güncelle (Eğer yeni veri varsa)
         const currentFeedJSON = JSON.stringify(recentFeed);

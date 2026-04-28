@@ -170,9 +170,11 @@ const analyzeProduct = async (req, res) => {
 
         await db.collection('feed').insertOne(newEntry);
 
-        if (finalScore >= 50) {
-            await db.collection('stats').updateOne({ id: 'global' }, { $inc: { globalFrauds: 1 } }, { upsert: true });
-        }
+        // Global istatistikleri güncelle (+1 Taranan İlan ve +1 Dolandırıcı (eğer riskliyse))
+        const updateDoc = { $inc: { globalAnalyses: 1 } };
+        if (finalScore >= 50) updateDoc.$inc.globalFrauds = 1;
+        
+        await db.collection('stats').updateOne({ id: 'global' }, updateDoc, { upsert: true });
 
         return res.status(200).json({ 
             success: true, 

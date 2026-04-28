@@ -21,7 +21,7 @@ const getGlobalStats = async (req, res) => {
     try {
         const statsCollection = db.collection('stats');
         const stats = await statsCollection.findOne({ id: 'global' });
-        res.json(stats || { globalFrauds: 0 });
+        res.json(stats || { globalFrauds: 0, globalAnalyses: 0 });
     } catch (error) {
         res.status(500).json({ error: 'İstatistikler cekilemedi.' });
     }
