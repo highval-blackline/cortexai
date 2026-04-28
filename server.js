@@ -32,5 +32,4 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Sunucu ${PORT} portunda aktif.`);
-    console.log("Render bağlantısı için 0.0.0.0 üzerinden dinleniyor.");
 });

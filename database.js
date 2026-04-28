@@ -1,7 +1,7 @@
-const piyasaVeritabani = {
-    // ==========================================
-    //               APPLE iPHONE
-    // ==========================================
+module.exports = {
+// ==========================================
+//            APPLE iPHONE
+// ==========================================
     "iPhone 17 Pro Max": { "TR_Sifir": "120.000 TL - 135.000 TL", "TR_IkinciEl": "105.000 TL - 115.000 TL", "YurtDisi_Sifir": "65.000 TL - 75.000 TL", "YurtDisi_IkinciEl": "55.000 TL - 60.000 TL" },
     "iPhone 17 Pro": { "TR_Sifir": "105.000 TL - 115.000 TL", "TR_IkinciEl": "90.000 TL - 100.000 TL", "YurtDisi_Sifir": "55.000 TL - 65.000 TL", "YurtDisi_IkinciEl": "48.000 TL - 53.000 TL" },
     "iPhone 17 Plus": { "TR_Sifir": "95.000 TL - 105.000 TL", "TR_IkinciEl": "80.000 TL - 90.000 TL", "YurtDisi_Sifir": "50.000 TL - 55.000 TL", "YurtDisi_IkinciEl": "43.000 TL - 48.000 TL" },
@@ -234,4 +234,3 @@ const piyasaVeritabani = {
     "POCO X3 Pro / X3 NFC": { "TR_IkinciEl": "4.500 TL - 6.500 TL" },
     "POCO F3 / F2 Pro": { "TR_IkinciEl": "5.500 TL - 7.000 TL" }
 };
-module.exports = piyasaVeritabani;
