@@ -205,7 +205,7 @@ async function fetchGlobalStats() {
             const timeDiff = Math.floor((Date.now() - new Date(item.time).getTime()) / 60000);
             let timeText = timeDiff <= 0 ? "Şimdi" : (timeDiff < 60 ? timeDiff + " dk önce" : Math.floor(timeDiff/60) + " saat önce");
             
-            const borderColor = item.riskScore >= 50 ? 'var(--risk-high)' : (item.riskScore >= 20 ? 'var(--risk-med)' : 'var(--risk-low)');
+            const borderColor = item.riskScore >= 90 ? 'var(--risk-high)' : (item.riskScore >= 40 ? 'var(--risk-med)' : 'var(--risk-low)');
 
             // Sol taraftaki Akış Kartı
             feedList.innerHTML += `
@@ -216,7 +216,7 @@ async function fetchGlobalStats() {
 
             // Sağ taraftaki Canlı Radar Tablosu
             if (tableBody) {
-                let riskText = item.riskScore >= 50 ? "Dolandırıcı Riski!" : (item.riskScore >= 20 ? "Şüpheli İlan" : "Güvenli / Uygun");
+                let riskText = item.riskScore >= 90 ? "Dolandırıcı Riski!" : (item.riskScore >= 40 ? "Şüpheli İlan" : "Güvenli / Uygun");
                 let shortReason = item.reason ? (item.reason.length > 30 ? item.reason.substring(0,30) + '...' : item.reason) : "Piyasa Analizi...";
                 tableBody.innerHTML += `
                     <tr onclick="showImage('${item.imageUrl}')" style="cursor:pointer;" class="feed-item">
@@ -383,14 +383,14 @@ async function startAnalysis() {
 
         const scoreBox = document.getElementById('scoreResult');
         scoreBox.innerText = "%" + data.riskScore + " Risk";
-        scoreBox.style.color = data.riskScore > 50 ? 'var(--risk-high)' : (data.riskScore > 0 ? 'var(--risk-med)' : 'var(--risk-low)');
+        scoreBox.style.color = data.riskScore >= 90 ? 'var(--risk-high)' : (data.riskScore >= 40 ? 'var(--risk-med)' : 'var(--risk-low)');
         document.getElementById('keywordResult').innerText = data.reason || "Şüpheli bir duruma rastlanmadı.";
 
         const decisionBox = document.getElementById('aiDecision');
-        if (data.riskScore >= 50) {
+        if (data.riskScore >= 90) {
             decisionBox.style.borderLeftColor = 'var(--risk-high)'; decisionBox.style.backgroundColor = 'rgba(255, 68, 68, 0.1)';
             decisionBox.innerHTML = `<div style="margin-bottom: 10px;"><strong>DİKKAT YÜKSEK RİSK:</strong> Sistem görselde riskli detaylar ve oltalama şüphesi tespit etti.</div><div style="font-size: 13px; color: #e0e0e0; border-top: 1px solid rgba(255, 68, 68, 0.3); padding-top: 10px;"><i class="fa-solid fa-triangle-exclamation" style="color: var(--risk-high); margin-right: 5px;"></i> <b>Tavsiye:</b> İmkanınız varsa satıcıyla mutlaka <b>yüz yüze</b> görüşün ve cihazı elden teslim alın. Eğer uzaktaysanız alışverişi sadece <b>'Param Güvende'</b> ile gerçekleştirmek istediğinizi söyleyin. Satıcı bunu reddedip havale/EFT talep ediyorsa işlemi derhal iptal edin ve uzaklaşın, %99 dolandırıcıdır!</div>`;
-        } else if (data.riskScore >= 20) {
+        } else if (data.riskScore >= 40) {
             decisionBox.style.borderLeftColor = 'var(--risk-med)'; decisionBox.style.backgroundColor = 'rgba(255, 187, 51, 0.1)';
             decisionBox.innerHTML = `<div style="margin-bottom: 10px;"><strong>ORTA RİSK:</strong> İlanda bazı şüpheli izler veya tutarsızlıklar bulunuyor.</div><div style="font-size: 13px; color: #e0e0e0; border-top: 1px solid rgba(255, 187, 51, 0.3); padding-top: 10px;"><i class="fa-solid fa-circle-exclamation" style="color: var(--risk-med); margin-right: 5px;"></i> <b>Tavsiye:</b> Satıcıyla yüz yüze görüşmeden veya Sahibinden 'Param Güvende' sistemini kullanmadan <b>kesinlikle ödeme yapmayın.</b> Satıcı güvenli ödemeye yanaşmıyorsa riske girmeyin.</div>`;
         } else {
@@ -759,14 +759,14 @@ async function loadSharedAnalysis(id) {
             
             const scoreBox = document.getElementById('scoreResult');
             scoreBox.innerText = "%" + data.riskScore + " Risk";
-            scoreBox.style.color = data.riskScore > 50 ? 'var(--risk-high)' : (data.riskScore > 0 ? 'var(--risk-med)' : 'var(--risk-low)');
+            scoreBox.style.color = data.riskScore >= 90 ? 'var(--risk-high)' : (data.riskScore >= 40 ? 'var(--risk-med)' : 'var(--risk-low)');
             document.getElementById('keywordResult').innerText = data.reason || "Detay bulunamadı.";
 
             const decisionBox = document.getElementById('aiDecision');
-            if (data.riskScore >= 50) {
+            if (data.riskScore >= 90) {
                 decisionBox.style.borderLeftColor = 'var(--risk-high)'; decisionBox.style.backgroundColor = 'rgba(255, 68, 68, 0.1)';
                 decisionBox.innerHTML = `<div style="margin-bottom: 10px;"><strong>DİKKAT YÜKSEK RİSK:</strong> Sistem bu paylaşımda yüksek oltalama şüphesi tespit etti.</div>`;
-            } else if (data.riskScore >= 20) {
+            } else if (data.riskScore >= 40) {
                 decisionBox.style.borderLeftColor = 'var(--risk-med)'; decisionBox.style.backgroundColor = 'rgba(255, 187, 51, 0.1)';
                 decisionBox.innerHTML = `<div style="margin-bottom: 10px;"><strong>ORTA RİSK:</strong> Bu ilanda bazı şüpheli izler veya tutarsızlıklar bulunuyor.</div>`;
             } else {

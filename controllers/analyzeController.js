@@ -20,7 +20,8 @@ const analyzeProduct = async (req, res) => {
         const db = getDB().db;
         
         // Frontend'den gelmeyen veriler için güvenlik (Sistemin çökmesini/undefined yazmasını engeller)
-        let model = "Analiz: " + (req.body.title || req.body.model || "Bilinmeyen Cihaz");
+        // UI Çıktısı: "Analiz:" veya "Taraması" eklerini siliyoruz
+        let model = req.body.title || req.body.model || "Bilinmeyen Cihaz";
         const price = req.body.price || "Fiyat Belirtilmedi";
         const description = req.body.description || "Görsel analizi...";
 
@@ -50,18 +51,27 @@ const analyzeProduct = async (req, res) => {
         // 2. Gemini AI Analizi (FOTOĞRAF GERÇEKTEN YAPAY ZEKAYA GİDİYOR)
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
         const prompt = `Sen bir ikinci el pazar uzmanısın ve sahtekarlık tespiti yapıyorsun. 
-        Bugün 28 Nisan 2026. İlandaki tarihin "Nisan 2026" olması güncelliği gösterir ve GÜVENLİ/GÜNCEL bir işarettir, kesinlikle risk olarak puanlama.
-        iPhone 17 serisi ve sağlanan listedeki tüm cihazlar piyasada mevcuttur. "Henüz mevcut değildir" veya "gelecek teknolojisidir" gibi hatalı çıkarımları KESİNLİKLE yapma.
+        İlan tarihlerini kesinlikle bir risk faktörü olarak görme, Sahibinden sistemi bunları otomatik atar. Tarih verisini tamamen görmezden gel.
+        iPhone 17 serisi ve sağlanan listedeki tüm cihazlar piyasada mevcuttur.
         
-        REFERANS FİYAT LİSTESİ:
+        REFERANS FİYAT LİSTESİ (JSON):
         ${JSON.stringify(piyasaVeritabani)}
 
-        KURALLAR:
-        1. Eğer bir cihaz yukarıdaki listede varsa, o cihaz piyasada mevcuttur ve yasaldır. AI eğitim verilerindeki "henüz çıkmadı" bilgisini KESİNLİKLE kullanma.
-        2. Görsele veya metne bakarak cihazın marka ve modelini kesin olarak tespit et.
-        3. Cihazın varlığını sorgulama; sadece fiyatın listedeki piyasa ortalamasına göre riskli olup olmadığını ve ilan detaylarındaki çelişkileri incele.
+        ANALİZ VE PUANLAMA PROTOKOLÜ (MATEMATİKSEL KESİNLİK):
+        1. Görseldeki veya metindeki cihazın marka/modelini bul ve SADECE yukarıdaki listedeki anahtar isimle eşleştir (Örn: "iPhone 17 Pro Max"). Eşleşme yoksa "Bilinmeyen Cihaz" yaz.
+        2. İlan fiyatını (P), listedeki Min (Vmin) ve Max (Vmax) değerleriyle kıyasla:
+           - P < (Vmin * 0.80) ise direkt +70 risk puanı ekle.
+           - P >= (Vmin * 0.94) ise bu fiyat için 0 risk ekle (Normal/Güvenli).
+           - P, Vmin'den %7-%20 daha düşükse veya Vmax'tan %25 daha yüksekse risk puanını buna göre artır (Şüpheli).
+        3. Diğer Risk Faktörleri:
+           - "Param Güvende Kapalı", "Havale", "EFT", "Önce ödeme" gibi ibareler varsa +25 risk puanı ekle.
+           - İlan "Sıfır" denilip açıklama "Yurt Dışı/Kayıtsız/Server Kayıtlı" ise +15 risk puanı ekle.
+        4. Sınıflandırma:
+           - %90 ve üzeri: "Dolandırıcı Riski!"
+           - %40-89: "Şüpheli İlan"
+           - %0-39: "Güvenli / Uygun"
         
-        Yanıtı SADECE şu formattaki bir JSON olarak ver, başka hiçbir şey yazma: {"score": 45, "reason": "Açıklamada havale isteniyor", "detected_model": "iPhone 13 Pro Max"}`;
+        Yanıtı SADECE şu formattaki bir JSON olarak ver, başka hiçbir şey yazma: {"score": 90, "reason": "Fiyat piyasanın %25 altında ve havale isteniyor", "detected_model": "iPhone 17 Pro Max"}`;
 
         const aiParts = [prompt];
         if (fileBuffer) {
@@ -92,9 +102,9 @@ const analyzeProduct = async (req, res) => {
             };
         }
         
-        // AI tarafından tespit edilen model ismini "Bilinmeyen Cihaz" yerine koy
-        if (analysis.detected_model && model.includes("Bilinmeyen Cihaz")) {
-            model = "Analiz: " + analysis.detected_model;
+        // UI Çıktısı: Sadece database içindeki anahtar ismini kullan
+        if (analysis.detected_model) {
+            model = analysis.detected_model;
         }
 
         // 3. Veritabanına Kayıt
