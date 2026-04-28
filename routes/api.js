@@ -10,7 +10,6 @@ const upload = multer({
 
 const { addAlarm, getMyAlarms, deleteAlarm } = require('../controllers/alarmController');
 const { analyzeProduct, getAnalysisById, reportFraud } = require('../controllers/analyzeController');
-const { getRecentFeed, getGlobalStats } = require('../controllers/feedController');
 const { connectDB } = require('../config/db');
 
 // Vercel cold boot DB connection middleware
@@ -19,38 +18,26 @@ router.use(async (req, res, next) => {
     next();
 });
 
-
-// --- VERİTABANI (Fiyat Listesi) ---
+// --- VERİTABANI ---
 router.get('/database', (req, res) => {
     res.json(piyasaVeritabani);
 });
 
-// --- ANALİZ VE RADAR ---
-router.post('/analyze', upload.array('images', 3), async (req, res) => {
-  try {
-    await analyzeProduct(req, res);
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "analiz patladı" });
-  }
+// --- ANALİZ (TEST MODE) ---
+router.post('/analyze', (req, res) => {
+  res.json({
+    success: true,
+    message: "test analiz çalıştı"
+  });
 });
-router.get('/analysis/:id', getAnalysisById);
-router.post('/report-fraud', reportFraud);
-router.get('/recent-feed', async (req, res) => {
-  try {
-    await getRecentFeed(req, res);
-  } catch (e) {
-    console.error(e);
-    res.json([]);
-  }
+
+// --- SABİT DATA ---
+router.get('/global-stats', (req, res) => {
+  res.json({ globalFrauds: 0 });
 });
-router.get('/global-stats', async (req, res) => {
-  try {
-    await getGlobalStats(req, res);
-  } catch (e) {
-    console.error(e);
-    res.json({ globalFrauds: 0 });
-  }
+
+router.get('/recent-feed', (req, res) => {
+  res.json([]);
 });
 
 // --- ALARMLAR ---
