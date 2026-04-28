@@ -2,6 +2,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const cloudinary = require('cloudinary').v2;
 const { getDB } = require('../config/db');
 const { ObjectId } = require('mongodb');
+const piyasaVeritabani = require('../database.js');
 
 // Gemini ve Cloudinary Yapılandırması
 const geminiKey = (process.env.GEMINI_API_KEY || "").trim();
@@ -50,8 +51,16 @@ const analyzeProduct = async (req, res) => {
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
         const prompt = `Sen bir ikinci el pazar uzmanısın ve sahtekarlık tespiti yapıyorsun. 
         Bugün 28 Nisan 2026. İlandaki tarihin "Nisan 2026" olması güncelliği gösterir ve GÜVENLİ/GÜNCEL bir işarettir, kesinlikle risk olarak puanlama.
-        Görsele veya metne bakarak cihazın marka ve modelini (Örn: "iPhone 13 Pro Max") kesin olarak tespit et.
-        Bu görseldeki ilanın dolandırıcılık riskini %0-100 arası puanla ve kısa bir neden yaz (örneğin fiyat aşırı düşük, garanti şüpheli, IBAN isteniyor vb.).
+        iPhone 17 serisi ve sağlanan listedeki tüm cihazlar piyasada mevcuttur. "Henüz mevcut değildir" veya "gelecek teknolojisidir" gibi hatalı çıkarımları KESİNLİKLE yapma.
+        
+        REFERANS FİYAT LİSTESİ:
+        ${JSON.stringify(piyasaVeritabani)}
+
+        KURALLAR:
+        1. Eğer bir cihaz yukarıdaki listede varsa, o cihaz piyasada mevcuttur ve yasaldır. AI eğitim verilerindeki "henüz çıkmadı" bilgisini KESİNLİKLE kullanma.
+        2. Görsele veya metne bakarak cihazın marka ve modelini kesin olarak tespit et.
+        3. Cihazın varlığını sorgulama; sadece fiyatın listedeki piyasa ortalamasına göre riskli olup olmadığını ve ilan detaylarındaki çelişkileri incele.
+        
         Yanıtı SADECE şu formattaki bir JSON olarak ver, başka hiçbir şey yazma: {"score": 45, "reason": "Açıklamada havale isteniyor", "detected_model": "iPhone 13 Pro Max"}`;
 
         const aiParts = [prompt];
