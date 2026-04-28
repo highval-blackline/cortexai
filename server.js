@@ -7,7 +7,7 @@ const apiRoutes = require('./routes/api');
 const piyasaVeritabani = require('./database.js'); // Statik fiyat listesi
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 // --- MİDDLEWARE (Ara Yazılımlar) ---
 app.use(cors({ origin: '*' }));
@@ -30,5 +30,7 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Sunucu ${PORT} portunda aktif.`));
-module.exports = app;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Sunucu ${PORT} portunda aktif.`);
+    console.log("Render bağlantısı için 0.0.0.0 üzerinden dinleniyor.");
+});
