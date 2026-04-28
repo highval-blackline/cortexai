@@ -2,20 +2,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const cloudinary = require('cloudinary').v2;
 const { getDB } = require('../config/db');
 const { ObjectId } = require('mongodb');
-
-// VERİ ENJEKSİYONU (SİSTEM ANAYASASI - phoneDB)
-const phoneDB = {
-    "iPhone 17 Pro Max": { "TR_Sifir": "115.000 TL - 125.000 TL", "TR_IkinciEl": "105.000 TL - 115.000 TL", "YurtDisi_IkinciEl": "55.000 TL - 65.000 TL" },
-    "iPhone 17 Pro": { "TR_Sifir": "100.000 TL - 110.000 TL", "TR_IkinciEl": "90.000 TL - 100.000 TL", "YurtDisi_IkinciEl": "45.000 TL - 55.000 TL" },
-    "iPhone 16 Pro Max": { "TR_Sifir": "95.000 TL - 105.000 TL", "TR_IkinciEl": "85.000 TL - 95.000 TL", "YurtDisi_IkinciEl": "42.000 TL - 48.000 TL" },
-    "iPhone 16 Pro": { "TR_Sifir": "85.000 TL - 95.000 TL", "TR_IkinciEl": "75.000 TL - 85.000 TL", "YurtDisi_IkinciEl": "35.000 TL - 40.000 TL" },
-    "Samsung Galaxy S26 Ultra": { "TR_Sifir": "105.000 TL - 115.000 TL", "TR_IkinciEl": "95.000 TL - 100.000 TL", "YurtDisi_IkinciEl": "48.000 TL - 53.000 TL" },
-    "Samsung Galaxy S25 Ultra": { "TR_Sifir": "90.000 TL - 98.000 TL", "TR_IkinciEl": "78.000 TL - 85.000 TL", "YurtDisi_IkinciEl": "45.000 TL - 50.000 TL" },
-    "Samsung Galaxy S25": { "TR_Sifir": "60.000 TL - 66.000 TL", "TR_IkinciEl": "48.000 TL - 55.000 TL", "YurtDisi_IkinciEl": "30.000 TL - 34.000 TL" },
-    "Samsung Galaxy S24 Ultra": { "TR_Sifir": "70.000 TL - 76.000 TL", "TR_IkinciEl": "58.000 TL - 65.000 TL", "YurtDisi_IkinciEl": "28.000 TL - 33.000 TL" },
-    "Samsung Galaxy Z Fold 7": { "TR_Sifir": "95.000 TL - 105.000 TL", "TR_IkinciEl": "80.000 TL - 88.000 TL", "YurtDisi_IkinciEl": "42.000 TL - 48.000 TL" },
-    "Samsung Galaxy Z Flip 7": { "TR_Sifir": "60.000 TL - 68.000 TL", "TR_IkinciEl": "48.000 TL - 55.000 TL", "YurtDisi_IkinciEl": "28.000 TL - 32.000 TL" }
-};
+const phoneDB = require('../database.js'); // Sabit phoneDB kaldırıldı, database.js bağlandı.
 
 // Yardımcı Araçlar
 const parsePrice = (str) => {
@@ -46,7 +33,7 @@ const analyzeProduct = async (req, res) => {
         if (!genAI) throw new Error("AI Key Missing");
 
         const dbConnection = getDB();
-        const db = dbConnection.db;
+        const db = dbConnection.db; // Değişken çakışmasını önlemek için standart yapı
         
         let initialModel = req.body.title || req.body.model || "Bilinmeyen Cihaz";
         let initialPrice = req.body.price || "Belirtilmedi";
@@ -74,25 +61,20 @@ const analyzeProduct = async (req, res) => {
         }
 
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-        const prompt = `Bugün 28 Nisan 2026. Sen Piyasa.ai Analiz Motorusun. ŞU PROTOKOLÜ HARFİYEN UYGULA:
+        const prompt = `Bugün 29 Nisan 2026. Sen Piyasa.ai Analiz Motorusun. ŞU PROTOKOLÜ HARFİYEN UYGULA:
 
-        1. VERİ KAYNAĞI: SADECE sana verilen ${JSON.stringify(phoneDB)} verilerini kullan. Eğer model veritabanında yoksa (Örn: Oppo A57, yeni bir model vb.), bunu "Yeni model, sınırlı veri" olarak işle ve veritabanındaki en yakın üst segmentle kıyasla. Kafandan fiyat uydurma.
+        1. VERİ KAYNAĞI: SADECE sana verilen ${JSON.stringify(phoneDB)} verilerini kullan. Eğer model bu listede YOKSA (Örn: Oppo A57 vb.), analizi "isValid: false" olarak işaretle ve şu notu yaz: "Bu model güncel veritabanımızda henüz yer almadığı için kesin bir fiyat analizi yapılamıyor."
 
-        2. GÖRSEL ANALİZ: 
-           - Arka plandaki diğer marka reklamları (iPhone tabelası, Samsung logosu vb.) mağaza ortamının doğal parçasıdır; risk artırıcı DEĞİLDİR. 
-           - Kutunun üzerindeki marka/model yazısı ile ilan başlığı tutarlıysa bu GÜVEN artırıcıdır.
-           - Görselde ekran, kamera, telefon gövdesi veya fiyat metni varsa bu bir TELEFONDUR.
-
-        3. RİSK VE TON UYUMU (KESİN KURAL):
+        2. RİSK VE TON UYUMU (KESİN KURAL):
            - Risk asla %15'in altına düşmez.
-           - %15 - %30: "Çok Güvenli / Mağaza İlanı". Metin çok olumlu ve güven verici olmalı.
-           - %31 - %50: "Dikkatli İncelenmeli". Metin nötr ve bilgilendirici olmalı, "Yüksek risk" veya "Soru işareti" gibi korkutucu kelimeler ASLA kullanma.
-           - %51 - %85: "Şüpheli İlan". 
+           - %15 - %30: "Oldukça Güvenli". Metin olumlu ve güven verici olmalı.
+           - %31 - %50: "Dikkatli İncelenmeli". Metin nötr ve bilgilendirici olmalı.
            - %86 - %100: "Dolandırıcı Riski!".
 
-        4. ANALİZ NOTU FORMATI:
+        3. ANALİZ NOTU FORMATI:
            - Daima şu cümleyle başla: "İncelediğimiz ilandaki [Fiyat] TL'lik bedel, veritabanımızdaki [Aralık] TL bandındaki [Kategori] fiyatlarıyla kıyaslanmıştır."
-           - Teknik terim (TR_IkinciEl vb.) YASAK. "Türkiye İkinci El", "Yurt Dışı Sıfır", "Yurt Dışı İkinci El" gibi temiz Türkçe kullan.
+           - Teknik terim (TR_IkinciEl vb.) YASAK. "Türkiye İkinci El", "Türkiye Sıfır", "Yurt Dışı Sıfır", "Yurt Dışı İkinci El" kullan.
+           - Tek bir profesyonel paragraf yaz.
 
         Yanıtı SADECE şu JSON formatında ver: 
         {
@@ -118,38 +100,41 @@ const analyzeProduct = async (req, res) => {
         try {
             analysis = JSON.parse(cleanJson);
         } catch (e) {
-            analysis = { isValid: false, modelName: initialModel, price: initialPrice };
+            analysis = { isValid: false, modelName: initialModel, price: initialPrice, analysisNote: "Analiz sırasında bir hata oluştu." };
         }
 
+        // MODEL YOKSA VEYA GEÇERSİZSE
         if (analysis.isValid === false) {
-            return res.status(200).json({ success: false, error: "Analiz Yapılamadı: Lütfen sadece akıllı telefon ilanı görselleri yükleyin." });
+            const errorMsg = analysis.analysisNote || "Bu model güncel veritabanımızda henüz yer almadığı için kesin bir fiyat analizi yapılamıyor.";
+            return res.status(200).json({ success: false, error: errorMsg });
         }
 
         // MANTIK VE VERİ TEMİZLİĞİ
         let finalModelName = (analysis.modelName || initialModel).trim();
         const dbEntry = phoneDB[finalModelName];
-        let marketValueStr = analysis.marketValue || (dbEntry ? (dbEntry.TR_IkinciEl || Object.values(dbEntry)[0]) : "Veri Yok");
-        
+
+        // Eğer AI yanılıp listede olmayan bir modeli geçerli saydıysa (Extra Kontrol)
+        if (!dbEntry) {
+            return res.status(200).json({ success: false, error: "Bu model güncel veritabanımızda henüz yer almadığı için kesin bir fiyat analizi yapılamıyor." });
+        }
+
+        let marketValueStr = analysis.marketValue || (dbEntry.TR_IkinciEl || Object.values(dbEntry)[0]);
         const vMin = getMinPrice(marketValueStr);
         const pVal = parsePrice(analysis.price || initialPrice);
 
-        // Fallback Logic (AI hata yaparsa veya veritabanında yoksa)
+        // Fallback Risk Hesaplama
         let fallbackScore = 65;
         let pText = analysis.price || initialPrice;
         let fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerleriyle kıyaslanmıştır. Fiyat piyasa normlarının dışında kaldığı için dolandırıcılık risklerine karşı temkinli olunmalıdır.`;
 
         if (vMin > 0) {
             if (pVal >= (vMin - 10) && pVal <= (vMin * 1.5)) {
-                fallbackScore = 15;
-                fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerleriyle kıyaslanmıştır. Fiyat piyasa verileriyle tam uyum göstermekte olup çok güvenli ve makul bir profil çizmektedir.`;
+                fallbackScore = 20;
+                fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerleriyle kıyaslanmıştır. Fiyat piyasa verileriyle tam uyum göstermekte olup oldukça güvenli ve makul bir profil çizmektedir.`;
             } else if (pVal < (vMin * 0.80)) {
                 fallbackScore = 95;
                 fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerlerinin çok altında kalarak yüksek bir risk profili oluşturmaktadır.`;
             }
-        }
-
-        if (marketValueStr === "Veri Yok") {
-            fallbackNote = "Bu model henüz sistemimize eklenmemiştir, yeni model verileri baz alınarak bir analiz gerçekleştirilmiştir.";
         }
 
         const finalScore = Math.max(15, analysis.riskScore || fallbackScore);
@@ -162,10 +147,10 @@ const analyzeProduct = async (req, res) => {
             .trim();
 
         let finalStatus = "Şüpheli İlan";
-        if (finalScore >= 90) finalStatus = "Dolandırıcı Riski!";
+        if (finalScore >= 86) finalStatus = "Dolandırıcı Riski!";
         else if (finalScore >= 51) finalStatus = "Şüpheli İlan";
         else if (finalScore >= 31) finalStatus = "Dikkatli İncelenmeli";
-        else finalStatus = "Çok Güvenli / Mağaza İlanı";
+        else finalStatus = "Oldukça Güvenli";
 
         const newEntry = {
             model: finalModelName,
