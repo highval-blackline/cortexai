@@ -79,8 +79,8 @@ const analyzeProduct = async (req, res) => {
         
         GÖREVİN VE KESİN KURALLAR:
         1. VERİ ANAYASASI: SADECE sana verilen ${JSON.stringify(phoneDB)} verilerini kullan. Kendi genel piyasa tahminlerini kullanman KESİNLİKLE YASAKTIR. 
-        2. ŞEFFAFLIK: Analiz notuna DAİMA şu cümleyle başla: "İlandaki [Fiyat] TL, veritabanımızdaki [Kategori] aralığı olan [Fiyat Aralığı] TL ile kıyaslanmıştır."
-        3. HASSAS EŞLEŞTİRME: Z Fold 7 gibi modellerde 79.998 TL, 80.000 TL olan alt sınırla tam uyumlu sayılır. 1-5 TL'lik farkları "karşılık bulamadım" diye reddetme, "makul ve uyumlu" kabul et.
+        2. AKILLI TANIMA: Görselde telefon hatları, ekran, kamera lensi veya "Samsung", "S25", "A57", "iPhone", "Fiyat" gibi metinler varsa analizi DURDURMA. "isValid": false uyarısını sadece %100 emin olduğun telefon dışı (araba, kedi, manzara vb.) görsellerde kullan.
+        3. ŞEFFAFLIK: Analiz notuna DAİMA şu cümleyle başla: "İlandaki [Fiyat] TL, veritabanımızdaki [Kategori] aralığı olan [Fiyat Aralığı] TL ile kıyaslanmıştır."
         4. MODEL YOKSA: Model database'de yoksa "Bu model henüz sistemimize eklenmemiştir" de ve analizi bitir.
         5. FORMAT: Profesyonel, doğal, kod terimsiz (Vmin vb. yasak) TEK BİR PARAGRAF.
 

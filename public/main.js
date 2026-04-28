@@ -382,9 +382,20 @@ async function startAnalysis() {
 
     try {
         const response = await fetch(`/api/analyze`, { method: 'POST', body: formData });
+        
+        if (!response.ok) {
+            if (response.status === 413) throw new Error("Görsel boyutu çok büyük, otomatik olarak daha fazla sıkıştırılamadı.");
+            throw new Error("Görsel işlenirken teknik bir hata oluştu, lütfen tekrar deneyin.");
+        }
+
         const data = await response.json();
 
-        if (data.error) { alert("Analiz Hatası: " + data.error); resetAnalysis(); return; }
+        if (data.error) { 
+            // Eğer hata AI tarafından (Telefon Değil vb) döndürüldüyse
+            alert(data.error); 
+            resetAnalysis(); 
+            return; 
+        }
 
         // YENİ: Başarılı analiz sonrası URL'ye ID ekle (Sayfa yenilenmeden)
         if (data.analysisId) {
@@ -425,7 +436,10 @@ async function startAnalysis() {
 
         fetchGlobalStats();
 
-    } catch (e) { alert("Sunucuya Bağlanılamadı! Lütfen internet bağlantınızı kontrol edin."); resetAnalysis(); }
+    } catch (e) { 
+        alert(e.message || "Görsel işlenirken teknik bir hata oluştu, lütfen tekrar deneyin."); 
+        resetAnalysis(); 
+    }
 }
 
 function resetAnalysis() {
