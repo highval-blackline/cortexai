@@ -15,8 +15,9 @@ async function connectDB() {
         console.log('MongoDB baglantisi basarili.');
         return dbInstance;
     } catch (err) {
-        console.error('MongoDB baglanti hatasi:', err);
-    }
+    console.error('MongoDB baglanti hatasi:', err);
+    process.exit(1);
+}
 }
 
 const getDB = () => dbInstance;
