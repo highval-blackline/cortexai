@@ -47,7 +47,7 @@ const parsePrice = (str) => {
 };
 
 const getMinPrice = (val) => {
-    if (!val) return 0;
+    if (!val || typeof val !== 'string') return 0;
     const parts = val.split('-');
     return parsePrice(parts[0]);
 };
@@ -64,7 +64,6 @@ cloudinary.config({
 });
 
 const analyzeProduct = async (req, res) => {
-    // ASLA BOŞ DÖNME (ERROR HANDLING)
     try {
         if (!genAI) throw new Error("AI Key Missing");
 
@@ -97,15 +96,31 @@ const analyzeProduct = async (req, res) => {
         }
 
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-        const prompt = `Bugün 28 Nisan 2026. Tarih analizini tamamen kapat.
-        İlandan model ismini ve fiyatı kesin olarak ayıkla.
+        const prompt = `Sen dünyanın en gelişmiş "Sahibinden Piyasa ve Güvenlik Analisti"sin. 
+        Bugün 28 Nisan 2026. İlan tarihlerini asla hata olarak görme; tüm modeller (iPhone 16, 17, Samsung S26) şu an günceldir.
         
-        REFERANS: ${JSON.stringify(phoneDB)}
+        GÖREVİN: İlandaki detayları bir uzman gözüyle yorumlamak ve matematiksel çelişkileri tespit etmek.
 
-        Yanıtı SADECE şu formatta ver: 
+        REFERANS VERİTABANI: ${JSON.stringify(phoneDB)}
+
+        ANALİZ KURALLARI:
+        1. Model Tespiti: Görselden/metinden net modeli oku (Örn: iPhone 16 Pro). "Belirlenemedi" yasaktır.
+        2. Fiyat Tespiti: Görseldeki fiyatı tam çek (Örn: 49.100 TL).
+        3. Piyasa Karşılaştırması: Fiyat veritabanındaki "TR_IkinciEl" aralığındaysa "piyasa değerleriyle uyumlu" de. Alt limitin (Vmin) %15-20 altındaysa "şüpheli derecede düşük" de.
+        4. Risk Puanlama (Kümülatif): 
+           - "Param Güvende" kapalıysa veya havale isteniyorsa: +20 risk
+           - Açıklama çok kısa/yetersizse: +10 risk
+           - Fiyat piyasa değerinin (Vmin) %20 ve daha altındaysa: +50 risk
+        5. Analiz Dili: Akıcı, ikna edici ve profesyonel ol. 
+           Format: "İlandaki cihazın referans piyasa değeri [Piyasa Değeri] aralığında olup, istenen [Fiyat] fiyatı bu aralığa göre [Düşük/Normal/Yüksek] kalmaktadır. [Çelişki tespiti] bu durum risk teşkil etmektedir."
+
+        Yanıtı SADECE şu JSON formatında ver, başka hiçbir metin ekleme: 
         {
-          "modelName": "iPhone 17 Pro Max", 
-          "price": "110.000 TL"
+          "modelName": "iPhone 16 Pro", 
+          "price": "49.100 TL",
+          "marketValue": "60.000 TL - 65.000 TL",
+          "riskScore": 85,
+          "reason": "..."
         }`;
 
         const aiParts = [prompt];
@@ -133,24 +148,26 @@ const analyzeProduct = async (req, res) => {
             .trim();
 
         const dbValue = phoneDB[finalModelName];
-        const marketValueStr = dbValue ? dbValue.TR_IkinciEl : "Veri Yok";
+        const marketValueStr = analysis.marketValue || (dbValue ? dbValue.TR_IkinciEl : "Veri Yok");
         const vMin = getMinPrice(marketValueStr);
         const pVal = parsePrice(analysis.price || initialPrice);
 
-        // Risk Hesaplama
-        let finalScore = 60; // Orta risk (Eşleşme yoksa veya aradaysa)
-        let note = "Fiyat piyasa ortalamasının altında, dikkatli olmanız önerilir.";
+        // Fallback Risk Hesaplama (AI başarısız olursa)
+        let fallbackScore = 60;
+        let fallbackNote = "Fiyat piyasa ortalamasının altında, dikkatli olmanız önerilir.";
 
         if (vMin > 0) {
             if (pVal < (vMin * 0.80)) {
-                finalScore = 95;
-                note = "Piyasa değerinin çok altında, dolandırıcılık riski yüksek.";
+                fallbackScore = 95;
+                fallbackNote = "Piyasa değerinin çok altında, dolandırıcılık riski yüksek.";
             } else if (pVal >= (vMin * 0.94)) {
-                finalScore = 10;
-                note = "Fiyat piyasa değerleriyle uyumlu, diğer detayları inceleyin.";
+                fallbackScore = 10;
+                fallbackNote = "Fiyat piyasa değerleriyle uyumlu, diğer detayları inceleyin.";
             }
         }
 
+        const finalScore = analysis.riskScore || fallbackScore;
+        const finalReason = analysis.reason || fallbackNote;
         const finalStatus = finalScore >= 90 ? "Dolandırıcı Riski!" : (finalScore >= 40 ? "Şüpheli İlan" : "Güvenli / Uygun");
 
         const newEntry = {
@@ -159,7 +176,7 @@ const analyzeProduct = async (req, res) => {
             marketValue: marketValueStr,
             riskScore: finalScore,
             status: finalStatus,
-            reason: note,
+            reason: finalReason,
             imageUrl,
             time: new Date().toISOString()
         };
@@ -176,7 +193,7 @@ const analyzeProduct = async (req, res) => {
             success: true, 
             riskScore: finalScore, 
             status: finalStatus,
-            reason: note, 
+            reason: finalReason, 
             modelName: finalModelName,
             price: newEntry.price,
             marketValue: marketValueStr,
@@ -184,7 +201,7 @@ const analyzeProduct = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("KRİTİK HATA:", error);
+        console.error("Analiz Hatası:", error);
         return res.status(200).json({ 
             success: false, 
             modelName: "Bilinmeyen Cihaz", 
