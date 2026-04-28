@@ -11,6 +11,8 @@ const phoneDB = {
     "iPhone 16 Pro": { "TR_Sifir": "85.000 TL - 95.000 TL", "TR_IkinciEl": "75.000 TL - 85.000 TL", "YurtDisi_IkinciEl": "35.000 TL - 40.000 TL" },
     "Samsung Galaxy S26 Ultra": { "TR_Sifir": "105.000 TL - 115.000 TL", "TR_IkinciEl": "95.000 TL - 100.000 TL", "YurtDisi_IkinciEl": "48.000 TL - 53.000 TL" },
     "Samsung Galaxy S26": { "TR_Sifir": "72.000 TL - 78.000 TL", "TR_IkinciEl": "62.000 TL - 68.000 TL", "YurtDisi_IkinciEl": "32.000 TL - 36.000 TL" },
+    "Samsung Galaxy S25 Ultra": { "TR_Sifir": "90.000 TL - 98.000 TL", "TR_IkinciEl": "78.000 TL - 85.000 TL", "YurtDisi_IkinciEl": "45.000 TL - 50.000 TL" },
+    "Samsung Galaxy S25": { "TR_Sifir": "60.000 TL - 66.000 TL", "TR_IkinciEl": "48.000 TL - 55.000 TL", "YurtDisi_IkinciEl": "30.000 TL - 34.000 TL" },
     "Samsung Galaxy S24 Ultra": { "TR_Sifir": "70.000 TL - 76.000 TL", "TR_IkinciEl": "58.000 TL - 65.000 TL", "YurtDisi_IkinciEl": "28.000 TL - 33.000 TL" },
     "Samsung Galaxy S24": { "TR_Sifir": "48.000 TL - 53.000 TL", "TR_IkinciEl": "38.000 TL - 44.000 TL", "YurtDisi_IkinciEl": "19.000 TL - 23.000 TL" }
 };
@@ -72,13 +74,13 @@ const analyzeProduct = async (req, res) => {
         }
 
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-        const prompt = `Bugün 28 Nisan 2026. Sen Piyasa.ai için "Gerçekçi Piyasa Denetçisi"sin. 
+        const prompt = `Bugün 28 Nisan 2026. Sen Piyasa.ai için "Piyasa Denetçisi"sin. 
         
         GÖREVİN VE KESİN KURALLAR:
-        1. TABAN RİSK: İkinci el piyasasında risk asla %0 olamaz. En güvenli ilana bile minimum %10-15 "Sektörel Risk" puanı ver.
-        2. MANTIKSAL ANALİZ: "Fiyat düşük olduğu için güvenli" gibi hatalı cümleler kurma. Fiyat düşükse dolandırıcılık riskine karşı uyar.
-        3. RİSK ARTIŞI: Param Güvende kapalıysa +%20, açıklama çok kısaysa +%10 risk ekle. Fiyat düştükçe risk agresif artar.
-        4. KOD TERİMLERİNİ YASAKLA: Analiz notunda ASLA "Vmin", "|" gibi terimler kullanma. Sadece tek bir profesyonel paragraf yaz.
+        1. TELEFON TANIMA: Görselde telefon silüeti, kamera veya "S25", "Samsung", "İlan", "TL" metni varsa analizi MUTLAKA yap. Sadece %100 telefon dışı (kedi, bina, araba vb.) nesneleri reddet. Şüpheli durumlarda analizi yapmaya zorla.
+        2. S25 ÖZEL: Görselde S25 yazısı veya dikey üçlü kamera dizilimi gördüğünde bunu Samsung Galaxy S25 olarak kabul et ve 48.000 TL - 55.000 TL bandıyla kıyasla.
+        3. RİSK MANTIĞI: Risk minimum %15'ten başlar. Fiyat piyasa değerinin altındaysa buna "Güvenli" deme; "Fiyatın piyasa ortalamasının altına inmesi nedeniyle risk profili artmıştır" şeklinde analiz yap.
+        4. KOD TERİMLERİ: Analiz notunda ASLA "Vmin", "isValid", "|" gibi teknik terimler kullanma. Sadece tek bir akıcı, profesyonel paragraf yaz.
 
         REFERANS VERİTABANI: ${JSON.stringify(phoneDB)}
 
