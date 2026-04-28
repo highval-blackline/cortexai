@@ -96,11 +96,11 @@ const analyzeProduct = async (req, res) => {
         }
 
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-        const prompt = `Bugün 28 Nisan 2026. Sen Piyasa.ai için "İçerik Filtreleyici ve Analiz Uzmanı"sın.
+        const prompt = `Bugün 28 Nisan 2026. Sen Piyasa.ai için "İçerik Filtreleme ve Analiz Uzmanı"sın.
         
         GÖREVİN VE KESİN KURALLAR:
-        1. İÇERİK DOĞRULAMA: Görseldeki nesne bir "Akıllı Telefon İlanı" değilse analizi ANINDA DURDUR ve "isValid": false döndür. Görselde telefon olsa bile Fiyat veya Model net okunmuyorsa "isValid": false döndür.
-        2. ANALİZ DİLİ: Sadece geçerli ilanlarda; teknik terimlerden arındırılmış, profesyonel ve bilgilendirici TEK BİR PARAGRAF yaz. "Model:", "Piyasa Değeri:" gibi başlıkları ASLA kullanma.
+        1. İÇERİK DOĞRULAMA (İLK ADIM - KRİTİK): Görseldeki nesne bir "Akıllı Telefon İlanı" değilse analizi derhal durdur ve "isValid": false döndür. Araba, manzara, insan, yemek veya diğer alakasız nesneler için ASLA analiz yapma, risk puanı verme ve açıklama metni yazma.
+        2. ANALİZ PROTOKOLÜ: Sadece telefon ilanları için; teknik terimlerden arındırılmış, profesyonel ve bilgilendirici TEK BİR PARAGRAF yaz.
         3. REFERANS VERİTABANI: ${JSON.stringify(phoneDB)}
 
         Yanıtı SADECE şu JSON formatında ver: 
@@ -134,7 +134,8 @@ const analyzeProduct = async (req, res) => {
         if (analysis.isValid === false) {
             return res.status(200).json({ 
                 success: false, 
-                error: "Analiz Başarısız: Geçerli bir akıllı telefon ilanı veya fiyat bilgisi tespit edilemedi." 
+                riskScore: 0,
+                error: "Analiz Yapılamadı: Lütfen sadece akıllı telefon ilanı görselleri yükleyin. Sistemimiz şu an diğer kategorileri desteklememektedir." 
             });
         }
 
