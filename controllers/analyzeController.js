@@ -76,10 +76,23 @@ const analyzeProduct = async (req, res) => {
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
         const prompt = `Bugün 28 Nisan 2026. Sen Piyasa.ai Analiz Motorusun. ŞU PROTOKOLÜ HARFİYEN UYGULA:
 
-        1. GÖRSEL TANIMA: Görselde ekran, kamera, telefon gövdesi veya "S25", "iPhone", "İlan", "Fiyat", "TL" gibi metinler varsa bu bir TELEFONDUR. Sadece %100 emin olduğun alakasız şeyleri reddet.
-        2. VERİ KAYNAĞI: SADECE sana verilen ${JSON.stringify(phoneDB)} verilerini kullan. İlanı uygun kategoriyle (TR/YurtDışı, Sıfır/İkinciEl) eşleştir.
-        3. RİSK VE ŞEFFAFLIK: Risk asla %0 olamaz, min %15 ver. Fiyat piyasa altındaysa "Avantajlı" deme, "Riskli/Şüpheli" yorumu yap.
-        4. ANALİZ NOTU: Analiz notuna her zaman: "İncelediğimiz ilandaki [Fiyat] TL'lik bedel, veritabanımızdaki [Aralık] TL bandındaki [Kategori] fiyatlarıyla kıyaslanmıştır." cümlesiyle başla. Teknik kod terimleri (Vmin, isValid vb.) asla kullanma. Tek bir profesyonel paragraf yaz.
+        1. VERİ KAYNAĞI: SADECE sana verilen ${JSON.stringify(phoneDB)} verilerini kullan. Eğer model veritabanında yoksa (Örn: Oppo A57, yeni bir model vb.), bunu "Yeni model, sınırlı veri" olarak işle ve veritabanındaki en yakın üst segmentle kıyasla. Kafandan fiyat uydurma.
+
+        2. GÖRSEL ANALİZ: 
+           - Arka plandaki diğer marka reklamları (iPhone tabelası, Samsung logosu vb.) mağaza ortamının doğal parçasıdır; risk artırıcı DEĞİLDİR. 
+           - Kutunun üzerindeki marka/model yazısı ile ilan başlığı tutarlıysa bu GÜVEN artırıcıdır.
+           - Görselde ekran, kamera, telefon gövdesi veya fiyat metni varsa bu bir TELEFONDUR.
+
+        3. RİSK VE TON UYUMU (KESİN KURAL):
+           - Risk asla %15'in altına düşmez.
+           - %15 - %30: "Çok Güvenli / Mağaza İlanı". Metin çok olumlu ve güven verici olmalı.
+           - %31 - %50: "Dikkatli İncelenmeli". Metin nötr ve bilgilendirici olmalı, "Yüksek risk" veya "Soru işareti" gibi korkutucu kelimeler ASLA kullanma.
+           - %51 - %85: "Şüpheli İlan". 
+           - %86 - %100: "Dolandırıcı Riski!".
+
+        4. ANALİZ NOTU FORMATI:
+           - Daima şu cümleyle başla: "İncelediğimiz ilandaki [Fiyat] TL'lik bedel, veritabanımızdaki [Aralık] TL bandındaki [Kategori] fiyatlarıyla kıyaslanmıştır."
+           - Teknik terim (TR_IkinciEl vb.) YASAK. "Türkiye İkinci El", "Yurt Dışı Sıfır", "Yurt Dışı İkinci El" gibi temiz Türkçe kullan.
 
         Yanıtı SADECE şu JSON formatında ver: 
         {
@@ -88,7 +101,7 @@ const analyzeProduct = async (req, res) => {
           "price": "...",
           "marketValue": "...",
           "riskScore": 15,
-          "analysisNote": "İncelediğimiz ilandaki ... TL'lik bedel, veritabanımızdaki ... TL bandındaki ... fiyatlarıyla kıyaslanmıştır. [Devamı...]"
+          "analysisNote": "..."
         }`;
 
         const aiParts = [prompt];
@@ -120,30 +133,39 @@ const analyzeProduct = async (req, res) => {
         const vMin = getMinPrice(marketValueStr);
         const pVal = parsePrice(analysis.price || initialPrice);
 
-        // Fallback Logic (AI hata yaparsa)
+        // Fallback Logic (AI hata yaparsa veya veritabanında yoksa)
         let fallbackScore = 65;
         let pText = analysis.price || initialPrice;
-        let fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerleriyle kıyaslanmıştır. Fiyat piyasa normlarının dışında kaldığı için dolandırıcılık risklerine karşı temkinli olunmalı, işlem sadece güvenli ödeme yöntemleriyle tamamlanmalıdır.`;
+        let fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerleriyle kıyaslanmıştır. Fiyat piyasa normlarının dışında kaldığı için dolandırıcılık risklerine karşı temkinli olunmalıdır.`;
 
         if (vMin > 0) {
             if (pVal >= (vMin - 10) && pVal <= (vMin * 1.5)) {
                 fallbackScore = 15;
-                fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerleriyle kıyaslanmıştır. Fiyat piyasa verileriyle tam uyum göstermekte olup makul ve güven verici bir profil çizmektedir.`;
+                fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerleriyle kıyaslanmıştır. Fiyat piyasa verileriyle tam uyum göstermekte olup çok güvenli ve makul bir profil çizmektedir.`;
             } else if (pVal < (vMin * 0.80)) {
                 fallbackScore = 95;
-                fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerleriyle kıyaslanmıştır. Fiyat piyasa normlarının çok altında kalarak yüksek bir risk profili oluşturmaktadır.`;
+                fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerlerinin çok altında kalarak yüksek bir risk profili oluşturmaktadır.`;
             }
+        }
+
+        if (marketValueStr === "Veri Yok") {
+            fallbackNote = "Bu model henüz sistemimize eklenmemiştir, yeni model verileri baz alınarak bir analiz gerçekleştirilmiştir.";
         }
 
         const finalScore = Math.max(15, analysis.riskScore || fallbackScore);
         let finalNote = (analysis.analysisNote || fallbackNote)
-            .replace(/YurtDisi_IkinciEl/g, "yurt dışı ikinci el")
-            .replace(/TR_IkinciEl/g, "Türkiye ikinci el")
-            .replace(/TR_Sifir/g, "Türkiye sıfır")
+            .replace(/YurtDisi_IkinciEl/g, "Yurt Dışı İkinci El")
+            .replace(/TR_IkinciEl/g, "Türkiye İkinci El")
+            .replace(/TR_Sifir/g, "Türkiye Sıfır")
+            .replace(/YurtDisi_Sifir/g, "Yurt Dışı Sıfır")
             .replace(/isValid/g, "")
             .trim();
 
-        const finalStatus = finalScore >= 90 ? "Dolandırıcı Riski!" : (finalScore >= 40 ? "Şüpheli İlan" : "Güvenli / Uygun");
+        let finalStatus = "Şüpheli İlan";
+        if (finalScore >= 90) finalStatus = "Dolandırıcı Riski!";
+        else if (finalScore >= 51) finalStatus = "Şüpheli İlan";
+        else if (finalScore >= 31) finalStatus = "Dikkatli İncelenmeli";
+        else finalStatus = "Çok Güvenli / Mağaza İlanı";
 
         const newEntry = {
             model: finalModelName,
