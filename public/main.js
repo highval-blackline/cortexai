@@ -6,7 +6,7 @@ window.alert = function(message) {
     document.getElementById('customAlertText').innerText = message;
     alertBox.style.display = 'flex';
     clearTimeout(alertTimeout);
-    alertTimeout = setTimeout(() => { alertBox.style.display = 'none'; }, 3500);
+    alertTimeout = setTimeout(() => { alertBox.style.display = 'none'; }, 7000);
 };
 let lastFeedJSON = ""; // Son gelen veriyi hafızada tutmak için
 
