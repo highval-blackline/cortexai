@@ -10,6 +10,8 @@ const upload = multer({
 
 const { addAlarm, getMyAlarms, deleteAlarm } = require('../controllers/alarmController');
 const { analyzeProduct, getAnalysisById, reportFraud } = require('../controllers/analyzeController');
+const { getRecentFeed, getGlobalStats } = require('../controllers/feedController');
+const { googleAuth } = require('../controllers/authController');
 const { connectDB } = require('../config/db');
 
 // Vercel cold boot DB connection middleware
@@ -23,21 +25,21 @@ router.get('/database', (req, res) => {
     res.json(piyasaVeritabani);
 });
 
-// --- ANALİZ (GERÇEK MOD) ---
+// --- AUTH ---
+router.post('/auth/google', googleAuth);
+
+// --- ANALİZ ---
 router.post('/analyze', upload.array('images', 3), analyzeProduct);
+router.get('/analysis/:id', getAnalysisById);
+router.post('/report-fraud', reportFraud);
 
-// --- SABİT DATA ---
-router.get('/global-stats', (req, res) => {
-  res.json({ globalFrauds: 0 });
-});
-
-router.get('/recent-feed', (req, res) => {
-  res.json([]);
-});
+// --- FEED & STATS ---
+router.get('/global-stats', getGlobalStats);
+router.get('/recent-feed', getRecentFeed);
 
 // --- ALARMLAR ---
 router.post('/add-alarm', addAlarm);
 router.get('/my-alarms', getMyAlarms);
-router.post('/delete-alarm', deleteAlarm);
+router.delete('/delete-alarm', deleteAlarm); // main.js uses DELETE
 
-module.exports = router;
+module.exports = router;

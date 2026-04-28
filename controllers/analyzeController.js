@@ -1,6 +1,7 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const cloudinary = require('cloudinary').v2;
 const { getDB } = require('../config/db');
+const { ObjectId } = require('mongodb');
 
 // Gemini ve Cloudinary Yapılandırması
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -113,7 +114,6 @@ const analyzeProduct = async (req, res) => {
 const getAnalysisById = async (req, res) => {
     const db = getDB().db;
     try {
-        const { ObjectId } = require('mongodb');
         const item = await db.collection('feed').findOne({ _id: new ObjectId(req.params.id) });
         if (!item) return res.status(404).json({ error: 'Analiz bulunamadı.' });
         res.json({ success: true, data: item });
