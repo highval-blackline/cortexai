@@ -81,7 +81,8 @@ const analyzeProduct = async (req, res) => {
            - %86 - %100: "Dolandırıcı Riski!".
 
         4. ANALİZ NOTU FORMATI:
-           - Daima şu cümleyle başla: "İncelediğimiz ilandaki [Fiyat] TL'lik bedel, veritabanımızdaki [Aralık] TL bandındaki [Kategori] fiyatlarıyla kıyaslanmıştır."
+           - Daima şu formatla başla: "İncelediğimiz ilandaki [Fiyat] TL fiyatlı [Model İsmi]..." (Örn: "İncelediğimiz ilandaki 29.999 TL fiyatlı Xiaomi 15T Pro...")
+           - Kıyaslama bilgisini şeffafça belirt: "Veritabanımızdaki [Kategori] fiyatlarıyla kıyaslanmıştır."
            - Teknik terim (TR_IkinciEl vb.) YASAK. "Türkiye İkinci El", "Türkiye Sıfır", "Yurt Dışı Sıfır", "Yurt Dışı İkinci El" kullan.
            - Tek bir profesyonel paragraf yaz.
 
@@ -134,15 +135,15 @@ const analyzeProduct = async (req, res) => {
         // Fallback Risk Hesaplama
         let fallbackScore = 65;
         let pText = analysis.price || initialPrice;
-        let fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerleriyle kıyaslanmıştır. Fiyat piyasa normlarının dışında kaldığı için dolandırıcılık risklerine karşı temkinli olunmalıdır.`;
+        let fallbackNote = `İncelediğimiz ilandaki ${pText} TL fiyatlı ${finalModelName}, veritabanımızdaki ${marketValueStr} bandındaki fiyatlarla kıyaslanmıştır. Fiyat piyasa normlarının dışında kaldığı için dolandırıcılık risklerine karşı temkinli olunmalıdır.`;
 
         if (vMin > 0) {
             if (pVal >= (vMin - 10) && pVal <= (vMin * 1.5)) {
                 fallbackScore = 20;
-                fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerleriyle kıyaslanmıştır. Fiyat piyasa verileriyle tam uyum göstermekte olup oldukça güvenli ve makul bir profil çizmektedir.`;
+                fallbackNote = `İncelediğimiz ilandaki ${pText} TL fiyatlı ${finalModelName}, veritabanımızdaki ${marketValueStr} bandındaki fiyatlarla kıyaslanmıştır. Fiyat piyasa verileriyle tam uyum göstermekte olup oldukça güvenli ve makul bir profil çizmektedir.`;
             } else if (pVal < (vMin * 0.80)) {
                 fallbackScore = 95;
-                fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerlerinin çok altında kalarak yüksek bir risk profili oluşturmaktadır.`;
+                fallbackNote = `İncelediğimiz ilandaki ${pText} TL fiyatlı ${finalModelName}, veritabanımızdaki ${marketValueStr} bandındaki fiyatlarla kıyaslanmıştır. Fiyat piyasa normlarının çok altında kalarak yüksek bir risk profili oluşturmaktadır.`;
             }
         }
 
