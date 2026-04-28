@@ -47,7 +47,7 @@ const analyzeProduct = async (req, res) => {
         }
 
         // 2. Gemini AI Analizi (FOTOĞRAF GERÇEKTEN YAPAY ZEKAYA GİDİYOR)
-        const aiModel = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+        const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
         const prompt = `Sen bir ikinci el pazar uzmanısın ve sahtekarlık tespiti yapıyorsun.
         Bu görseldeki ilanın dolandırıcılık riskini %0-100 arası puanla ve kısa bir neden yaz (örneğin fiyat aşırı düşük, garanti şüpheli, IBAN isteniyor vb.).
         Yanıtı SADECE şu formattaki bir JSON olarak ver, başka hiçbir şey yazma: {"score": 45, "reason": "Açıklamada havale isteniyor"}`;
