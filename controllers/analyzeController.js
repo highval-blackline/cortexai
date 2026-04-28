@@ -99,17 +99,17 @@ const analyzeProduct = async (req, res) => {
         const prompt = `Bugün 28 Nisan 2026. Sen Piyasa.ai için "İçerik Filtreleme ve Analiz Uzmanı"sın.
         
         GÖREVİN VE KESİN KURALLAR:
-        1. İÇERİK DOĞRULAMA (İLK ADIM - KRİTİK): Görseldeki nesne bir "Akıllı Telefon İlanı" değilse analizi derhal durdur ve "isValid": false döndür. Araba, manzara, insan, yemek veya diğer alakasız nesneler için ASLA analiz yapma, risk puanı verme ve açıklama metni yazma.
-        2. ANALİZ PROTOKOLÜ: Sadece telefon ilanları için; teknik terimlerden arındırılmış, profesyonel ve bilgilendirici TEK BİR PARAGRAF yaz.
+        1. İÇERİK DOĞRULAMA: Sadece tamamen alakasız (araba, ev, manzara, yemek vb.) nesneleri reddet ve "isValid": false döndür. Görselde bir ekran, kamera lensi veya ilan metni (Samsung S26, Ultra, S24, iPhone vb.) varsa bu bir telefondur; analize devam et. Samsung S26 gibi yeni nesil tasarımları "yabancı nesne" sanma.
+        2. ANALİZ PROTOKOLÜ: Samsung S26 serisi piyasadaki en güncel modellerdendir. Profesyonel, bilgilendirici ve teknik terimlerden (sapma oranı vb.) arındırılmış TEK BİR PARAGRAF yaz.
         3. REFERANS VERİTABANI: ${JSON.stringify(phoneDB)}
 
         Yanıtı SADECE şu JSON formatında ver: 
         {
           "isValid": true,
-          "modelName": "iPhone 16 Pro", 
-          "price": "49.100 TL",
-          "marketValue": "60.000 TL - 65.000 TL",
-          "riskScore": 85,
+          "modelName": "Samsung Galaxy S26 Ultra", 
+          "price": "98.500 TL",
+          "marketValue": "95.000 TL - 100.000 TL",
+          "riskScore": 10,
           "analysisNote": "..."
         }`;
 
