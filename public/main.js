@@ -155,11 +155,21 @@ async function fetchGlobalStats() {
             fetch('/api/recent-feed')
         ]);
 
-        let stats = await statsRes.json();
-        let recentFeed = await feedRes.json();
+        let stats = { globalFrauds: 0 };
+        let recentFeed = [];
 
-        if (stats.error) stats = { globalFrauds: 0 };
-        if (recentFeed.error || !Array.isArray(recentFeed)) recentFeed = [];
+        try {
+            if (statsRes.ok) {
+                const data = await statsRes.json();
+                if (data && !data.error) stats = data;
+            }
+            if (feedRes.ok) {
+                const data = await feedRes.json();
+                if (Array.isArray(data)) recentFeed = data;
+            }
+        } catch (jsonErr) {
+            console.warn("JSON ayrıştırma hatası:", jsonErr);
+        }
 
         // 2. UI Elemanlarını bul
         const feedList = document.getElementById('liveFeedList');
@@ -306,7 +316,8 @@ function updateFileName() {
 }
 
 async function startAnalysis() {
-    if (typeof imageCompression === 'undefined') {
+    const compressor = window.imageCompression || imageCompression;
+    if (typeof compressor !== 'function') {
         alert("Sıkıştırma kütüphanesi yüklenemedi, lütfen sayfayı yenileyin.");
         return;
     }
@@ -339,7 +350,7 @@ async function startAnalysis() {
         for (let file of filesToProcess) {
             if (file.type.startsWith('image/')) {
                 try {
-                    let compressed = await imageCompression(file, { maxSizeMB: 0.3, maxWidthOrHeight: 1200, useWebWorker: true });
+                    let compressed = await compressor(file, { maxSizeMB: 0.3, maxWidthOrHeight: 1200, useWebWorker: true });
                     formData.append('images', compressed);
                 }
                 catch (error) {
