@@ -3,18 +3,19 @@ const cloudinary = require('cloudinary').v2;
 const { getDB } = require('../config/db');
 const { ObjectId } = require('mongodb');
 
-// VERİ ENJEKSİYONU (ZORUNLU - Vercel Filesystem hatalarını engellemek için)
+// VERİ ENJEKSİYONU (ANAYASA - KESİN KAYNAK)
 const phoneDB = {
     "iPhone 17 Pro Max": { "TR_Sifir": "115.000 TL - 125.000 TL", "TR_IkinciEl": "105.000 TL - 115.000 TL", "YurtDisi_IkinciEl": "55.000 TL - 65.000 TL" },
     "iPhone 17 Pro": { "TR_Sifir": "100.000 TL - 110.000 TL", "TR_IkinciEl": "90.000 TL - 100.000 TL", "YurtDisi_IkinciEl": "45.000 TL - 55.000 TL" },
     "iPhone 16 Pro Max": { "TR_Sifir": "95.000 TL - 105.000 TL", "TR_IkinciEl": "85.000 TL - 95.000 TL", "YurtDisi_IkinciEl": "42.000 TL - 48.000 TL" },
     "iPhone 16 Pro": { "TR_Sifir": "85.000 TL - 95.000 TL", "TR_IkinciEl": "75.000 TL - 85.000 TL", "YurtDisi_IkinciEl": "35.000 TL - 40.000 TL" },
     "Samsung Galaxy S26 Ultra": { "TR_Sifir": "105.000 TL - 115.000 TL", "TR_IkinciEl": "95.000 TL - 100.000 TL", "YurtDisi_IkinciEl": "48.000 TL - 53.000 TL" },
-    "Samsung Galaxy S26": { "TR_Sifir": "72.000 TL - 78.000 TL", "TR_IkinciEl": "62.000 TL - 68.000 TL", "YurtDisi_IkinciEl": "32.000 TL - 36.000 TL" },
     "Samsung Galaxy S25 Ultra": { "TR_Sifir": "90.000 TL - 98.000 TL", "TR_IkinciEl": "78.000 TL - 85.000 TL", "YurtDisi_IkinciEl": "45.000 TL - 50.000 TL" },
     "Samsung Galaxy S25": { "TR_Sifir": "60.000 TL - 66.000 TL", "TR_IkinciEl": "48.000 TL - 55.000 TL", "YurtDisi_IkinciEl": "30.000 TL - 34.000 TL" },
     "Samsung Galaxy S24 Ultra": { "TR_Sifir": "70.000 TL - 76.000 TL", "TR_IkinciEl": "58.000 TL - 65.000 TL", "YurtDisi_IkinciEl": "28.000 TL - 33.000 TL" },
-    "Samsung Galaxy S24": { "TR_Sifir": "48.000 TL - 53.000 TL", "TR_IkinciEl": "38.000 TL - 44.000 TL", "YurtDisi_IkinciEl": "19.000 TL - 23.000 TL" }
+    "Samsung Galaxy Z Fold 7": { "TR_Sifir": "95.000 TL - 105.000 TL", "TR_IkinciEl": "80.000 TL - 88.000 TL", "YurtDisi_IkinciEl": "42.000 TL - 48.000 TL" },
+    "Samsung Galaxy Z Flip 7": { "TR_Sifir": "60.000 TL - 68.000 TL", "TR_IkinciEl": "48.000 TL - 55.000 TL", "YurtDisi_IkinciEl": "28.000 TL - 32.000 TL" },
+    "Samsung Galaxy Z Fold 6": { "TR_Sifir": "80.000 TL - 88.000 TL", "TR_IkinciEl": "65.000 TL - 72.000 TL", "YurtDisi_IkinciEl": "34.000 TL - 39.000 TL" }
 };
 
 // Yardımcı Araçlar
@@ -74,15 +75,14 @@ const analyzeProduct = async (req, res) => {
         }
 
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-        const prompt = `Bugün 28 Nisan 2026. Sen Piyasa.ai için "Piyasa Denetçisi"sin. 
+        const prompt = `Bugün 28 Nisan 2026. Sen Piyasa.ai için "Anayasal Piyasa Denetçisi"sin. 
         
         GÖREVİN VE KESİN KURALLAR:
-        1. TELEFON TANIMA: Görselde telefon silüeti, kamera veya "S25", "Samsung", "İlan", "TL" metni varsa analizi MUTLAKA yap. Sadece %100 telefon dışı (kedi, bina, araba vb.) nesneleri reddet. Şüpheli durumlarda analizi yapmaya zorla.
-        2. S25 ÖZEL: Görselde S25 yazısı veya dikey üçlü kamera dizilimi gördüğünde bunu Samsung Galaxy S25 olarak kabul et ve 48.000 TL - 55.000 TL bandıyla kıyasla.
-        3. RİSK MANTIĞI: Risk minimum %15'ten başlar. Fiyat piyasa değerinin altındaysa buna "Güvenli" deme; "Fiyatın piyasa ortalamasının altına inmesi nedeniyle risk profili artmıştır" şeklinde analiz yap.
-        4. KOD TERİMLERİ: Analiz notunda ASLA "Vmin", "isValid", "|" gibi teknik terimler kullanma. Sadece tek bir akıcı, profesyonel paragraf yaz.
-
-        REFERANS VERİTABANI: ${JSON.stringify(phoneDB)}
+        1. VERİ ANAYASASI: SADECE sana verilen ${JSON.stringify(phoneDB)} verilerini kullan. Kendi genel piyasa tahminlerini kullanman KESİNLİKLE YASAKTIR. 
+        2. ŞEFFAFLIK: Analiz notuna DAİMA şu cümleyle başla: "İlandaki [Fiyat] TL, veritabanımızdaki [Kategori] aralığı olan [Fiyat Aralığı] TL ile kıyaslanmıştır."
+        3. HASSAS EŞLEŞTİRME: Z Fold 7 gibi modellerde 79.998 TL, 80.000 TL olan alt sınırla tam uyumlu sayılır. 1-5 TL'lik farkları "karşılık bulamadım" diye reddetme, "makul ve uyumlu" kabul et.
+        4. MODEL YOKSA: Model database'de yoksa "Bu model henüz sistemimize eklenmemiştir" de ve analizi bitir.
+        5. FORMAT: Profesyonel, doğal, kod terimsiz (Vmin vb. yasak) TEK BİR PARAGRAF.
 
         Yanıtı SADECE şu JSON formatında ver: 
         {
@@ -91,7 +91,7 @@ const analyzeProduct = async (req, res) => {
           "price": "...",
           "marketValue": "...",
           "riskScore": 15,
-          "analysisNote": "..."
+          "analysisNote": "İlandaki ... TL, veritabanımızdaki ... aralığı olan ... TL ile kıyaslanmıştır. [Devamı...]"
         }`;
 
         const aiParts = [prompt];
@@ -133,26 +133,28 @@ const analyzeProduct = async (req, res) => {
         const vMin = getMinPrice(marketValueStr);
         const pVal = parsePrice(analysis.price || initialPrice);
 
-        // Fallback Risk Hesaplama (AI Çuvallarsa)
+        // Fallback Risk Hesaplama
         let fallbackScore = 65;
         let pText = analysis.price || initialPrice;
-        let fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik fiyat, ${marketValueStr} bandındaki piyasa değerleriyle karşılaştırıldığında bir miktar düşük kalmaktadır. Bu durum alıcı için bir fırsat gibi görünse de, dolandırıcılık risklerine karşı dikkatli olunmalı ve işlem elden veya güvenli ödeme yöntemleriyle tamamlanmalıdır.`;
+        let fallbackNote = `İlandaki ${pText} TL, veritabanımızdaki piyasa aralığı olan ${marketValueStr} TL ile kıyaslanmıştır. Fiyat piyasa ortalamasının altında seyrettiği için temkinli olunmalı, işlemler güvenli ödeme yöntemleriyle tamamlanmalıdır.`;
 
         if (vMin > 0) {
-            if (pVal < (vMin * 0.80)) {
+            // Hassas Eşleştirme (Z Fold 7 örneği gibi 5 TL tolerans)
+            if (pVal >= (vMin - 10) && pVal <= (vMin * 1.5)) {
+                fallbackScore = 15;
+                fallbackNote = `İlandaki ${pText} TL, veritabanımızdaki piyasa aralığı olan ${marketValueStr} TL ile kıyaslanmıştır. Fiyat piyasa verileriyle tam uyum göstermekte olup makul ve güven verici bir profil çizmektedir.`;
+            } else if (pVal < (vMin * 0.80)) {
                 fallbackScore = 95;
-                fallbackNote = `İlandaki ${pText} TL'lik fiyat, ${marketValueStr} aralığındaki güncel piyasa değerlerinin çok altında kalarak yüksek bir risk profili oluşturmaktadır. Bu seviyedeki bir fiyatlandırma şüpheli bir durumdur ve güvenli ödeme yöntemleri dışında işlem yapılmamalıdır.`;
-            } else if (pVal >= (vMin * 0.94)) {
-                fallbackScore = 15; // Taban Risk
-                fallbackNote = `Tespit edilen ${pText} TL'lik bedel, ${marketValueStr} bandındaki güncel piyasa değerleriyle tam uyum göstermektedir. Fiyatın piyasa normlarında olması nedeniyle cihaz güven verici bir profil çizse de, ikinci el piyasasındaki sektörel riskler nedeniyle işlemler kontrollü bir şekilde tamamlanmalıdır.`;
+                fallbackNote = `İlandaki ${pText} TL, veritabanımızdaki piyasa aralığı olan ${marketValueStr} TL ile kıyaslanmıştır. Fiyat piyasa normlarının çok altında kaldığı için yüksek risk taşımaktadır.`;
             }
+        }
+
+        if (marketValueStr === "Veri Yok") {
+            fallbackNote = "Bu model henüz sistemimize eklenmemiştir, analiz genel güvenlik kriterlerine göre yapılmıştır.";
         }
 
         const finalScore = Math.max(15, analysis.riskScore || fallbackScore);
         let finalNote = (analysis.analysisNote || fallbackNote)
-            .replace(/Tespit Edilen Fiyat:/g, "İlandaki fiyat olan")
-            .replace(/Referans Piyasa Değeri:/g, "seviyesindeki piyasa değerleri")
-            .replace(/\|/g, "ve")
             .replace(/YurtDisi_IkinciEl/g, "yurt dışı ikinci el")
             .replace(/TR_IkinciEl/g, "Türkiye ikinci el")
             .replace(/TR_Sifir/g, "Türkiye sıfır")
