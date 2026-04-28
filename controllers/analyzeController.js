@@ -2,8 +2,14 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const cloudinary = require('cloudinary').v2;
 const { getDB } = require('../config/db');
 
-// Gemini Yapılandırması
+// Gemini ve Cloudinary Yapılandırması
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const analyzeProduct = async (req, res) => {
     try {
@@ -54,15 +60,22 @@ const analyzeProduct = async (req, res) => {
         }
 
         const aiResult = await aiModel.generateContent(aiParts);
-        const responseText = aiResult.response.text();
+        const response = await aiResult.response;
+        const responseText = response.text();
         
-        // AI Yanıtını Temizle ve Hata Koruması Ekle
-        const cleanJson = responseText.replace(/```json|```/g, "").trim();
+        // AI Yanıtını Temizle ve Hata Koruması Ekle (JSON Formatını garantileyelim)
+        const cleanJson = responseText.replace(/```json|```/g, "").replace(/JSON/i, "").trim();
         let analysis;
         try {
             analysis = JSON.parse(cleanJson);
         } catch (e) {
-            analysis = { score: 65, reason: "Görseldeki detaylar şüpheli bulundu, dikkatli olun." };
+            // Eğer JSON parse edilemezse, text'ten sayı ve string ayıklamaya çalışalım
+            const scoreMatch = responseText.match(/score["']?\s*:\s*(\d+)/i);
+            const reasonMatch = responseText.match(/reason["']?\s*:\s*["']([^"']+)["']/i);
+            analysis = { 
+                score: scoreMatch ? parseInt(scoreMatch[1]) : 65, 
+                reason: reasonMatch ? reasonMatch[1] : "Görseldeki detaylar şüpheli bulundu, dikkatli olun." 
+            };
         }
 
         // 3. Veritabanına Kayıt

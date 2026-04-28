@@ -28,11 +28,13 @@ document.addEventListener("DOMContentLoaded", function () {
             frontEndDB = data;
             console.log("✅ Piyasa.ai: Veritabanı senkronize edildi.");
             
-            // Arama kutularını tetikle
+            // Arama kutularını tetikle (Sadece sayfa açılışında otomatik açılmasını engelledik)
+            /*
             ['modelSearchInput', 'wizardModelInput', 'headerSearchInput'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el && el.offsetParent !== null) el.dispatchEvent(new Event('input'));
             });
+            */
         } catch (err) {
             console.error("❌ Veritabanı Hatası:", err);
             // Hata durumunda yerel bir boş obje oluştur ki sistem çökmesin
