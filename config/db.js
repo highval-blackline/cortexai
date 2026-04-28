@@ -1,23 +1,25 @@
 const { MongoClient } = require('mongodb');
 
-let dbInstance = {};
+let client;
+let dbInstance = { db: null };
 
 async function connectDB() {
+    if (dbInstance.db) return dbInstance;
     try {
-        const client = new MongoClient(process.env.MONGO_URI);
+        const uri = (process.env.MONGO_URI || "").trim();
+        if (!uri) throw new Error("MONGO_URI tanimlanmamis.");
+        client = new MongoClient(uri);
         await client.connect();
         const db = client.db('PiyasaAI');
-        
         dbInstance.db = db;
         dbInstance.statsCollection = db.collection('stats');
         dbInstance.feedCollection = db.collection('feed');
-        
         console.log('MongoDB baglantisi basarili.');
         return dbInstance;
     } catch (err) {
-    console.error('MongoDB baglanti hatasi:', err);
-    process.exit(1);
-}
+        console.error('MongoDB baglanti hatasi:', err);
+        throw err;
+    }
 }
 
 const getDB = () => dbInstance;

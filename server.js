@@ -19,7 +19,7 @@ app.use(express.urlencoded({ limit: '20mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- VERİTABANI BAĞLANTISI ---
-connectDB();
+connectDB().catch(err => console.error("Baslangic DB baglanti hatasi:", err));
 
 // --- API ROTARI ---
 // Tüm API istekleri artık /api ile başlayacak (Örn: /api/analyze)

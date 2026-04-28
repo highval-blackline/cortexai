@@ -1,6 +1,7 @@
 const { OAuth2Client } = require('google-auth-library');
 const { getDB } = require('../config/db');
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const googleClientId = (process.env.GOOGLE_CLIENT_ID || "").trim();
+const client = new OAuth2Client(googleClientId);
 
 const googleAuth = async (req, res) => {
     const { token } = req.body;
@@ -13,7 +14,7 @@ const googleAuth = async (req, res) => {
     try {
         const ticket = await client.verifyIdToken({
             idToken: token,
-            audience: process.env.GOOGLE_CLIENT_ID
+            audience: googleClientId
         });
         const payload = ticket.getPayload();
         const { email, name, picture } = payload;
