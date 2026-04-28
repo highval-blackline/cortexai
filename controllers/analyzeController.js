@@ -96,22 +96,16 @@ const analyzeProduct = async (req, res) => {
         }
 
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-        const prompt = `Sen dünyanın en gelişmiş "Sahibinden Piyasa ve Güvenlik Analisti"sin. 
-        Bugün 28 Nisan 2026. İlan tarihlerini asla hata olarak görme; tüm modeller (iPhone 16, 17, Samsung S26) şu an günceldir.
+        const prompt = `Bugün 28 Nisan 2026. Sen Piyasa.ai için "İçerik Filtreleyici ve Analiz Uzmanı"sın.
         
-        GÖREVİN: İlandaki detayları bir uzman gözüyle yorumlamak ve matematiksel çelişkileri tespit etmek.
+        GÖREVİN VE KESİN KURALLAR:
+        1. İÇERİK DOĞRULAMA: Görseldeki nesne bir "Akıllı Telefon İlanı" değilse analizi ANINDA DURDUR ve "isValid": false döndür. Görselde telefon olsa bile Fiyat veya Model net okunmuyorsa "isValid": false döndür.
+        2. ANALİZ DİLİ: Sadece geçerli ilanlarda; teknik terimlerden arındırılmış, profesyonel ve bilgilendirici TEK BİR PARAGRAF yaz. "Model:", "Piyasa Değeri:" gibi başlıkları ASLA kullanma.
+        3. REFERANS VERİTABANI: ${JSON.stringify(phoneDB)}
 
-        REFERANS VERİTABANI: ${JSON.stringify(phoneDB)}
-
-        ANALİZ KURALLARI:
-        1. ÇIKTI FORMATI (KRİTİK): Yanıtında "Model: ...", "İlan Fiyatı: ..." gibi başlıklar kullanma. Sadece ve sadece tek bir paragraftan oluşan, akıcı bir "Analiz Notu" yaz.
-        2. ANALİZ DİLİ: Matematiksel formülleri metne dökme. İnsani ve bilgilendirici terimler kullan. (Örn: "Piyasa gerçeklerinin çok altında", "Güven sarsıcı bir unsur" vb.)
-        3. Model Tespiti: Görselden/metinden net modeli oku.
-        4. Fiyat Tespiti: Görseldeki fiyatı tam çek (Örn: 49.100 TL).
-        5. Risk Puanlama (Arka Plan): "Param Güvende" kapalıysa +20, kısa açıklama +10, çok düşük fiyat +50 risk ekle.
-        
         Yanıtı SADECE şu JSON formatında ver: 
         {
+          "isValid": true,
           "modelName": "iPhone 16 Pro", 
           "price": "49.100 TL",
           "marketValue": "60.000 TL - 65.000 TL",
@@ -133,7 +127,15 @@ const analyzeProduct = async (req, res) => {
         try {
             analysis = JSON.parse(cleanJson);
         } catch (e) {
-            analysis = { modelName: initialModel, price: initialPrice };
+            analysis = { isValid: false, modelName: initialModel, price: initialPrice };
+        }
+
+        // İÇERİK FİLTRELEME (ZORUNLU)
+        if (analysis.isValid === false) {
+            return res.status(200).json({ 
+                success: false, 
+                error: "Analiz Başarısız: Geçerli bir akıllı telefon ilanı veya fiyat bilgisi tespit edilemedi." 
+            });
         }
 
         // UI TEMİZLİĞİ VE MANTIK
@@ -148,7 +150,7 @@ const analyzeProduct = async (req, res) => {
         const vMin = getMinPrice(marketValueStr);
         const pVal = parsePrice(analysis.price || initialPrice);
 
-        // Fallback Risk Hesaplama (AI başarısız olursa)
+        // Fallback Risk Hesaplama
         let fallbackScore = 60;
         let fallbackNote = "Fiyat piyasa ortalamasının altında, dikkatli olmanız önerilir.";
 
