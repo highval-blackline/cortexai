@@ -65,13 +65,18 @@ const analyzeProduct = async (req, res) => {
 
         1. VERİ KAYNAĞI: SADECE sana verilen ${JSON.stringify(phoneDB)} verilerini kullan. Eğer model bu listede YOKSA (Örn: Oppo A57 vb.), analizi "isValid: false" olarak işaretle ve şu notu yaz: "Bu model güncel veritabanımızda henüz yer almadığı için kesin bir fiyat analizi yapılamıyor."
 
-        2. RİSK VE TON UYUMU (KESİN KURAL):
+        2. GÜVEN ÇARPANLARI (RİSK DÜŞÜRENLER):
+           - İlanda "Param Güvende" ibaresi tespit edilirse: Mevcut risk puanından 5-10 puan düş.
+           - Satıcı "Mağaza" veya "Kurumsal" bir profilse: Mevcut risk puanından 10 puan düş.
+           - İlanda açık "Adres" veya "Sabit Telefon" gibi mağaza detayları varsa: Mevcut risk puanından 5 puan düş.
+
+        3. RİSK VE TON UYUMU (KESİN KURAL):
            - Risk asla %15'in altına düşmez.
            - %15 - %30: "Oldukça Güvenli". Metin olumlu ve güven verici olmalı.
            - %31 - %50: "Dikkatli İncelenmeli". Metin nötr ve bilgilendirici olmalı.
            - %86 - %100: "Dolandırıcı Riski!".
 
-        3. ANALİZ NOTU FORMATI:
+        4. ANALİZ NOTU FORMATI:
            - Daima şu cümleyle başla: "İncelediğimiz ilandaki [Fiyat] TL'lik bedel, veritabanımızdaki [Aralık] TL bandındaki [Kategori] fiyatlarıyla kıyaslanmıştır."
            - Teknik terim (TR_IkinciEl vb.) YASAK. "Türkiye İkinci El", "Türkiye Sıfır", "Yurt Dışı Sıfır", "Yurt Dışı İkinci El" kullan.
            - Tek bir profesyonel paragraf yaz.
