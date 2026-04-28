@@ -3,7 +3,7 @@ const cloudinary = require('cloudinary').v2;
 const { getDB } = require('../config/db');
 const { ObjectId } = require('mongodb');
 
-// VERİ ENJEKSİYONU (ANAYASA - KESİN KAYNAK)
+// VERİ ENJEKSİYONU (SİSTEM ANAYASASI - phoneDB)
 const phoneDB = {
     "iPhone 17 Pro Max": { "TR_Sifir": "115.000 TL - 125.000 TL", "TR_IkinciEl": "105.000 TL - 115.000 TL", "YurtDisi_IkinciEl": "55.000 TL - 65.000 TL" },
     "iPhone 17 Pro": { "TR_Sifir": "100.000 TL - 110.000 TL", "TR_IkinciEl": "90.000 TL - 100.000 TL", "YurtDisi_IkinciEl": "45.000 TL - 55.000 TL" },
@@ -14,8 +14,7 @@ const phoneDB = {
     "Samsung Galaxy S25": { "TR_Sifir": "60.000 TL - 66.000 TL", "TR_IkinciEl": "48.000 TL - 55.000 TL", "YurtDisi_IkinciEl": "30.000 TL - 34.000 TL" },
     "Samsung Galaxy S24 Ultra": { "TR_Sifir": "70.000 TL - 76.000 TL", "TR_IkinciEl": "58.000 TL - 65.000 TL", "YurtDisi_IkinciEl": "28.000 TL - 33.000 TL" },
     "Samsung Galaxy Z Fold 7": { "TR_Sifir": "95.000 TL - 105.000 TL", "TR_IkinciEl": "80.000 TL - 88.000 TL", "YurtDisi_IkinciEl": "42.000 TL - 48.000 TL" },
-    "Samsung Galaxy Z Flip 7": { "TR_Sifir": "60.000 TL - 68.000 TL", "TR_IkinciEl": "48.000 TL - 55.000 TL", "YurtDisi_IkinciEl": "28.000 TL - 32.000 TL" },
-    "Samsung Galaxy Z Fold 6": { "TR_Sifir": "80.000 TL - 88.000 TL", "TR_IkinciEl": "65.000 TL - 72.000 TL", "YurtDisi_IkinciEl": "34.000 TL - 39.000 TL" }
+    "Samsung Galaxy Z Flip 7": { "TR_Sifir": "60.000 TL - 68.000 TL", "TR_IkinciEl": "48.000 TL - 55.000 TL", "YurtDisi_IkinciEl": "28.000 TL - 32.000 TL" }
 };
 
 // Yardımcı Araçlar
@@ -75,14 +74,12 @@ const analyzeProduct = async (req, res) => {
         }
 
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-        const prompt = `Bugün 28 Nisan 2026. Sen Piyasa.ai için "Anayasal Piyasa Denetçisi"sin. 
-        
-        GÖREVİN VE KESİN KURALLAR:
-        1. VERİ ANAYASASI: SADECE sana verilen ${JSON.stringify(phoneDB)} verilerini kullan. Kendi genel piyasa tahminlerini kullanman KESİNLİKLE YASAKTIR. 
-        2. AKILLI TANIMA: Görselde telefon hatları, ekran, kamera lensi veya "Samsung", "S25", "A57", "iPhone", "Fiyat" gibi metinler varsa analizi DURDURMA. "isValid": false uyarısını sadece %100 emin olduğun telefon dışı (araba, kedi, manzara vb.) görsellerde kullan.
-        3. ŞEFFAFLIK: Analiz notuna DAİMA şu cümleyle başla: "İlandaki [Fiyat] TL, veritabanımızdaki [Kategori] aralığı olan [Fiyat Aralığı] TL ile kıyaslanmıştır."
-        4. MODEL YOKSA: Model database'de yoksa "Bu model henüz sistemimize eklenmemiştir" de ve analizi bitir.
-        5. FORMAT: Profesyonel, doğal, kod terimsiz (Vmin vb. yasak) TEK BİR PARAGRAF.
+        const prompt = `Bugün 28 Nisan 2026. Sen Piyasa.ai Analiz Motorusun. ŞU PROTOKOLÜ HARFİYEN UYGULA:
+
+        1. GÖRSEL TANIMA: Görselde ekran, kamera, telefon gövdesi veya "S25", "iPhone", "İlan", "Fiyat", "TL" gibi metinler varsa bu bir TELEFONDUR. Sadece %100 emin olduğun alakasız şeyleri reddet.
+        2. VERİ KAYNAĞI: SADECE sana verilen ${JSON.stringify(phoneDB)} verilerini kullan. İlanı uygun kategoriyle (TR/YurtDışı, Sıfır/İkinciEl) eşleştir.
+        3. RİSK VE ŞEFFAFLIK: Risk asla %0 olamaz, min %15 ver. Fiyat piyasa altındaysa "Avantajlı" deme, "Riskli/Şüpheli" yorumu yap.
+        4. ANALİZ NOTU: Analiz notuna her zaman: "İncelediğimiz ilandaki [Fiyat] TL'lik bedel, veritabanımızdaki [Aralık] TL bandındaki [Kategori] fiyatlarıyla kıyaslanmıştır." cümlesiyle başla. Teknik kod terimleri (Vmin, isValid vb.) asla kullanma. Tek bir profesyonel paragraf yaz.
 
         Yanıtı SADECE şu JSON formatında ver: 
         {
@@ -91,7 +88,7 @@ const analyzeProduct = async (req, res) => {
           "price": "...",
           "marketValue": "...",
           "riskScore": 15,
-          "analysisNote": "İlandaki ... TL, veritabanımızdaki ... aralığı olan ... TL ile kıyaslanmıştır. [Devamı...]"
+          "analysisNote": "İncelediğimiz ilandaki ... TL'lik bedel, veritabanımızdaki ... TL bandındaki ... fiyatlarıyla kıyaslanmıştır. [Devamı...]"
         }`;
 
         const aiParts = [prompt];
@@ -111,46 +108,31 @@ const analyzeProduct = async (req, res) => {
             analysis = { isValid: false, modelName: initialModel, price: initialPrice };
         }
 
-        // İÇERİK FİLTRELEME (ZORUNLU)
         if (analysis.isValid === false) {
-            return res.status(200).json({ 
-                success: false, 
-                riskScore: 0,
-                error: "Analiz Yapılamadı: Lütfen sadece akıllı telefon ilanı görselleri yükleyin. Sistemimiz şu an diğer kategorileri desteklememektedir." 
-            });
+            return res.status(200).json({ success: false, error: "Analiz Yapılamadı: Lütfen sadece akıllı telefon ilanı görselleri yükleyin." });
         }
 
-        // UI TEMİZLİĞİ VE MANTIK
-        let finalModelName = (analysis.modelName || initialModel)
-            .replace(/Analiz:\s*/i, "")
-            .replace(/Şüpheli İlan Taraması\s*/i, "")
-            .replace(/Taraması:\s*/i, "")
-            .trim();
-
+        // MANTIK VE VERİ TEMİZLİĞİ
+        let finalModelName = (analysis.modelName || initialModel).trim();
         const dbEntry = phoneDB[finalModelName];
         let marketValueStr = analysis.marketValue || (dbEntry ? (dbEntry.TR_IkinciEl || Object.values(dbEntry)[0]) : "Veri Yok");
         
         const vMin = getMinPrice(marketValueStr);
         const pVal = parsePrice(analysis.price || initialPrice);
 
-        // Fallback Risk Hesaplama
+        // Fallback Logic (AI hata yaparsa)
         let fallbackScore = 65;
         let pText = analysis.price || initialPrice;
-        let fallbackNote = `İlandaki ${pText} TL, veritabanımızdaki piyasa aralığı olan ${marketValueStr} TL ile kıyaslanmıştır. Fiyat piyasa ortalamasının altında seyrettiği için temkinli olunmalı, işlemler güvenli ödeme yöntemleriyle tamamlanmalıdır.`;
+        let fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerleriyle kıyaslanmıştır. Fiyat piyasa normlarının dışında kaldığı için dolandırıcılık risklerine karşı temkinli olunmalı, işlem sadece güvenli ödeme yöntemleriyle tamamlanmalıdır.`;
 
         if (vMin > 0) {
-            // Hassas Eşleştirme (Z Fold 7 örneği gibi 5 TL tolerans)
             if (pVal >= (vMin - 10) && pVal <= (vMin * 1.5)) {
                 fallbackScore = 15;
-                fallbackNote = `İlandaki ${pText} TL, veritabanımızdaki piyasa aralığı olan ${marketValueStr} TL ile kıyaslanmıştır. Fiyat piyasa verileriyle tam uyum göstermekte olup makul ve güven verici bir profil çizmektedir.`;
+                fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerleriyle kıyaslanmıştır. Fiyat piyasa verileriyle tam uyum göstermekte olup makul ve güven verici bir profil çizmektedir.`;
             } else if (pVal < (vMin * 0.80)) {
                 fallbackScore = 95;
-                fallbackNote = `İlandaki ${pText} TL, veritabanımızdaki piyasa aralığı olan ${marketValueStr} TL ile kıyaslanmıştır. Fiyat piyasa normlarının çok altında kaldığı için yüksek risk taşımaktadır.`;
+                fallbackNote = `İncelediğimiz ilandaki ${pText} TL'lik bedel, veritabanımızdaki ${marketValueStr} TL bandındaki piyasa değerleriyle kıyaslanmıştır. Fiyat piyasa normlarının çok altında kalarak yüksek bir risk profili oluşturmaktadır.`;
             }
-        }
-
-        if (marketValueStr === "Veri Yok") {
-            fallbackNote = "Bu model henüz sistemimize eklenmemiştir, analiz genel güvenlik kriterlerine göre yapılmıştır.";
         }
 
         const finalScore = Math.max(15, analysis.riskScore || fallbackScore);
@@ -158,6 +140,7 @@ const analyzeProduct = async (req, res) => {
             .replace(/YurtDisi_IkinciEl/g, "yurt dışı ikinci el")
             .replace(/TR_IkinciEl/g, "Türkiye ikinci el")
             .replace(/TR_Sifir/g, "Türkiye sıfır")
+            .replace(/isValid/g, "")
             .trim();
 
         const finalStatus = finalScore >= 90 ? "Dolandırıcı Riski!" : (finalScore >= 40 ? "Şüpheli İlan" : "Güvenli / Uygun");
@@ -173,12 +156,11 @@ const analyzeProduct = async (req, res) => {
             time: new Date().toISOString()
         };
 
-        const feedCollection = db.collection('feed');
-        const insertResult = await feedCollection.insertOne(newEntry);
+        const db = getDB().db;
+        await db.collection('feed').insertOne(newEntry);
 
         if (finalScore >= 50) {
-            const statsCollection = db.collection('stats');
-            await statsCollection.updateOne({ id: 'global' }, { $inc: { globalFrauds: 1 } }, { upsert: true });
+            await db.collection('stats').updateOne({ id: 'global' }, { $inc: { globalFrauds: 1 } }, { upsert: true });
         }
 
         return res.status(200).json({ 
@@ -189,19 +171,13 @@ const analyzeProduct = async (req, res) => {
             modelName: finalModelName,
             price: newEntry.price,
             marketValue: marketValueStr,
-            imageUrl 
+            imageUrl,
+            analysisId: newEntry._id
         });
 
     } catch (error) {
-        console.error("Analiz Hatası:", error);
-        return res.status(200).json({ 
-            success: false, 
-            modelName: "Bilinmeyen Cihaz", 
-            price: "Belirtilmedi", 
-            marketValue: "Veri Yok", 
-            riskScore: 0, 
-            analysisNote: "Analiz tamamlanamadı." 
-        });
+        console.error("HATA:", error);
+        return res.status(200).json({ success: false, error: "Teknik bir hata oluştu, lütfen tekrar deneyin." });
     }
 };
 
