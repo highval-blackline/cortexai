@@ -70,7 +70,11 @@ const analyzeProduct = async (req, res) => {
            - Satıcı "Mağaza" veya "Kurumsal" bir profilse: Mevcut risk puanından 10 puan düş.
            - İlanda açık "Adres" veya "Sabit Telefon" gibi mağaza detayları varsa: Mevcut risk puanından 5 puan düş.
 
-        3. RİSK VE TON UYUMU (KESİN KURAL):
+        3. ANORMAL FİYAT SAPMASI (ÖNCELİKLİ):
+           - Eğer fiyat piyasa ortalamasının %40 ve daha fazlası altındaysa, risk puanına +40 ekle ve en az %60 risk ver.
+           - Metne mutlaka "İlan fiyatı piyasa ortalamasının çok altında tespit edilmiştir" uyarısını ekle.
+
+        4. RİSK VE TON UYUMU (KESİN KURAL):
            - Risk asla %15'in altına düşmez.
            - %15 - %30: "Oldukça Güvenli". Metin olumlu ve güven verici olmalı.
            - %31 - %50: "Dikkatli İncelenmeli". Metin nötr ve bilgilendirici olmalı.
@@ -142,7 +146,19 @@ const analyzeProduct = async (req, res) => {
             }
         }
 
-        const finalScore = Math.max(15, analysis.riskScore || fallbackScore);
+        // ANORMAL FİYAT SAPMASI KONTROLÜ
+        let isAbnormalDeviation = false;
+        if (vMin > 0 && pVal > 0 && pVal < (vMin * 0.60)) {
+            isAbnormalDeviation = true;
+        }
+
+        let finalScore = Math.max(15, analysis.riskScore || fallbackScore);
+        
+        if (isAbnormalDeviation) {
+            finalScore = Math.max(60, finalScore + 40);
+            if (finalScore > 100) finalScore = 100;
+        }
+
         let finalNote = (analysis.analysisNote || fallbackNote)
             .replace(/YurtDisi_IkinciEl/g, "Yurt Dışı İkinci El")
             .replace(/TR_IkinciEl/g, "Türkiye İkinci El")
@@ -150,6 +166,13 @@ const analyzeProduct = async (req, res) => {
             .replace(/YurtDisi_Sifir/g, "Yurt Dışı Sıfır")
             .replace(/isValid/g, "")
             .trim();
+
+        if (isAbnormalDeviation) {
+            const deviationWarning = "DİKKAT: İlan fiyatı piyasa ortalamasının çok altında tespit edilmiştir. Bu durum genellikle ağır hasarlı, yurt dışı kayıtlı olmayan veya dolandırıcılık amaçlı ilanlarda görülür.";
+            if (!finalNote.includes("piyasa ortalamasının çok altında")) {
+                finalNote = deviationWarning + " " + finalNote;
+            }
+        }
 
         let finalStatus = "Şüpheli İlan";
         if (finalScore >= 86) finalStatus = "Dolandırıcı Riski!";
