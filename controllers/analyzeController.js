@@ -98,9 +98,9 @@ const analyzeProduct = async (req, res) => {
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
         const prompt = `Bugün 28 Nisan 2026. Sen Piyasa.ai için "İçerik Filtreleme ve Analiz Uzmanı"sın.
         
-        GÖREVİN VE KESİN KURALLAR:
-        1. İÇERİK DOĞRULAMA: Sadece tamamen alakasız (araba, ev, manzara, yemek vb.) nesneleri reddet ve "isValid": false döndür. Görselde bir ekran, kamera lensi veya ilan metni (Samsung S26, Ultra, S24, iPhone vb.) varsa bu bir telefondur; analize devam et. Samsung S26 gibi yeni nesil tasarımları "yabancı nesne" sanma.
-        2. ANALİZ PROTOKOLÜ: Samsung S26 serisi piyasadaki en güncel modellerdendir. Profesyonel, bilgilendirici ve teknik terimlerden (sapma oranı vb.) arındırılmış TEK BİR PARAGRAF yaz.
+        GÖREVİN (AKILLI TANIMA):
+        1. İÇERİK DOĞRULAMA: Sadece tamamen alakasız (araba, ev, manzara, yemek vb.) nesneleri reddet ve "isValid": false döndür. Görselde ekran, kamera lensi veya "Samsung", "S26", "iPhone", "Fiyat" gibi metinler varsa bu bir telefondur; analize devam et. Samsung S26 serisi günceldir; yabancı nesne sanma.
+        2. RİSK VE ANALİZ: Geçerli ilanlarda ASLA %0 risk döndürme. Fiyata göre mantıklı bir skor hesapla. Teknik terimsiz, profesyonel ve bilgilendirici TEK BİR PARAGRAF yaz.
         3. REFERANS VERİTABANI: ${JSON.stringify(phoneDB)}
 
         Yanıtı SADECE şu JSON formatında ver: 
@@ -109,7 +109,7 @@ const analyzeProduct = async (req, res) => {
           "modelName": "Samsung Galaxy S26 Ultra", 
           "price": "98.500 TL",
           "marketValue": "95.000 TL - 100.000 TL",
-          "riskScore": 10,
+          "riskScore": 15,
           "analysisNote": "..."
         }`;
 
@@ -160,7 +160,7 @@ const analyzeProduct = async (req, res) => {
                 fallbackScore = 95;
                 fallbackNote = "Piyasa değerinin çok altında, dolandırıcılık riski yüksek.";
             } else if (pVal >= (vMin * 0.94)) {
-                fallbackScore = 10;
+                fallbackScore = 15; // Asla 0 değil
                 fallbackNote = "Fiyat piyasa değerleriyle uyumlu, diğer detayları inceleyin.";
             }
         }
