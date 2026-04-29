@@ -80,10 +80,11 @@ const analyzeProduct = async (req, res) => {
            - %31 - %50: "Dikkatli İncelenmeli". Metin nötr ve bilgilendirici olmalı.
            - %86 - %100: "Dolandırıcı Riski!".
 
-        4. ANALİZ NOTU FORMATI:
-           - Daima şu formatla başla: "İncelediğimiz ilandaki [Fiyat] TL fiyatlı [Model İsmi]..." (Örn: "İncelediğimiz ilandaki 29.999 TL fiyatlı Xiaomi 15T Pro...")
-           - Kıyaslama bilgisini şeffafça belirt: "Veritabanımızdaki [Kategori] fiyatlarıyla kıyaslanmıştır."
-           - Teknik terim (TR_IkinciEl vb.) YASAK. "Türkiye İkinci El", "Türkiye Sıfır", "Yurt Dışı Sıfır", "Yurt Dışı İkinci El" kullan.
+        4. ANALİZ NOTU FORMATI (KESİN KURALLAR):
+           - "Yüzde (%)" veya "%40 altında" gibi matematiksel oran ifadelerini ASLA kullanma.
+           - Metne daima şu şablonla başla: "İncelediğimiz ilandaki [İlan_Fiyatı] TL fiyatlı [Model_İsmi], veritabanımızdaki [Piyasa_Aralığı] aralığındaki [Kategori] piyasasıyla kıyaslanmıştır. ..."
+           - [Piyasa_Aralığı] yerine database.js'deki ilgili modelin fiyat aralığını (Örn: 105.000 TL - 115.000 TL) yaz.
+           - Teknik terim (TR_IkinciEl vb.) kullanma. "Türkiye İkinci El", "Türkiye Sıfır" vb. kullan.
            - Tek bir profesyonel paragraf yaz.
 
         Yanıtı SADECE şu JSON formatında ver: 
@@ -128,22 +129,23 @@ const analyzeProduct = async (req, res) => {
             return res.status(200).json({ success: false, error: "Bu model güncel veritabanımızda henüz yer almadığı için kesin bir fiyat analizi yapılamıyor." });
         }
 
-        let marketValueStr = analysis.marketValue || (dbEntry.TR_IkinciEl || Object.values(dbEntry)[0]);
+        // Veritabanından o modele ait güncel piyasa aralığını al (Örn: "105.000 TL - 115.000 TL")
+        let marketValueStr = dbEntry.TR_IkinciEl || Object.values(dbEntry)[0];
         const vMin = getMinPrice(marketValueStr);
         const pVal = parsePrice(analysis.price || initialPrice);
 
         // Fallback Risk Hesaplama
         let fallbackScore = 65;
         let pText = analysis.price || initialPrice;
-        let fallbackNote = `İncelediğimiz ilandaki ${pText} TL fiyatlı ${finalModelName}, veritabanımızdaki ${marketValueStr} bandındaki fiyatlarla kıyaslanmıştır. Fiyat piyasa normlarının dışında kaldığı için dolandırıcılık risklerine karşı temkinli olunmalıdır.`;
+        let fallbackNote = `İncelediğimiz ilandaki ${pText} TL fiyatlı ${finalModelName}, veritabanımızdaki ${marketValueStr} aralığındaki Türkiye İkinci El piyasasıyla kıyaslanmıştır. İlan fiyatı piyasa normlarının dışında kaldığı için dolandırıcılık risklerine karşı temkinli olunmalıdır.`;
 
         if (vMin > 0) {
             if (pVal >= (vMin - 10) && pVal <= (vMin * 1.5)) {
                 fallbackScore = 20;
-                fallbackNote = `İncelediğimiz ilandaki ${pText} TL fiyatlı ${finalModelName}, veritabanımızdaki ${marketValueStr} bandındaki fiyatlarla kıyaslanmıştır. Fiyat piyasa verileriyle tam uyum göstermekte olup oldukça güvenli ve makul bir profil çizmektedir.`;
+                fallbackNote = `İncelediğimiz ilandaki ${pText} TL fiyatlı ${finalModelName}, veritabanımızdaki ${marketValueStr} aralığındaki Türkiye İkinci El piyasasıyla kıyaslanmıştır. İlan fiyatı piyasa verileriyle tam uyum göstermekte olup oldukça güvenli ve makul bir profil çizmektedir.`;
             } else if (pVal < (vMin * 0.80)) {
                 fallbackScore = 95;
-                fallbackNote = `İncelediğimiz ilandaki ${pText} TL fiyatlı ${finalModelName}, veritabanımızdaki ${marketValueStr} bandındaki fiyatlarla kıyaslanmıştır. Fiyat piyasa normlarının çok altında kalarak yüksek bir risk profili oluşturmaktadır.`;
+                fallbackNote = `İncelediğimiz ilandaki ${pText} TL fiyatlı ${finalModelName}, veritabanımızdaki ${marketValueStr} aralığındaki Türkiye İkinci El piyasasıyla kıyaslanmıştır. İlan fiyatı, tespit edilen bu piyasa ortalamasının çok altında kaldığı için ciddi bir güvenlik riski oluşturmaktadır.`;
             }
         }
 
@@ -166,6 +168,7 @@ const analyzeProduct = async (req, res) => {
             .replace(/TR_Sifir/g, "Türkiye Sıfır")
             .replace(/YurtDisi_Sifir/g, "Yurt Dışı Sıfır")
             .replace(/isValid/g, "")
+            .replace(/%\d+|%\s*\d+|\d+\s*%/g, "") // Her ihtimale karşı yüzde ifadelerini temizle
             .trim();
 
         if (isAbnormalDeviation) {
