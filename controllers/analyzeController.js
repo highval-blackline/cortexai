@@ -71,10 +71,10 @@ const analyzeProduct = async (req, res) => {
 
         1. VERİ: Sadece ${JSON.stringify(phoneDB)} listesini kullan.
         2. AKILLI ANALİZ: İlan fotoğrafındaki modeli tespit et, veritabanındaki (TR İkinci El veya Yurt Dışı İkinci El) fiyat aralığını bul.
-        3. RAPOR DİLİ: Günlük, samimi ve anlaşılır bir dil kullan. Teknik terimlere boğma.
-        4. ZORUNLU İÇERİK: Metne mutlaka "İncelediğimiz [Fiyat] TL'lik [Model], veritabanımızdaki [Min] TL - [Max] TL aralığıyla kıyaslanmıştır" cümlesiyle başla.
+        3. RAPOR DİLİ: Günlük, samimi ve "BEN" (birinci tekil şahıs) dili kullan (Örn: "İncelediğim", "Öneririm"). "BİZ" dili kullanma.
+        4. ZORUNLU İÇERİK: Metne mutlaka "İncelediğim [Fiyat] TL'lik [Model], veritabanımdaki [Min] TL - [Max] TL aralığıyla kıyaslanmıştır" cümlesiyle başla.
         5. TUTARLILIK: JSON içindeki "riskScore" ile metinde bahsettiğin risk durumu birebir aynı olmalı.
-        6. FORMAT: "Güvenli Alım İçin Uygulama Adımları:" başlığı ve altındaki maddeler (1, 2, 3) yeni satırda (\n) olmalı.
+        6. FORMAT: "Güvenli Alım İçin Uygulama Adımları:" başlığından önce bir satır boşluk (\n), her maddeden (1., 2., 3.) önce ise birer satır boşluk (\n) bırak.
 
         Yanıtı SADECE TEK SATIRLIK JSON olarak ver (Metin alanları içinde asla gerçek satır sonu \n kullanma, gerekirse boşluk kullan):
         {
