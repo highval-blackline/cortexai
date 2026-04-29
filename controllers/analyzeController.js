@@ -69,10 +69,12 @@ const analyzeProduct = async (req, res) => {
         });
         const prompt = `Sen Piyasa.ai Analiz Motorusun. ŞU KURALLARI UYGULA:
 
-        1. VERİ: Sadece ${JSON.stringify(phoneDB)} listesini kullan. Model yoksa isValid:false dön.
-        2. DİNAMİK RİSK: Yurt Dışı/İthalatçı cihazlarda baz risk %30'dan başlar. 15+ yıllık kurumsal mağaza ise bu riski %15'e kadar indirir. Bireysel/Yeni satıcılarda risk %50'nin üzerine çıkar.
-        3. ÜSLUP: %30 altı riskte olumlu, %70 üstü riskte "Elden Teslimat" odaklı sert bir dil kullan.
-        4. FORMAT: "Güvenli Alım İçin Uygulama Adımları:" başlığından önce 1 adet, her maddeden (1-, 2-, 3-) önce ise 1 adet \n ekle. Metnin başında boşluk bırakma.
+        1. VERİ: Sadece ${JSON.stringify(phoneDB)} listesini kullan.
+        2. AKILLI ANALİZ: İlan fotoğrafındaki modeli tespit et, veritabanındaki (TR İkinci El veya Yurt Dışı İkinci El) fiyat aralığını bul.
+        3. RAPOR DİLİ: Günlük, samimi ve anlaşılır bir dil kullan. Teknik terimlere boğma.
+        4. ZORUNLU İÇERİK: Metne mutlaka "İncelediğimiz [Fiyat] TL'lik [Model], veritabanımızdaki [Min] TL - [Max] TL aralığıyla kıyaslanmıştır" cümlesiyle başla.
+        5. TUTARLILIK: JSON içindeki "riskScore" ile metinde bahsettiğin risk durumu birebir aynı olmalı.
+        6. FORMAT: "Güvenli Alım İçin Uygulama Adımları:" başlığı ve altındaki maddeler (1, 2, 3) yeni satırda (\n) olmalı.
 
         Yanıtı SADECE TEK SATIRLIK JSON olarak ver (Metin alanları içinde asla gerçek satır sonu \n kullanma, gerekirse boşluk kullan):
         {
@@ -156,31 +158,18 @@ const analyzeProduct = async (req, res) => {
         // Fiyat ve Market Verisi
         const categoryKey = analysis.origin === "YurtDisi" ? "YurtDisi_IkinciEl" : "TR_IkinciEl";
         const marketValueStr = dbEntry[categoryKey] || dbEntry.TR_IkinciEl || Object.values(dbEntry)[0];
-        const vMin = getMinPrice(marketValueStr);
-        const pVal = parsePrice(analysis.price || initialPrice);
 
-        // Dinamik Risk Puanlaması
-        let baseScore = analysis.origin === "YurtDisi" ? 30 : 20;
-
-        if (analysis.isCorporate && analysis.yearsInSystem >= 15) {
-            baseScore -= 15; // Kurumsal güven indirimi
-        } else if (!analysis.isCorporate) {
-            baseScore += 35; // Bireysel/Yeni satıcı artırımı
-        }
-
-        let finalScore = Math.max(15, baseScore);
-        const isAbnormal = (vMin > 0 && pVal > 0 && pVal < (vMin * 0.60));
-
-        if (isAbnormal) {
-            finalScore = Math.max(analysis.isCorporate ? 40 : 85, finalScore + 40);
+        // AI zaten akıllı bir skor üretiyor, biz sadece kurumsal güvene göre ufak bir kalibrasyon yapalım
+        let finalScore = parseInt(analysis.riskScore) || 20;
+        
+        // Eğer AI kurumsal olduğunu görmüşse ama skoru çok yüksekse (hata payı), kurumsal güvende puanı kır.
+        if (analysis.isCorporate && finalScore > 40) {
+            finalScore = 35; 
         }
 
         if (finalScore > 100) finalScore = 100;
 
-        // Not Temizliği
         let finalNote = (analysis.analysisNote || "")
-            .replace(/YurtDisi_IkinciEl/g, "Yurt Dışı İkinci El")
-            .replace(/TR_IkinciEl/g, "Türkiye İkinci El")
             .replace(/isValid|%/g, "")
             .split('\n').map(line => line.trim()).join('\n').trim();
 
