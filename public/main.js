@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
         setTimeout(() => {
             if (window.google) {
                 google.accounts.id.initialize({
-                    client_id: "104508083781-2ib50lt8k0ud027375q9k3aja7gd8403.apps.googleusercontent.com",
+                    client_id: "82134490516-mutql7flfklfrtu02a5h9luf1vakpue8.apps.googleusercontent.com",
                     callback: handleCredentialResponse
                 });
                 google.accounts.id.renderButton(
