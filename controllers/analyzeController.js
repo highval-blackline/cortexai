@@ -67,19 +67,32 @@ const analyzeProduct = async (req, res) => {
                 { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
             ]
         });
-        const prompt = `Sen Piyasa.ai Analiz Motorusun. Görseldeki ilan bilgilerini tespit et. Veritabanı: ${JSON.stringify(phoneDB)}
-        Yanıtı JSON olarak döndür:
-        {
-          "isValid": true,
-          "modelName": "...",
-          "price": "...",
-          "origin": "TR" | "YurtDisi",
-          "isParamGuvende": true | false,
-          "isCorporate": true | false,
-          "yearsInSystem": 0,
-          "riskScore": 0,
-          "analysisNote": "..."
-        }`;
+        const prompt = `Sen Piyasa.ai'nın en gelişmiş Analiz Motorusun. Görseldeki ilan verilerini ve aşağıdaki veritabanını kullanarak KESİN ve KATI kurallara bağlı bir risk analizi yapmalısın.
+
+VERİTABANI: ${JSON.stringify(phoneDB)}
+
+ANALİZ KURALLARI (KRİTİK):
+1. ÇIKTI FORMATI: Yanıt SADECE ham JSON olmalıdır. Markdown kod blokları ( \`\`\`json ), "JSON:" ön eki veya herhangi bir ekstra açıklama metni ASLA kullanılmayacaktır.
+2. RİSK HESAPLAMA (Fiyat Odaklı): İlan fiyatı, veritabanındaki piyasa ortalamasının (Second Hand TR/Yurt Dışı) altındaysa risk skoru eksponansiyel olarak YÜKSELTİLECEKTİR. Çok düşük fiyat her zaman yüksek dolandırıcılık veya gizli kusur sinyalidir.
+3. HESAP YAŞI ETKİSİ: Satıcı hesabı yeniyse (0-6 ay) ve fiyat piyasanın çok altındaysa, risk skoru direkt %80-%100 aralığına çekilmelidir.
+4. METİN ANALİZİ (NLP): 
+   - İlanda "yurtdışı", "önce havale", "acil nakit", "el elden", "açıklamayı oku" gibi şüpheli ibareler risk skorunu artırır.
+   - Satıcı "kılcal çizik", "ekran değişimi", "kasa vuruğu" gibi şeffaf kusur detayları vermişse, bu durum dürüstlük göstergesi kabul edilmeli, düşük fiyatın nedeni netleştiği için risk skoru normalize edilmelidir.
+5. GÜVENCE SİSTEMLERİ: "Param Güvende" gibi sistemlerin varlığı finansal riski düşürür; bu durumda analiz notunda sadece kargo kontrolü ve fiziki inceleme tavsiye edilmelidir.
+6. ANALİZ NOTU (analysisNote): Raporun profesyonel, çelişkisiz ve net olmalıdır. Kullanıcıya fiyatın neden riskli veya güvenli olduğunu teknik verilere dayanarak (Örn: "Piyasanın %30 altında olması şüphelidir") açıkla.
+
+JSON ŞABLONU (Birebir uyulmalıdır):
+{
+  "isValid": true,
+  "modelName": "Ürün Adı",
+  "price": "İlan Fiyatı",
+  "origin": "TR" | "YurtDisi",
+  "isParamGuvende": true | false,
+  "isCorporate": true | false,
+  "yearsInSystem": 0,
+  "riskScore": 0,
+  "analysisNote": "Detaylı profesyonel rapor..."
+}`;
 
         // URL'den Resim Çekme (Eğer dosya yoksa)
         if (!fileBuffer && imageUrl && imageUrl.startsWith('http')) {
