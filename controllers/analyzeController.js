@@ -80,6 +80,7 @@ ANALİZ KURALLARI (KRİTİK):
    - Satıcı "kılcal çizik", "ekran değişimi", "kasa vuruğu" gibi şeffaf kusur detayları vermişse, bu durum dürüstlük göstergesi kabul edilmeli, düşük fiyatın nedeni netleştiği için risk skoru normalize edilmelidir.
 5. GÜVENCE SİSTEMLERİ: "Param Güvende" gibi sistemlerin varlığı finansal riski düşürür; bu durumda analiz notunda sadece kargo kontrolü ve fiziki inceleme tavsiye edilmelidir.
 6. ANALİZ NOTU (analysisNote): Raporun profesyonel, çelişkisiz ve net olmalıdır. Kullanıcıya fiyatın neden riskli veya güvenli olduğunu teknik verilere dayanarak (Örn: "Unit AInın %30 altında olması şüphelidir") açıkla.
+7. GEÇERSİZ GÖRSEL: Eğer görsel bir telefon ilanı değilse, "isValid": false dönmeli ve "analysisNote" kısmına "Lütfen geçerli bir telefon ilanı fotoğrafı yükleyin." yazmalısın.
 
 JSON ŞABLONU (Birebir uyulmalıdır):
 {
@@ -124,8 +125,7 @@ JSON ŞABLONU (Birebir uyulmalıdır):
             responseText = response.text();
         } catch (err) {
             console.error("AI ÜRETİM HATASI:", err);
-            const detail = err.message || "";
-            throw new Error(`Yapay zeka yanıt veremiyor: ${detail.substring(0, 50)}`);
+            throw new Error("Görsel doğrulanırken bir sorun oluştu. Lütfen net bir ilan fotoğrafı yükleyin.");
         }
 
         // JSON Temizleme: Literal satır sonlarını ve kontrol karakterlerini temizle
@@ -234,7 +234,7 @@ JSON ŞABLONU (Birebir uyulmalıdır):
 
     } catch (error) {
         console.error("ANALİZ HATASI:", error);
-        res.json({ success: false, error: error.message.includes("Yapay zeka") ? error.message : "Teknik hata." });
+        res.json({ success: false, error: error.message.includes("Görsel") ? error.message : "Teknik bir aksaklık oluştu, lütfen tekrar deneyin." });
     }
 };
 

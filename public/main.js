@@ -423,7 +423,11 @@ async function startAnalysis() {
 
         if (data.error) { 
             // Eğer hata AI tarafından (Telefon Değil vb) döndürüldüyse
-            alert(data.error); 
+            let displayError = data.error;
+            if (displayError.includes("[GoogleGenerativeAI") || displayError.includes("Error fetching")) {
+                displayError = "Görsel analiz edilemedi. Lütfen geçerli bir ilan fotoğrafı yükleyin.";
+            }
+            alert(displayError); 
             resetAnalysis(); 
             return; 
         }
