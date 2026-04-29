@@ -482,7 +482,7 @@ function resetAnalysis() {
 
     box.innerHTML = `
         <i class="fa-solid fa-images"></i>
-        <h3>Çoklu Görsel Analizi</h3>
+        <h3>Çoklu İlan Analizi</h3>
         <p style="font-size: 12px; margin-bottom: 10px;">(Ekran görüntülerini kopyalayıp sırayla <b>Ctrl+V</b> yapabilirsiniz)</p>
         <div class="input-group">
             <div style="display: flex; gap: 10px; width: 80%;">
