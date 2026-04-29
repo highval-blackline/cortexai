@@ -28,8 +28,23 @@
 [data-theme='light'] *, 
 [data-theme='light'] .sidebar span, 
 [data-theme='light'] .sidebar div,
-[data-theme='light'] .logo {
-    color: var(--text-main);
+[data-theme='light'] .logo,
+[data-theme='light'] .page-title,
+[data-theme='light'] .page-subtitle,
+[data-theme='light'] .stat-header span,
+[data-theme='light'] .panel-title,
+[data-theme='light'] h1, 
+[data-theme='light'] h2, 
+[data-theme='light'] h3, 
+[data-theme='light'] p,
+[data-theme='light'] i:not(.fa-satellite-dish) {
+    color: var(--text-main) !important;
+}
+
+[data-theme='light'] .text-muted,
+[data-theme='light'] .page-subtitle,
+[data-theme='light'] .stat-header i {
+    color: var(--text-muted) !important;
 }
 
 * {
@@ -1280,4 +1295,28 @@ select.apple-select-hidden {
 
 [data-theme='light'] .search-bar input {
     color: #1d1d1f !important;
+}
+
+[data-theme='light'] #customAlertBox {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    color: #1d1d1f !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1) !important;
+}
+
+[data-theme='light'] #customAlertText {
+    color: #1d1d1f !important;
+}
+
+[data-theme='light'] .apple-select-menu {
+    background: rgba(255, 255, 255, 0.98) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme='light'] .apple-select-item:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme='light'] .apple-select-item.selected {
+    background: rgba(0, 0, 0, 0.08) !important;
 }
