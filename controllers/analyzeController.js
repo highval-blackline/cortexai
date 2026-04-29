@@ -74,7 +74,7 @@ const analyzeProduct = async (req, res) => {
         3. RAPOR DİLİ: Birinci tekil şahıs ("BEN") dili kullan (Örn: "İncelediğim", "Kıyasladım"). Kullanıcıya doğrudan tavsiye ver (Örn: "Temkinli olmalısın").
         4. ZORUNLU İÇERİK: Metne mutlaka "İncelediğim [Fiyat] TL'lik [Model], veritabanımdaki [Min] TL - [Max] TL aralığıyla kıyasladım" cümlesiyle başla.
         5. YASAK: Metin içerisinde hesaplanan risk puanını (Örn: "Risk puanını 15 belirledim") ASLA söyleme. Skor zaten UI'da görünüyor.
-        6. FORMAT: "Güvenli Alım İçin Uygulama Adımları:" başlığından önce bir adet satır sonu (\n), her maddeden (1., 2., 3.) önce ise birer adet satır sonu (\n) kullan.
+        6. FORMAT: "Güvenli Alım İçin Uygulama Adımları:" başlığından önce ASLA boş satır bırakma, sadece bir adet satır sonu (\n) kullan. Her maddeden (1., 2., 3.) önce de sadece bir adet satır sonu (\n) kullan. Tüm rapor bitişik ve boş satırsız olmalı.
 
         Yanıtı SADECE geçerli bir JSON olarak ver. Metin alanları (analysisNote) içerisinde satır sonları için mutlaka \n karakterini kullan:
         {
@@ -188,6 +188,7 @@ const analyzeProduct = async (req, res) => {
 
         let finalNote = (analysis.analysisNote || "")
             .replace(/isValid|%/g, "")
+            .replace(/\n\s*\n/g, "\n") // Çift satır sonlarını (boş satırları) temizle
             .split('\n').map(line => line.trim()).join('\n').trim();
 
         const statusMap = [
