@@ -1,29 +1,3 @@
-// Tema Yönetimi
-function toggleTheme() {
-    const isLight = document.body.classList.toggle('light-mode');
-    const icon = document.querySelector('#themeToggle i');
-    
-    if (isLight) {
-        icon.classList.replace('fa-moon', 'fa-sun');
-        localStorage.setItem('theme', 'light');
-    } else {
-        icon.classList.replace('fa-sun', 'fa-moon');
-        localStorage.setItem('theme', 'dark');
-    }
-}
-
-// Tema İlklendirme (Flicker engelleme)
-(function() {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-        document.body.classList.add('light-mode');
-        document.addEventListener('DOMContentLoaded', () => {
-            const icon = document.querySelector('#themeToggle i');
-            if (icon) icon.classList.replace('fa-moon', 'fa-sun');
-        });
-    }
-})();
-
 // Vercel tetikleme satırı
 // GLOBAL NATIVE ALERT EZİCİ (Android/iOS uyarılarını iptal eder)
 let alertTimeout;
