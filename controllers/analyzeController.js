@@ -67,7 +67,7 @@ const analyzeProduct = async (req, res) => {
                 { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
             ]
         });
-        const prompt = `Sen Cortex AI'nın en gelişmiş Analiz Motorusun. Görseldeki ilan verilerini ve aşağıdaki veritabanını kullanarak KESİN ve KATI kurallara bağlı bir risk analizi yapmalısın.
+        const prompt = `Sen Unit AI'nın en gelişmiş Analiz Motorusun. Görseldeki ilan verilerini ve aşağıdaki veritabanını kullanarak KESİN ve KATI kurallara bağlı bir risk analizi yapmalısın.
 
 VERİTABANI: ${JSON.stringify(phoneDB)}
 
@@ -79,7 +79,7 @@ ANALİZ KURALLARI (KRİTİK):
    - İlanda "yurtdışı", "önce havale", "acil nakit", "el elden", "açıklamayı oku" gibi şüpheli ibareler risk skorunu artırır.
    - Satıcı "kılcal çizik", "ekran değişimi", "kasa vuruğu" gibi şeffaf kusur detayları vermişse, bu durum dürüstlük göstergesi kabul edilmeli, düşük fiyatın nedeni netleştiği için risk skoru normalize edilmelidir.
 5. GÜVENCE SİSTEMLERİ: "Param Güvende" gibi sistemlerin varlığı finansal riski düşürür; bu durumda analiz notunda sadece kargo kontrolü ve fiziki inceleme tavsiye edilmelidir.
-6. ANALİZ NOTU (analysisNote): Raporun profesyonel, çelişkisiz ve net olmalıdır. Kullanıcıya fiyatın neden riskli veya güvenli olduğunu teknik verilere dayanarak (Örn: "Cortex AInın %30 altında olması şüphelidir") açıkla.
+6. ANALİZ NOTU (analysisNote): Raporun profesyonel, çelişkisiz ve net olmalıdır. Kullanıcıya fiyatın neden riskli veya güvenli olduğunu teknik verilere dayanarak (Örn: "Unit AInın %30 altında olması şüphelidir") açıkla.
 
 JSON ŞABLONU (Birebir uyulmalıdır):
 {
