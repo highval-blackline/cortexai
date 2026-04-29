@@ -5,11 +5,12 @@
     --border-light: #1a1a1a;
     --border-focus: #333333;
     --text-main: #ffffff;
-    --text-muted: #8E8E93; /* Apple Orijinal Gri */
-    --risk-high: #FF453A; /* Apple Borsa Kırmızısı */
-    --risk-med: #FF9F0A; /* Apple Orijinal Turuncu */
-    --risk-low: #30D158; /* Apple Borsa Yeşili */
+    --text-muted: #8E8E93;
+    --risk-high: #FF453A;
+    --risk-med: #FF9F0A;
+    --risk-low: #30D158;
     --brand-accent: #ffffff;
+    --standard-transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * {
@@ -116,7 +117,7 @@ select {
     display: flex;
     align-items: center;
     gap: 12px;
-    transition: 0.2s;
+    transition: var(--standard-transition);
 }
 
 .nav-item:hover,
@@ -204,7 +205,7 @@ select {
     padding: 8px 16px;
     border-radius: 6px;
     font-weight: 500;
-    transition: 0.2s;
+    transition: var(--standard-transition);
     white-space: nowrap;
 }
 
@@ -667,13 +668,30 @@ td {
     backdrop-filter: blur(15px) !important;
     -webkit-backdrop-filter: blur(15px) !important;
     border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease, border-color 0.4s ease, background 0.4s ease !important;
+    transition: var(--standard-transition) !important;
 }
+
 .stat-card:hover {
-    transform: translateY(-4px) !important; /* -8px çok abartıydı, -4px ile sakinleştirdik */
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4) !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    background: rgba(25, 25, 25, 0.7) !important;
+    transform: translateY(-4px) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    background: rgba(25, 25, 25, 0.8) !important;
+}
+
+/* Skeleton Loading Animation */
+.skeleton {
+    background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0.03) 25%, 
+        rgba(255, 255, 255, 0.08) 50%, 
+        rgba(255, 255, 255, 0.03) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-pulse 2s infinite ease-in-out;
+    border-radius: 4px;
+}
+
+@keyframes skeleton-pulse {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
 /* 6. Canlı Akış (Radar) - İDEAL AKIŞKAN BÜYÜME (1.2s) */
