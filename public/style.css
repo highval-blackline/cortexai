@@ -181,9 +181,8 @@ select {
 }
 
 .search-bar:focus-within {
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
-    border-color: rgba(0, 122, 255, 0.5);
-    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .search-bar input {
@@ -422,9 +421,8 @@ td {
 
 .scan-input:hover,
 .scan-input:focus {
-    border-color: rgba(0, 122, 255, 0.5);
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
-    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(255, 255, 255, 0.05);
     color: white;
 }
 
@@ -648,9 +646,9 @@ td {
 }
 
 .search-bar:focus-within, .scan-input:focus, input[type="text"]:focus, select:focus {
-    background: rgba(255, 255, 255, 0.06) !important;
-    border-color: rgba(0, 122, 255, 0.5) !important;
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
 }
 
 /* 5. Kart Yükselme - Daha Sade ve Oturaklı */
