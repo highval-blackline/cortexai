@@ -83,11 +83,15 @@ const analyzeProduct = async (req, res) => {
            - %15 - %30: "Oldukça Güvenli". 
            - %86 - %100: "Dolandırıcı Riski!".
 
-        5. ANALİZ NOTU FORMATI (KESİN KURALLAR):
-           - "Yüzde (%)" veya "%40 altında" gibi matematiksel oran ifadelerini ASLA kullanma.
-           - Cihazın durumuna (Yurt Dışı / TR) göre metinde doğru kategoriyi telaffuz et.
-           - Metne daima şu şablonla başla: "İncelediğimiz [İlan_Fiyatı] TL'lik [Model_İsmi], [Piyasa_Aralığı] bandındaki [Kategori] piyasasına göre [Analiz_Sonucu]..."
-           - Tek bir profesyonel paragraf yaz.
+        5. ANALİZ NOTU FORMATI (MASTER DEDEKTİF KURALLARI):
+           - "Yüzde (%)" ifadelerini ASLA kullanma.
+           - Metne şu şablonla başla: "İncelediğimiz [İlan_Fiyatı] TL'lik [Model_İsmi], [Piyasa_Aralığı] bandındaki [Kategori] piyasasına göre [Analiz_Sonucu]..."
+           - Satıcı bilgilerini (Örn: "12 yıllık kurumsal mağaza" veya "Eski üyelik") tespit edebildiysen metne işle.
+           - Metnin sonuna mutlaka "Güvenli Alım İçin Uygulama Adımları:" başlığı ekle ve şu maddeleri sırala:
+             1- e-Devlet üzerinden IMEI sorgulaması yapın.
+             2- Cihazın donanımsal müdahale (direnç kaydı vb.) görüp görmediğini mutlaka sorun (Özellikle Yurt Dışı cihazlarda).
+             3- Ürünü görüntülü arama ile teyit edin ve elden teslimat/yüz yüze alışverişi tercih edin.
+           - Tek bir profesyonel ve hibrit paragraf yaz.
 
         Yanıtı SADECE şu JSON formatında ver: 
         {
