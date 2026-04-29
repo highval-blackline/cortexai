@@ -59,7 +59,7 @@ const analyzeProduct = async (req, res) => {
         }
 
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-1.5-flash-latest",
+            model: "gemini-1.5-flash",
             safetySettings: [
                 { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
                 { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -101,7 +101,7 @@ const analyzeProduct = async (req, res) => {
 
         const aiParts = [{ text: prompt }];
         if (fileBuffer) {
-            aiParts.push({ inlineData: { data: fileBuffer.toString("base64"), mimeType } });
+            aiParts.push({ inlineData: { data: fileBuffer.toString("base64"), mimeType: mimeType || "image/jpeg" } });
         }
 
         let responseText = "";
@@ -117,7 +117,8 @@ const analyzeProduct = async (req, res) => {
             responseText = response.text();
         } catch (err) {
             console.error("AI ÜRETİM HATASI:", err);
-            throw new Error("Yapay zeka yanıt veremiyor veya içerik engellendi.");
+            const detail = err.message || "";
+            throw new Error(`Yapay zeka yanıt veremiyor: ${detail.substring(0, 50)}`);
         }
 
         const cleanJson = responseText.replace(/```json|```/g, "").replace(/JSON/i, "").trim();
