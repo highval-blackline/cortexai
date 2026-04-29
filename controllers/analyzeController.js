@@ -63,28 +63,30 @@ const analyzeProduct = async (req, res) => {
         const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
         const prompt = `Bugün 29 Nisan 2026. Sen Piyasa.ai Analiz Motorusun. ŞU PROTOKOLÜ HARFİYEN UYGULA:
 
-        1. VERİ KAYNAĞI: SADECE sana verilen ${JSON.stringify(phoneDB)} verilerini kullan. Eğer model bu listede YOKSA (Örn: Oppo A57 vb.), analizi "isValid: false" olarak işaretle ve şu notu yaz: "Bu model güncel veritabanımızda henüz yer almadığı için kesin bir fiyat analizi yapılamıyor."
+        1. VERİ KAYNAĞI VE ANALİZ: 
+           - SADECE sana verilen ${JSON.stringify(phoneDB)} verilerini kullan.
+           - İlan görsellerinden "Alındığı Yer", "Garanti" ve "Açıklama" kısımlarını dikkatle incele.
+           - Eğer ilanda "Yurt dışı", "Kayıtsız", "Global" veya "İthalatçı Garantili" ibaresi varsa, bu cihazı "Yurt Dışı" kategorisinde değerlendir.
+           - Eğer model bu listede YOKSA, analizi "isValid: false" olarak işaretle.
 
-        2. GÜVEN ÇARPANLARI (RİSK DÜŞÜRENLER):
-           - İlanda "Param Güvende" ibaresi tespit edilirse: Mevcut risk puanından 5-10 puan düş.
-           - Satıcı "Mağaza" veya "Kurumsal" bir profilse: Mevcut risk puanından 10 puan düş.
-           - İlanda açık "Adres" veya "Sabit Telefon" gibi mağaza detayları varsa: Mevcut risk puanından 5 puan düş.
+        2. GÜVEN ÇARPANLARI VE FİLTRELER:
+           - "Param Güvende" ibaresi varsa: Mevcut risk puanından 10 puan düş.
+           - Eğer ilanda "Param Güvende ile gönderim yapmamaktadır" veya benzeri bir uyarı/işaret varsa: Mevcut risk puanına 15-20 puan EKLE (Elden teslimat zorunluluğu riski).
+           - Satıcı "Mağaza" veya "Kurumsal" ise: Mevcut risk puanından 10 puan düş.
 
-        3. ANORMAL FİYAT SAPMASI (ÖNCELİKLİ):
-           - Eğer fiyat piyasa ortalamasının %40 ve daha fazlası altındaysa, risk puanına +40 ekle ve en az %60 risk ver.
-           - Metne mutlaka "İlan fiyatı piyasa ortalamasının çok altında tespit edilmiştir" uyarısını ekle.
+        3. FİYAT VE RİSK DENGESİ:
+           - Fiyat analizi yaparken cihazın kökenine (TR veya Yurt Dışı) göre doğru veriyi baz al.
+           - Eğer cihaz Yurt Dışı ise ve fiyatı Yurt Dışı piyasasının üzerindeyse, "Uçurum Fiyat" uyarısı verme; makul/yüksek olarak değerlendir.
 
-        4. RİSK VE TON UYUMU (KESİN KURAL):
+        4. RİSK VE TON UYUMU:
            - Risk asla %15'in altına düşmez.
-           - %15 - %30: "Oldukça Güvenli". Metin olumlu ve güven verici olmalı.
-           - %31 - %50: "Dikkatli İncelenmeli". Metin nötr ve bilgilendirici olmalı.
+           - %15 - %30: "Oldukça Güvenli". 
            - %86 - %100: "Dolandırıcı Riski!".
 
-        4. ANALİZ NOTU FORMATI (KESİN KURALLAR):
+        5. ANALİZ NOTU FORMATI (KESİN KURALLAR):
            - "Yüzde (%)" veya "%40 altında" gibi matematiksel oran ifadelerini ASLA kullanma.
-           - Metne daima şu şablonla başla: "İncelediğimiz ilandaki [İlan_Fiyatı] TL fiyatlı [Model_İsmi], veritabanımızdaki [Piyasa_Aralığı] aralığındaki [Kategori] piyasasıyla kıyaslanmıştır. ..."
-           - [Piyasa_Aralığı] yerine database.js'deki ilgili modelin fiyat aralığını (Örn: 105.000 TL - 115.000 TL) yaz.
-           - Teknik terim (TR_IkinciEl vb.) kullanma. "Türkiye İkinci El", "Türkiye Sıfır" vb. kullan.
+           - Cihazın durumuna (Yurt Dışı / TR) göre metinde doğru kategoriyi telaffuz et.
+           - Metne daima şu şablonla başla: "İncelediğimiz [İlan_Fiyatı] TL'lik [Model_İsmi], [Piyasa_Aralığı] bandındaki [Kategori] piyasasına göre [Analiz_Sonucu]..."
            - Tek bir profesyonel paragraf yaz.
 
         Yanıtı SADECE şu JSON formatında ver: 
@@ -92,6 +94,8 @@ const analyzeProduct = async (req, res) => {
           "isValid": true,
           "modelName": "...", 
           "price": "...",
+          "origin": "TR" | "YurtDisi",
+          "isParamGuvende": true | false,
           "marketValue": "...",
           "riskScore": 15,
           "analysisNote": "..."
@@ -129,23 +133,27 @@ const analyzeProduct = async (req, res) => {
             return res.status(200).json({ success: false, error: "Bu model güncel veritabanımızda henüz yer almadığı için kesin bir fiyat analizi yapılamıyor." });
         }
 
-        // Veritabanından o modele ait güncel piyasa aralığını al (Örn: "105.000 TL - 115.000 TL")
-        let marketValueStr = dbEntry.TR_IkinciEl || Object.values(dbEntry)[0];
+        // Veritabanından o modele ait güncel piyasa aralığını al (Origin'e göre)
+        let categoryKey = (analysis.origin === "YurtDisi") ? "YurtDisi_IkinciEl" : "TR_IkinciEl";
+        let marketValueStr = dbEntry[categoryKey] || dbEntry.TR_IkinciEl || Object.values(dbEntry)[0];
+        
         const vMin = getMinPrice(marketValueStr);
         const pVal = parsePrice(analysis.price || initialPrice);
 
         // Fallback Risk Hesaplama
         let fallbackScore = 65;
         let pText = analysis.price || initialPrice;
-        let fallbackNote = `İncelediğimiz ilandaki ${pText} TL fiyatlı ${finalModelName}, veritabanımızdaki ${marketValueStr} aralığındaki Türkiye İkinci El piyasasıyla kıyaslanmıştır. İlan fiyatı piyasa normlarının dışında kaldığı için dolandırıcılık risklerine karşı temkinli olunmalıdır.`;
+        const categoryLabel = (analysis.origin === "YurtDisi") ? "Yurt Dışı İkinci El" : "Türkiye İkinci El";
+
+        let fallbackNote = `İncelediğimiz ${pText} TL'lik ${finalModelName}, ${marketValueStr} bandındaki ${categoryLabel} piyasasına göre analiz edilmiştir. Cihazın ${categoryLabel.toLowerCase()} olması nedeniyle fiyat piyasa normlarının dışında kalmaktadır.`;
 
         if (vMin > 0) {
             if (pVal >= (vMin - 10) && pVal <= (vMin * 1.5)) {
                 fallbackScore = 20;
-                fallbackNote = `İncelediğimiz ilandaki ${pText} TL fiyatlı ${finalModelName}, veritabanımızdaki ${marketValueStr} aralığındaki Türkiye İkinci El piyasasıyla kıyaslanmıştır. İlan fiyatı piyasa verileriyle tam uyum göstermekte olup oldukça güvenli ve makul bir profil çizmektedir.`;
+                fallbackNote = `İncelediğimiz ${pText} TL'lik ${finalModelName}, ${marketValueStr} bandındaki ${categoryLabel} piyasasıyla uyumlu görünmektedir.`;
             } else if (pVal < (vMin * 0.80)) {
                 fallbackScore = 95;
-                fallbackNote = `İncelediğimiz ilandaki ${pText} TL fiyatlı ${finalModelName}, veritabanımızdaki ${marketValueStr} aralığındaki Türkiye İkinci El piyasasıyla kıyaslanmıştır. İlan fiyatı, tespit edilen bu piyasa ortalamasının çok altında kaldığı için ciddi bir güvenlik riski oluşturmaktadır.`;
+                fallbackNote = `İncelediğimiz ${pText} TL'lik ${finalModelName}, ${marketValueStr} bandındaki ${categoryLabel} piyasasına göre çok düşük fiyatlanmıştır. Bu durum ciddi bir güvenlik riski oluşturmaktadır.`;
             }
         }
 
@@ -157,6 +165,11 @@ const analyzeProduct = async (req, res) => {
 
         let finalScore = Math.max(15, analysis.riskScore || fallbackScore);
         
+        // Param Güvende yoksa ek risk
+        if (analysis.isParamGuvende === false) {
+            finalScore = Math.min(100, finalScore + 20);
+        }
+
         if (isAbnormalDeviation) {
             finalScore = Math.max(60, finalScore + 40);
             if (finalScore > 100) finalScore = 100;
