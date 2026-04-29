@@ -152,8 +152,25 @@ const analyzeProduct = async (req, res) => {
 
         if (!analysis.isValid) return res.status(200).json({ success: false, error: analysis.analysisNote });
 
-        const dbEntry = phoneDB[analysis.modelName.trim()];
-        if (!dbEntry) return res.status(200).json({ success: false, error: "Model veritabanında bulunamadı." });
+        // Mantıksal Model Eşleştirme (Gelişmiş)
+        let finalModelName = (analysis.modelName || initialModel).trim();
+        let dbEntry = phoneDB[finalModelName];
+
+        if (!dbEntry) {
+            const detectedLower = finalModelName.toLowerCase();
+            const matchingKey = Object.keys(phoneDB).find(key => {
+                const keyLower = key.toLowerCase();
+                // "POCO X5 Pro / X5" anahtarı "POCO X5 Pro"yu içermeli
+                return keyLower.includes(detectedLower);
+            });
+            
+            if (matchingKey) {
+                dbEntry = phoneDB[matchingKey];
+                finalModelName = matchingKey; // Veritabanı anahtarına normalize et
+            }
+        }
+
+        if (!dbEntry) return res.status(200).json({ success: false, error: "Bu model henüz veritabanımızda yer almıyor." });
 
         // Fiyat ve Market Verisi
         const categoryKey = analysis.origin === "YurtDisi" ? "YurtDisi_IkinciEl" : "TR_IkinciEl";
@@ -182,7 +199,7 @@ const analyzeProduct = async (req, res) => {
         const finalStatus = statusMap.find(s => finalScore <= s.limit)?.label || "Bilinmeyen Durum";
 
         const newEntry = {
-            model: analysis.modelName,
+            model: finalModelName,
             price: analysis.price,
             marketValue: marketValueStr,
             riskScore: finalScore,
