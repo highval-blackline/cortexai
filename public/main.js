@@ -1,3 +1,19 @@
+// --- THEME MANAGEMENT ENGINE ---
+function toggleAppTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    // Update switch icon
+    const icon = document.querySelector('#themeSwitch i');
+    if (icon) {
+        icon.className = newTheme === 'light' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+}
+
 // Vercel tetikleme satırı
 // GLOBAL NATIVE ALERT EZİCİ (Android/iOS uyarılarını iptal eder)
 let alertTimeout;

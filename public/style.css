@@ -13,6 +13,17 @@
     --standard-transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+[data-theme='light'] {
+    --bg-absolute: #f5f5f7;
+    --bg-panel: #ffffff;
+    --bg-panel-hover: #f0f0f2;
+    --border-light: #d2d2d7;
+    --border-focus: #86868b;
+    --text-main: #1d1d1f;
+    --text-muted: #6e6e73;
+    --brand-accent: #0071e3;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -1172,3 +1183,78 @@ select.apple-select-hidden {
     background: rgba(255, 255, 255, 0.1) !important;
     transition: transform 0.1s ease-out, background 0.1s ease !important;
 }
+
+/* --- THEME SWITCH STYLES --- */
+.theme-switch {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-light);
+    color: var(--text-main);
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--standard-transition);
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.theme-switch:hover {
+    background: var(--bg-panel-hover);
+    transform: scale(1.05);
+}
+
+.theme-switch:active {
+    transform: scale(0.95);
+}
+
+/* Light Mode Specific Overrides */
+[data-theme='light'] .sidebar, 
+[data-theme='light'] .panel, 
+[data-theme='light'] .stat-card,
+[data-theme='light'] #modelDropdownList,
+[data-theme='light'] #wizardDropdownList,
+[data-theme='light'] #headerDropdownList,
+[data-theme='light'] .apple-select-menu {
+    background: rgba(255, 255, 255, 0.75) !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme='light'] .apple-select-btn {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+}
+
+[data-theme='light'] .btn-outline {
+    background: #000 !important;
+    color: #fff !important;
+}
+
+[data-theme='light'] .sidebar .logo {
+    border-bottom-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='light'] .sidebar .nav-item.active {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme='light'] .header {
+    background: rgba(245, 245, 247, 0.72) !important;
+}
+
+[data-theme='light'] .search-bar, 
+[data-theme='light'] .scan-input, 
+[data-theme='light'] select, 
+[data-theme='light'] input[type="text"] {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    color: #1d1d1f !important;
+}
+
+[data-theme='light'] .search-bar input {
+    color: #1d1d1f !important;
+}
