@@ -10,7 +10,7 @@ async function connectDB() {
         if (!uri) throw new Error("MONGO_URI tanimlanmamis.");
         client = new MongoClient(uri);
         await client.connect();
-        const db = client.db('CortexAI');
+        const db = client.db('UnitAI');
         dbInstance.db = db;
         dbInstance.statsCollection = db.collection('stats');
         dbInstance.feedCollection = db.collection('feed');

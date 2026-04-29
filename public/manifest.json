@@ -1,6 +1,6 @@
 {
-  "name": "Cortex AI",
-  "short_name": "Cortex",
+  "name": "Unit AI",
+  "short_name": "Unit",
   "description": "Sıfır ve İkinci El Piyasa Analiz Asistanı",
   "start_url": "/",
   "display": "standalone",
