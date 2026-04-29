@@ -121,12 +121,15 @@ const analyzeProduct = async (req, res) => {
             throw new Error(`Yapay zeka yanıt veremiyor: ${detail.substring(0, 50)}`);
         }
 
-        const cleanJson = responseText.replace(/```json|```/g, "").replace(/JSON/i, "").trim();
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        const cleanJson = jsonMatch ? jsonMatch[0] : responseText.trim();
+        
         let analysis;
         try {
             analysis = JSON.parse(cleanJson);
         } catch (e) {
-            analysis = { isValid: false, analysisNote: "Veri ayrıştırma hatası." };
+            console.error("JSON Parse Hatası. Ham Yanıt:", responseText);
+            analysis = { isValid: false, analysisNote: `Veri ayrıştırma hatası: AI yanıtı JSON formatında değil. Yanıtın başı: ${responseText.substring(0, 50)}` };
         }
 
         if (!analysis.isValid) return res.status(200).json({ success: false, error: analysis.analysisNote });
