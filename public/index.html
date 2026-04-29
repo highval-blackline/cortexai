@@ -11,7 +11,7 @@
     <link rel="icon" type="image/png" href="/favicon3.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=block"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
@@ -20,6 +20,15 @@
 
     <link rel="stylesheet" href="style.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        body { opacity: 0; background-color: #000000; }
+        .sidebar { min-width: 260px; }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(() => { document.body.style.transition = "opacity 0.5s ease"; document.body.style.opacity = "1"; }, 50);
+        });
+    </script>
 </head>
 
 <body>
