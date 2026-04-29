@@ -640,13 +640,13 @@ td {
 
 /* 4. Arama Kutuları ve Inputlar (Kutu Görüntüsü Tamamen Kaldırıldı) */
 .search-bar, .scan-input, select, input[type="text"] {
-    background: rgba(255, 255, 255, 0.03) !important;
+    background: var(--bg-absolute) !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
     border: 1px solid rgba(255, 255, 255, 0.05) !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     color: white !important;
-    outline: none !important; /* Dış çizgiyi tamamen siler */
+    outline: none !important;
 }
 
 /* İçteki o beyazımsı dikdörtgeni silmek için bu ekstra satırı ekledik */
@@ -657,11 +657,14 @@ td {
     padding-left: 10px;
 }
 
-.search-bar:focus-within, .scan-input:focus, input[type="text"]:focus, select:focus {
+.scan-input:focus, #modelSearchInput:focus, select:focus {
     background: rgba(255, 255, 255, 0.03) !important;
     border-color: rgba(255, 255, 255, 0.15) !important;
-    box-shadow: none !important;
-    outline: none !important;
+}
+
+.header .search-bar:focus-within {
+    background: var(--bg-absolute) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
 }
 
 /* 5. Kart Yükselme - Daha Sade ve Oturaklı */
