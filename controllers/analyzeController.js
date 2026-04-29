@@ -60,7 +60,7 @@ const analyzeProduct = async (req, res) => {
             imageUrl = result.secure_url;
         }
 
-        const aiModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
+        const aiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         const prompt = `Bugün 29 Nisan 2026. Sen Piyasa.ai Analiz Motorusun. ŞU PROTOKOLÜ HARFİYEN UYGULA:
 
         1. VERİ KAYNAĞI VE ANALİZ: 
@@ -108,9 +108,16 @@ const analyzeProduct = async (req, res) => {
             aiParts.push({ inlineData: { data: fileBuffer.toString("base64"), mimeType: mimeType } });
         }
 
-        const aiResult = await aiModel.generateContent(aiParts);
-        const response = await aiResult.response;
-        const responseText = response.text();
+        let responseText = "";
+        try {
+            const aiResult = await aiModel.generateContent(aiParts);
+            const response = await aiResult.response;
+            responseText = response.text();
+        } catch (aiErr) {
+            console.error("AI Hatası:", aiErr);
+            throw new Error("Yapay zeka şu an yanıt veremiyor, lütfen biraz sonra tekrar deneyin.");
+        }
+
         const cleanJson = responseText.replace(/```json|```/g, "").replace(/JSON/i, "").trim();
         
         let analysis;
@@ -237,7 +244,8 @@ const analyzeProduct = async (req, res) => {
 
     } catch (error) {
         console.error("HATA:", error);
-        return res.status(200).json({ success: false, error: "Teknik bir hata oluştu, lütfen tekrar deneyin." });
+        const errorMsg = error.message.includes("Yapay zeka") ? error.message : "Teknik bir hata oluştu, lütfen tekrar deneyin.";
+        return res.status(200).json({ success: false, error: errorMsg });
     }
 };
 
