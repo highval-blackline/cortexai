@@ -62,10 +62,9 @@ const analyzeProduct = async (req, res) => {
         const prompt = `Sen Piyasa.ai Analiz Motorusun. ŞU KURALLARI UYGULA:
 
         1. VERİ: Sadece ${JSON.stringify(phoneDB)} listesini kullan. Model yoksa isValid:false dön.
-        2. AKILLI GÜVEN: Satıcı 15+ yıllık kurumsal mağaza ise bu GÜVEN verisi, Param Güvende kapalı olması veya Yurt Dışı olması gibi tüm riskleri domine eder. Risk puanını düşür.
-        3. RİSK TARTI: Yurt dışı cihazlar piyasa normu ise (Xiaomi 17 vb.) risk skoru %15-25 bandında kalmalı. %50+ risk sadece bireysel satıcı veya uçurum fiyatlarda tetiklenmeli.
-        4. ÜSLUP: %30 altı riskte olumlu, %70 üstü riskte "Elden Teslimat" odaklı sert ve uyarıcı bir dil kullan. Suçlayıcı (dolandırıcı vb.) terim kullanma.
-        5. FORMAT: "Güvenli Alım Adımları:" başlığı ve maddeleri (1, 2, 3) yeni satırda olmalı.
+        2. DİNAMİK RİSK: Yurt Dışı/İthalatçı cihazlarda baz risk %30'dan başlar. 15+ yıllık kurumsal mağaza ise bu riski %15'e kadar indirir. Bireysel/Yeni satıcılarda risk %50'nin üzerine çıkar.
+        3. ÜSLUP: %30 altı riskte olumlu, %70 üstü riskte "Elden Teslimat" odaklı sert bir dil kullan.
+        4. FORMAT: "Güvenli Alım İçin Uygulama Adımları:" başlığından önce 1 adet, her maddeden (1-, 2-, 3-) önce ise 1 adet \n ekle. Metnin başında boşluk bırakma.
 
         Yanıtı JSON olarak ver:
         {
@@ -110,16 +109,20 @@ const analyzeProduct = async (req, res) => {
         const vMin = getMinPrice(marketValueStr);
         const pVal = parsePrice(analysis.price || initialPrice);
 
-        // Dinamik Risk Hesaplama
-        let finalScore = Math.max(15, parseInt(analysis.riskScore) || 20);
+        // Dinamik Risk Puanlaması
+        let baseScore = analysis.origin === "YurtDisi" ? 30 : 20;
+
+        if (analysis.isCorporate && analysis.yearsInSystem >= 15) {
+            baseScore -= 15; // Kurumsal güven indirimi
+        } else if (!analysis.isCorporate) {
+            baseScore += 35; // Bireysel/Yeni satıcı artırımı
+        }
+
+        let finalScore = Math.max(15, baseScore);
         const isAbnormal = (vMin > 0 && pVal > 0 && pVal < (vMin * 0.60));
 
-        // Kurumsal Güven Filtresi
-        if (analysis.isCorporate && analysis.yearsInSystem >= 15) {
-            finalScore = isAbnormal ? 35 : 15;
-        } else {
-            if (!analysis.isParamGuvende) finalScore += 20;
-            if (isAbnormal) finalScore = Math.max(75, finalScore + 40);
+        if (isAbnormal) {
+            finalScore = Math.max(analysis.isCorporate ? 40 : 85, finalScore + 40);
         }
 
         if (finalScore > 100) finalScore = 100;
