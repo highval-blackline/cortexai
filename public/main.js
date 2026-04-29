@@ -443,11 +443,7 @@ async function startAnalysis() {
         const scoreBox = document.getElementById('scoreResult');
         scoreBox.innerText = "%" + data.riskScore + " Risk";
         scoreBox.style.color = data.riskScore >= 90 ? 'var(--risk-high)' : (data.riskScore >= 40 ? 'var(--risk-med)' : 'var(--risk-low)');
-        document.getElementById('keywordResult').innerHTML = `
-            <div style="font-size: 14px; line-height: 1.6; color: #e0e0e0; padding: 5px; white-space: pre-wrap;">
-                ${data.analysisNote || data.reason || "Piyasa analizi başarıyla tamamlandı."}
-            </div>
-        `;
+        document.getElementById('keywordResult').innerHTML = `<div style="font-size: 14px; line-height: 1.6; color: #e0e0e0; padding: 5px; white-space: pre-wrap;">${(data.analysisNote || data.reason || "Piyasa analizi başarıyla tamamlandı.").trim()}</div>`;
 
         const decisionBox = document.getElementById('aiDecision');
         if (data.riskScore >= 90) {

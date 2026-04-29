@@ -87,12 +87,12 @@ const analyzeProduct = async (req, res) => {
            - "Yüzde (%)" ifadelerini ASLA kullanma.
            - Metne şu şablonla başla: "İncelediğimiz [İlan_Fiyatı] TL'lik [Model_İsmi], [Piyasa_Aralığı] bandındaki [Kategori] piyasasına göre [Analiz_Sonucu]..."
            - Satıcı bilgilerini (Örn: "12 yıllık kurumsal mağaza" veya "Eski üyelik") tespit edebildiysen metne işle.
-           - Metnin sonuna mutlaka iki alt satır boşluk bırakarak (\n\n) "Güvenli Alım İçin Uygulama Adımları:" başlığını ekle.
-           - Maddeleri şu şekilde her biri yeni bir satırda (\n) olacak şekilde sırala:
-             \n1- e-Devlet üzerinden IMEI sorgulaması yapın.
-             \n2- Cihazın donanımsal müdahale (direnç kaydı vb.) durumunu mutlaka sorgulayın.
-             \n3- Ürünü görüntülü arama ile teyit edin ve yüz yüze alışverişi tercih edin.
-           - Tek bir profesyonel hibrit paragraf ve ardından bu listeyi yaz. Metnin başında boşluk bırakma.
+           - Metnin sonuna mutlaka bir alt satır boşluk bırakarak (\n\n) "Güvenli Alım İçin Uygulama Adımları:" başlığını ekle.
+           - Maddeleri şu şekilde her biri yeni bir satırda (\n) olacak şekilde sırala (başlarına ekstra boşluk koyma):
+             1- e-Devlet üzerinden IMEI sorgulaması yapın.
+             2- Cihazın donanımsal müdahale (direnç kaydı vb.) durumunu mutlaka sorgulayın.
+             3- Ürünü görüntülü arama ile teyit edin ve yüz yüze alışverişi tercih edin.
+           - Tek bir profesyonel hibrit paragraf ve ardından bu listeyi yaz.
 
         Yanıtı SADECE şu JSON formatında ver: 
         {
