@@ -13,6 +13,7 @@ const { analyzeProduct, getAnalysisById, reportFraud } = require('../controllers
 const { getRecentFeed, getGlobalStats } = require('../controllers/feedController');
 const { googleAuth } = require('../controllers/authController');
 const { connectDB } = require('../config/db');
+const { freshStart } = require('../controllers/maintenanceController');
 
 // Vercel cold boot DB connection middleware
 router.use(async (req, res, next) => {
@@ -41,5 +42,8 @@ router.get('/recent-feed', getRecentFeed);
 router.post('/add-alarm', addAlarm);
 router.get('/my-alarms', getMyAlarms);
 router.delete('/delete-alarm', deleteAlarm); // main.js uses DELETE
+
+// --- MAINTENANCE ---
+router.get('/maintenance/fresh-start', freshStart);
 
 module.exports = router;
