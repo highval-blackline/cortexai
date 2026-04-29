@@ -67,7 +67,7 @@ const analyzeProduct = async (req, res) => {
                 { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
             ]
         });
-        const prompt = `Sen Piyasa.ai'nın en gelişmiş Analiz Motorusun. Görseldeki ilan verilerini ve aşağıdaki veritabanını kullanarak KESİN ve KATI kurallara bağlı bir risk analizi yapmalısın.
+        const prompt = `Sen Cortex AI'nın en gelişmiş Analiz Motorusun. Görseldeki ilan verilerini ve aşağıdaki veritabanını kullanarak KESİN ve KATI kurallara bağlı bir risk analizi yapmalısın.
 
 VERİTABANI: ${JSON.stringify(phoneDB)}
 

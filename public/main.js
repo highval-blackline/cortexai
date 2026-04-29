@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!response.ok) throw new Error('Sunucu hatası');
             const data = await response.json();
             frontEndDB = data;
-            console.log("✅ Piyasa.ai: Veritabanı senkronize edildi.");
+            console.log("✅ Cortex AI: Veritabanı senkronize edildi.");
             
             // Arama kutularını tetikle (Sadece sayfa açılışında otomatik açılmasını engelledik)
             /*
@@ -817,7 +817,7 @@ async function loadSharedAnalysis(id) {
 
         if (result.success) {
             const data = result.data;
-            document.getElementById('scannedUrl').innerText = "Paylaşılan Piyasa.ai Bağlantısı";
+            document.getElementById('scannedUrl').innerText = "Paylaşılan Cortex AI Bağlantısı";
             
             const scoreBox = document.getElementById('scoreResult');
             scoreBox.innerText = "%" + data.riskScore + " Risk";
@@ -854,7 +854,7 @@ function copyShareUrl() {
     copyText.select();
     copyText.setSelectionRange(0, 99999); 
     navigator.clipboard.writeText(copyText.value).then(() => {
-        alert("Piyasa.ai analiz linki başarıyla kopyalandı! İstediğiniz yere yapıştırabilirsiniz.");
+        alert("Cortex AI analiz linki başarıyla kopyalandı! İstediğiniz yere yapıştırabilirsiniz.");
     });
 }
 

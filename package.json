@@ -1,7 +1,7 @@
 {
   "name": "piyasa-ai-backend",
   "version": "1.0.0",
-  "description": "Piyasa AI Arka Plan Sunucusu",
+  "description": "Cortex AI Arka Plan Sunucusu",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
