@@ -77,13 +77,18 @@ select {
 
 .sidebar {
     width: 260px;
-    background-color: var(--bg-absolute);
-    border-right: 1px solid var(--border-light);
+    background-color: rgba(20, 20, 20, 0.6);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    margin: 20px;
     display: flex;
     flex-direction: column;
     padding: 20px 0;
     z-index: 100;
-    transition: 0.3s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .logo {
@@ -148,23 +153,37 @@ select {
 
 .header {
     height: 70px;
-    border-bottom: 1px solid var(--border-light);
+    background-color: rgba(13, 13, 13, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 30px;
     flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: all 0.3s ease;
 }
 
 .search-bar {
     display: flex;
     align-items: center;
-    background-color: var(--bg-panel);
-    border: 1px solid var(--border-light);
-    border-radius: 6px;
-    padding: 8px 16px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 10px 16px;
     width: 400px;
     max-width: 100%;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-bar:focus-within {
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+    border-color: rgba(0, 122, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.06);
 }
 
 .search-bar input {
@@ -390,20 +409,22 @@ td {
 }
 
 .scan-input {
-    background: var(--bg-absolute);
-    border: 1px solid var(--border-focus);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     color: var(--text-muted);
-    padding: 12px;
+    padding: 12px 16px;
     width: 100%;
-    border-radius: 6px;
+    border-radius: 10px;
     font-size: 14px;
     outline: none;
-    transition: 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .scan-input:hover,
 .scan-input:focus {
-    border-color: var(--text-main);
+    border-color: rgba(0, 122, 255, 0.5);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.06);
     color: white;
 }
 
@@ -573,12 +594,21 @@ td {
 }
 
 .header, .sidebar {
-    background: rgba(10, 10, 10, 0.75) !important; /* Çamur gibi yapan beyazlığı aldık, tam karanlık cam yaptık */
-    backdrop-filter: blur(20px) saturate(150%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+    background: rgba(13, 13, 13, 0.7) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.03) !important;
     box-shadow: none !important;
+}
+
+.sidebar {
+    background: rgba(20, 20, 20, 0.6) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 20px !important;
+    margin: 20px !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* 2. Açılır Menüler, Paneller ve Kartlar (Karanlık Cam) */
@@ -600,11 +630,11 @@ td {
 
 /* 4. Arama Kutuları ve Inputlar (Kutu Görüntüsü Tamamen Kaldırıldı) */
 .search-bar, .scan-input, select, input[type="text"] {
-    background: rgba(20, 20, 20, 0.6) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
     border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     color: white !important;
     outline: none !important; /* Dış çizgiyi tamamen siler */
 }
@@ -618,9 +648,9 @@ td {
 }
 
 .search-bar:focus-within, .scan-input:focus, input[type="text"]:focus, select:focus {
-    background: rgba(30, 30, 30, 0.8) !important;
-    border-color: rgba(255, 255, 255, 0.15) !important;
-    box-shadow: none !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(0, 122, 255, 0.5) !important;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2) !important;
 }
 
 /* 5. Kart Yükselme - Daha Sade ve Oturaklı */
