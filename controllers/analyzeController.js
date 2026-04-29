@@ -70,11 +70,11 @@ const analyzeProduct = async (req, res) => {
         const prompt = `Sen Piyasa.ai Analiz Motorusun. ŞU KURALLARI UYGULA:
 
         1. VERİ: Sadece ${JSON.stringify(phoneDB)} listesini kullan.
-        2. AKILLI ANALİZ: İlan fotoğrafındaki modeli tespit et, veritabanındaki fiyat aralığını bul.
-        3. RAPOR DİLİ: Birinci tekil şahıs ("BEN") dili kullan (Örn: "İncelediğim", "Kıyasladım"). Kullanıcıya doğrudan tavsiye ver (Örn: "Temkinli olmalısın").
-        4. ZORUNLU İÇERİK: Metne mutlaka "İncelediğim [Fiyat] TL'lik [Model], veritabanımdaki [Min] TL - [Max] TL aralığıyla kıyasladım" cümlesiyle başla.
-        5. YASAK: Metin içerisinde hesaplanan risk puanını (Örn: "Risk puanını 15 belirledim") ASLA söyleme. Skor zaten UI'da görünüyor.
-        6. FORMAT: "Güvenli Alım İçin Uygulama Adımları:" başlığından önce ASLA boş satır bırakma, sadece bir adet satır sonu (\n) kullan. Her maddeden (1., 2., 3.) önce de sadece bir adet satır sonu (\n) kullan. Tüm rapor bitişik ve boş satırsız olmalı.
+        2. AKILLI ANALİZ: Görselden "Param Güvende" ibaresi, satıcının kurumsal mağaza mı yoksa bireysel mi olduğu ve satıcı yaşını tespit et.
+        3. GÜVEN ÇARPANI: 15+ yıllık kurumsal mağaza en yüksek güvendir; cihaz yurt dışı olsa bile risk puanını yükseltme. "Param Güvende" varsa risk puanını düşür. Bireysel satıcıda bu özellik yoksa temkinli risk puanı belirle.
+        4. RAPOR DİLİ: Birinci tekil şahıs ("BEN") dili kullan. Kullanıcıya doğrudan tavsiye ver.
+        5. ZORUNLU İÇERİK: Metne "İncelediğim [Fiyat] TL'lik [Model], veritabanımdaki [Min] TL - [Max] TL aralığıyla kıyasladım" cümlesiyle başla.
+        6. FORMAT: "Güvenli Alım İçin Uygulama Adımları:" başlığından önce mutlaka iki adet satır sonu (\n\n) bırak. Her maddeden (1., 2., 3.) önce ise bir adet satır sonu (\n) bırak.
 
         Yanıtı SADECE geçerli bir JSON olarak ver. Metin alanları (analysisNote) içerisinde satır sonları için mutlaka \n karakterini kullan:
         {
@@ -188,7 +188,6 @@ const analyzeProduct = async (req, res) => {
 
         let finalNote = (analysis.analysisNote || "")
             .replace(/isValid|%/g, "")
-            .replace(/\n\s*\n/g, "\n") // Çift satır sonlarını (boş satırları) temizle
             .split('\n').map(line => line.trim()).join('\n').trim();
 
         const statusMap = [
