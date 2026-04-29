@@ -58,7 +58,15 @@ const analyzeProduct = async (req, res) => {
             }
         }
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash-latest",
+            safetySettings: [
+                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+            ]
+        });
         const prompt = `Sen Piyasa.ai Analiz Motorusun. ŞU KURALLARI UYGULA:
 
         1. VERİ: Sadece ${JSON.stringify(phoneDB)} listesini kullan. Model yoksa isValid:false dön.
@@ -79,15 +87,37 @@ const analyzeProduct = async (req, res) => {
           "analysisNote": "..."
         }`;
 
-        const aiParts = [prompt];
-        if (fileBuffer) aiParts.push({ inlineData: { data: fileBuffer.toString("base64"), mimeType } });
+        // URL'den Resim Çekme (Eğer dosya yoksa)
+        if (!fileBuffer && imageUrl && imageUrl.startsWith('http')) {
+            try {
+                const imgResp = await fetch(imageUrl);
+                const arrayBuffer = await imgResp.arrayBuffer();
+                fileBuffer = Buffer.from(arrayBuffer);
+                mimeType = imgResp.headers.get('content-type') || "image/jpeg";
+            } catch (err) {
+                console.error("URL Resim Çekme Hatası:", err);
+            }
+        }
+
+        const aiParts = [{ text: prompt }];
+        if (fileBuffer) {
+            aiParts.push({ inlineData: { data: fileBuffer.toString("base64"), mimeType } });
+        }
 
         let responseText = "";
         try {
             const result = await model.generateContent(aiParts);
-            responseText = (await result.response).text();
+            const response = await result.response;
+            
+            // Yanıt bloklandı mı kontrolü
+            if (response.promptFeedback && response.promptFeedback.blockReason) {
+                throw new Error(`Yapay zeka içeriği engelledi: ${response.promptFeedback.blockReason}`);
+            }
+            
+            responseText = response.text();
         } catch (err) {
-            throw new Error("Yapay zeka yanıt veremiyor.");
+            console.error("AI ÜRETİM HATASI:", err);
+            throw new Error("Yapay zeka yanıt veremiyor veya içerik engellendi.");
         }
 
         const cleanJson = responseText.replace(/```json|```/g, "").replace(/JSON/i, "").trim();
