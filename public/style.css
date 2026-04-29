@@ -34,8 +34,8 @@ h1,
 h2,
 h3,
 h4 {
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-weight: 700;
+    letter-spacing: -0.03em;
 }
 
 a {
@@ -228,11 +228,16 @@ select {
 .page-title {
     font-size: 28px;
     margin-bottom: 4px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: #ffffff;
 }
 
 .page-subtitle {
     color: var(--text-muted);
     font-size: 14px;
+    letter-spacing: 0.02em;
+    font-weight: 400;
 }
 
 .stats-grid {
@@ -273,6 +278,7 @@ select {
     font-size: 24px;
     font-weight: 700;
     color: var(--text-main);
+    font-variant-numeric: tabular-nums;
 }
 
 .panel {
@@ -312,14 +318,16 @@ td {
     padding: 16px 20px;
     border-bottom: 1px solid var(--border-light);
     font-size: 14px;
+    font-variant-numeric: tabular-nums;
 }
 
 .badge {
-    padding: 6px 12px !important; /* Etiketin iç boşluğunu genişletir, daha etli durur */
-    border-radius: 6px !important; /* Köşeleri çok hafif daha yumuşak yapar */
-    font-size: 13px; /* Yazı boyutunu büyütür (Eskisi 11px idi) */
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    font-size: 13px;
     font-weight: 600;
-    letter-spacing: 0.3px; /* Harflerin arasını milimetrik açarak okunabilirliği artırır */
+    letter-spacing: 0.3px;
+    font-variant-numeric: tabular-nums;
 }
 
 .badge-risk-high {
