@@ -1088,7 +1088,7 @@ document.addEventListener("DOMContentLoaded", function () {
             item.style.padding = "12px 16px";
             item.innerText = model;
             item.onclick = function () {
-                // 1. Cortex AI Özeti sekmesine otomatik geçiş yap
+                // 1. Piyasa Özeti sekmesine otomatik geçiş yap
                 switchTab('dashboard', document.querySelector('.nav-item'));
                 // 2. Dashboard'daki arama kutularını doldur
                 document.getElementById('modelSearchInput').value = model;
