@@ -167,7 +167,7 @@ const analyzeProduct = async (req, res) => {
             isAbnormalDeviation = true;
         }
 
-        let finalScore = Math.max(15, analysis.riskScore || fallbackScore);
+        let finalScore = Math.max(15, parseInt(analysis.riskScore) || fallbackScore);
         
         // Param Güvende yoksa ek risk
         if (analysis.isParamGuvende === false) {
@@ -212,13 +212,15 @@ const analyzeProduct = async (req, res) => {
             time: new Date().toISOString()
         };
 
-        await db.collection('feed').insertOne(newEntry);
+        if (db) {
+            await db.collection('feed').insertOne(newEntry);
 
-        // Global istatistikleri güncelle (+1 Taranan İlan ve +1 Dolandırıcı (eğer riskliyse))
-        const updateDoc = { $inc: { globalAnalyses: 1 } };
-        if (finalScore >= 50) updateDoc.$inc.globalFrauds = 1;
-        
-        await db.collection('stats').updateOne({ id: 'global' }, updateDoc, { upsert: true });
+            // Global istatistikleri güncelle (+1 Taranan İlan ve +1 Dolandırıcı (eğer riskliyse))
+            const updateDoc = { $inc: { globalAnalyses: 1 } };
+            if (finalScore >= 50) updateDoc.$inc.globalFrauds = 1;
+            
+            await db.collection('stats').updateOne({ id: 'global' }, updateDoc, { upsert: true });
+        }
 
         return res.status(200).json({ 
             success: true, 
@@ -229,7 +231,7 @@ const analyzeProduct = async (req, res) => {
             price: newEntry.price,
             marketValue: marketValueStr,
             imageUrl,
-            analysisId: newEntry._id
+            analysisId: newEntry._id || "temporary_id"
         });
 
     } catch (error) {
