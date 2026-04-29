@@ -265,7 +265,7 @@ async function fetchGlobalStats() {
             // Sağ taraftaki Canlı Radar Tablosu
             if (tableBody) {
                 let riskText = item.riskScore >= 90 ? "Dolandırıcı Riski!" : (item.riskScore >= 40 ? "Şüpheli İlan" : "Güvenli / Uygun");
-                let shortReason = item.reason ? (item.reason.length > 30 ? item.reason.substring(0,30) + '...' : item.reason) : "Piyasa Analizi...";
+                let shortReason = item.reason ? (item.reason.length > 30 ? item.reason.substring(0,30) + '...' : item.reason) : "Cortex AI Analizi...";
                 tableBody.innerHTML += `
                     <tr onclick="showImage('${item.imageUrl}')" style="cursor:pointer;" class="feed-item">
                         <td>${item.model}</td>
@@ -443,7 +443,7 @@ async function startAnalysis() {
         const scoreBox = document.getElementById('scoreResult');
         scoreBox.innerText = "%" + data.riskScore + " Risk";
         scoreBox.style.color = data.riskScore >= 90 ? 'var(--risk-high)' : (data.riskScore >= 40 ? 'var(--risk-med)' : 'var(--risk-low)');
-        document.getElementById('keywordResult').innerHTML = `<div style="font-size: 14px; line-height: 1.6; color: #e0e0e0; padding: 5px; white-space: pre-wrap;">${(data.analysisNote || data.reason || "Piyasa analizi başarıyla tamamlandı.").trim()}</div>`;
+        document.getElementById('keywordResult').innerHTML = `<div style="font-size: 14px; line-height: 1.6; color: #e0e0e0; padding: 5px; white-space: pre-wrap;">${(data.analysisNote || data.reason || "Cortex AI analizi başarıyla tamamlandı.").trim()}</div>`;
 
         const decisionBox = document.getElementById('aiDecision');
         if (data.riskScore >= 90) {
@@ -696,7 +696,7 @@ function deleteAlarm(modelName) {
 
 async function sendFeedback(isCorrect) {
     const feedbackBox = document.getElementById('communityFeedback');
-    feedbackBox.innerHTML = '<p style="font-size: 13px; color: var(--risk-low);"><i class="fa-solid fa-circle-check"></i> Geri bildiriminiz için teşekkürler! Piyasa veri tabanına işlendi.</p>';
+    feedbackBox.innerHTML = '<p style="font-size: 13px; color: var(--risk-low);"><i class="fa-solid fa-circle-check"></i> Geri bildiriminiz için teşekkürler! Cortex AI veri tabanına işlendi.</p>';
     
     if (isCorrect && window.lastAnalyzedScore >= 75) {
         try {
@@ -1088,7 +1088,7 @@ document.addEventListener("DOMContentLoaded", function () {
             item.style.padding = "12px 16px";
             item.innerText = model;
             item.onclick = function () {
-                // 1. Piyasa Özeti sekmesine otomatik geçiş yap
+                // 1. Cortex AI Özeti sekmesine otomatik geçiş yap
                 switchTab('dashboard', document.querySelector('.nav-item'));
                 // 2. Dashboard'daki arama kutularını doldur
                 document.getElementById('modelSearchInput').value = model;

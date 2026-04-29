@@ -79,7 +79,7 @@ ANALİZ KURALLARI (KRİTİK):
    - İlanda "yurtdışı", "önce havale", "acil nakit", "el elden", "açıklamayı oku" gibi şüpheli ibareler risk skorunu artırır.
    - Satıcı "kılcal çizik", "ekran değişimi", "kasa vuruğu" gibi şeffaf kusur detayları vermişse, bu durum dürüstlük göstergesi kabul edilmeli, düşük fiyatın nedeni netleştiği için risk skoru normalize edilmelidir.
 5. GÜVENCE SİSTEMLERİ: "Param Güvende" gibi sistemlerin varlığı finansal riski düşürür; bu durumda analiz notunda sadece kargo kontrolü ve fiziki inceleme tavsiye edilmelidir.
-6. ANALİZ NOTU (analysisNote): Raporun profesyonel, çelişkisiz ve net olmalıdır. Kullanıcıya fiyatın neden riskli veya güvenli olduğunu teknik verilere dayanarak (Örn: "Piyasanın %30 altında olması şüphelidir") açıkla.
+6. ANALİZ NOTU (analysisNote): Raporun profesyonel, çelişkisiz ve net olmalıdır. Kullanıcıya fiyatın neden riskli veya güvenli olduğunu teknik verilere dayanarak (Örn: "Cortex AInın %30 altında olması şüphelidir") açıkla.
 
 JSON ŞABLONU (Birebir uyulmalıdır):
 {

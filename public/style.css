@@ -648,7 +648,7 @@ td {
     will-change: transform, box-shadow; 
 }
 
-/* 2. Sadece 'div' olan (Piyasa Özeti yan menü) ilanlar için yatay hizalama */
+/* 2. Sadece 'div' olan (Cortex AI Özeti yan menü) ilanlar için yatay hizalama */
 div.feed-item {
     display: flex !important;
     justify-content: space-between !important;
