@@ -196,10 +196,9 @@ JSON ŞABLONU (Birebir uyulmalıdır):
             .split('\n').map(line => line.trim()).join('\n').trim();
 
         const statusMap = [
-            { limit: 30, label: "Oldukça Güvenli" },
-            { limit: 50, label: "Dikkatli İncelenmeli" },
-            { limit: 70, label: "Şüpheli İlan" },
-            { limit: 100, label: "Yüksek Risk Seviyesi" }
+            { limit: 39, label: "Güvenli" },
+            { limit: 80, label: "Şüpheli / Dikkatli İncelenmeli" },
+            { limit: 100, label: "Yüksek Risk / Dolandırıcı" }
         ];
         const finalStatus = statusMap.find(s => finalScore <= s.limit)?.label || "Bilinmeyen Durum";
 
@@ -217,7 +216,7 @@ JSON ŞABLONU (Birebir uyulmalıdır):
         if (db) {
             await db.collection('feed').insertOne(newEntry);
             const statsUpdate = { $inc: { globalAnalyses: 1 } };
-            if (finalScore >= 50) statsUpdate.$inc.globalFrauds = 1;
+            if (finalScore > 80) statsUpdate.$inc.globalFrauds = 1;
             await db.collection('stats').updateOne({ id: 'global' }, statsUpdate, { upsert: true });
         }
 
