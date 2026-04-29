@@ -24,6 +24,14 @@
     --brand-accent: #0071e3;
 }
 
+/* Force global text color for light mode to catch rogue elements */
+[data-theme='light'] *, 
+[data-theme='light'] .sidebar span, 
+[data-theme='light'] .sidebar div,
+[data-theme='light'] .logo {
+    color: var(--text-main);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -179,6 +187,12 @@ select {
     top: 0;
     z-index: 100;
     transition: all 0.3s ease;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .search-bar {
@@ -1230,11 +1244,18 @@ select.apple-select-hidden {
 }
 
 [data-theme='light'] .btn-outline {
-    background: #000 !important;
-    color: #fff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #d2d2d7 !important;
+}
+
+[data-theme='light'] .btn-outline:hover {
+    background: #000000 !important;
+    color: #ffffff !important;
 }
 
 [data-theme='light'] .sidebar .logo {
+    color: #1d1d1f !important;
     border-bottom-color: rgba(0, 0, 0, 0.05);
 }
 
@@ -1243,8 +1264,10 @@ select.apple-select-hidden {
 }
 
 [data-theme='light'] .header {
-    background: rgba(245, 245, 247, 0.72) !important;
+    background: rgba(255, 255, 255, 0.72) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
+
 
 [data-theme='light'] .search-bar, 
 [data-theme='light'] .scan-input, 
