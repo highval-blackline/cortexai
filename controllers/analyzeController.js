@@ -67,16 +67,8 @@ const analyzeProduct = async (req, res) => {
                 { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
             ]
         });
-        const prompt = `Sen Piyasa.ai Analiz Motorusun. ŞU KURALLARI UYGULA:
-
-        1. VERİ: Sadece ${JSON.stringify(phoneDB)} listesini kullan.
-        2. AKILLI ANALİZ: Görselden "Param Güvende" ibaresi, satıcının kurumsal mağaza mı yoksa bireysel mi olduğu ve satıcı yaşını tespit et.
-        3. GÜVEN ÇARPANI: 15+ yıllık kurumsal mağaza en yüksek güvendir; cihaz yurt dışı olsa bile risk puanını yükseltme. "Param Güvende" varsa risk puanını düşür. Bireysel satıcıda bu özellik yoksa temkinli risk puanı belirle.
-        4. RAPOR DİLİ: Birinci tekil şahıs ("BEN") dili kullan. Kullanıcıya doğrudan tavsiye ver.
-        5. ZORUNLU İÇERİK: Metne "İncelediğim [Fiyat] TL'lik [Model], veritabanımdaki [Min] TL - [Max] TL aralığıyla kıyasladım" cümlesiyle başla.
-        6. FORMAT: "Güvenli Alım İçin Uygulama Adımları:" başlığından önce mutlaka iki adet satır sonu (\n\n) bırak. Her maddeden (1., 2., 3.) önce ise bir adet satır sonu (\n) bırak.
-
-        Yanıtı SADECE geçerli bir JSON olarak ver. Metin alanları (analysisNote) içerisinde satır sonları için mutlaka \n karakterini kullan:
+        const prompt = `Sen Piyasa.ai Analiz Motorusun. Görseldeki ilan bilgilerini tespit et. Veritabanı: ${JSON.stringify(phoneDB)}
+        Yanıtı JSON olarak döndür:
         {
           "isValid": true,
           "modelName": "...",
@@ -84,8 +76,8 @@ const analyzeProduct = async (req, res) => {
           "origin": "TR" | "YurtDisi",
           "isParamGuvende": true | false,
           "isCorporate": true | false,
-          "yearsInSystem": 15,
-          "riskScore": 15,
+          "yearsInSystem": 0,
+          "riskScore": 0,
           "analysisNote": "..."
         }`;
 
