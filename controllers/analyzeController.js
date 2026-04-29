@@ -70,11 +70,11 @@ const analyzeProduct = async (req, res) => {
         const prompt = `Sen Piyasa.ai Analiz Motorusun. ŞU KURALLARI UYGULA:
 
         1. VERİ: Sadece ${JSON.stringify(phoneDB)} listesini kullan.
-        2. AKILLI ANALİZ: İlan fotoğrafındaki modeli tespit et, veritabanındaki (TR İkinci El veya Yurt Dışı İkinci El) fiyat aralığını bul.
-        3. RAPOR DİLİ: Günlük, samimi ve "BEN" (birinci tekil şahıs) dili kullan (Örn: "İncelediğim", "Öneririm"). "BİZ" dili kullanma.
-        4. ZORUNLU İÇERİK: Metne mutlaka "İncelediğim [Fiyat] TL'lik [Model], veritabanımdaki [Min] TL - [Max] TL aralığıyla kıyaslanmıştır" cümlesiyle başla.
-        5. TUTARLILIK: JSON içindeki "riskScore" ile metinde bahsettiğin risk durumu birebir aynı olmalı.
-        6. FORMAT: "Güvenli Alım İçin Uygulama Adımları:" başlığından önce bir satır boşluk (\n), her maddeden (1., 2., 3.) önce ise birer satır boşluk (\n) bırak.
+        2. AKILLI ANALİZ: İlan fotoğrafındaki modeli tespit et, veritabanındaki fiyat aralığını bul.
+        3. RAPOR DİLİ: Birinci tekil şahıs ("BEN") dili kullan (Örn: "İncelediğim", "Kıyasladım"). Kullanıcıya doğrudan tavsiye ver (Örn: "Temkinli olmalısın").
+        4. ZORUNLU İÇERİK: Metne mutlaka "İncelediğim [Fiyat] TL'lik [Model], veritabanımdaki [Min] TL - [Max] TL aralığıyla kıyasladım" cümlesiyle başla.
+        5. YASAK: Metin içerisinde hesaplanan risk puanını (Örn: "Risk puanını 15 belirledim") ASLA söyleme. Skor zaten UI'da görünüyor.
+        6. FORMAT: "Güvenli Alım İçin Uygulama Adımları:" başlığından önce iki adet satır sonu (\n\n), her maddeden (1., 2., 3.) önce ise birer adet satır sonu (\n) kullan.
 
         Yanıtı SADECE TEK SATIRLIK JSON olarak ver (Metin alanları içinde asla gerçek satır sonu \n kullanma, gerekirse boşluk kullan):
         {
