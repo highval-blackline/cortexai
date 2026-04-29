@@ -78,10 +78,13 @@ const analyzeProduct = async (req, res) => {
            - Fiyat analizi yaparken cihazın kökenine (TR veya Yurt Dışı) göre doğru veriyi baz al.
            - Eğer cihaz Yurt Dışı ise ve fiyatı Yurt Dışı piyasasının üzerindeyse, "Uçurum Fiyat" uyarısı verme; makul/yüksek olarak değerlendir.
 
-        4. RİSK VE TON UYUMU:
+        4. RİSK VE DİL ÜSLUBU:
+           - "Dolandırıcı" veya "Sahtekar" gibi suçlayıcı ifadeler ASLA kullanma.
+           - Bunun yerine "Yüksek Risk", "Piyasa Uyumsuzluğu" veya "Güvenlik Hassasiyeti" terimlerini kullan.
+           - Analizi kişiye değil, ilandaki fiyat ve veri tutarsızlığına odakla.
            - Risk asla %15'in altına düşmez.
            - %15 - %30: "Oldukça Güvenli". 
-           - %86 - %100: "Dolandırıcı Riski!".
+           - %86 - %100: "Yüksek Risk Seviyesi".
 
         5. ANALİZ NOTU FORMATI (MASTER DEDEKTİF KURALLARI):
            - "Yüzde (%)" ifadelerini ASLA kullanma.
@@ -191,14 +194,14 @@ const analyzeProduct = async (req, res) => {
             .trim();
 
         if (isAbnormalDeviation) {
-            const deviationWarning = "DİKKAT: İlan fiyatı piyasa ortalamasının çok altında tespit edilmiştir. Bu durum genellikle ağır hasarlı, yurt dışı kayıtlı olmayan veya dolandırıcılık amaçlı ilanlarda görülür.";
+            const deviationWarning = "DİKKAT: İlan fiyatı piyasa ortalamasının çok altında tespit edilmiştir. Bu durum genellikle ağır hasarlı, yurt dışı kayıtlı olmayan veya ciddi veri tutarsızlığı içeren ilanlarda görülür.";
             if (!finalNote.includes("piyasa ortalamasının çok altında")) {
                 finalNote = deviationWarning + " " + finalNote;
             }
         }
 
         let finalStatus = "Şüpheli İlan";
-        if (finalScore >= 86) finalStatus = "Dolandırıcı Riski!";
+        if (finalScore >= 86) finalStatus = "Yüksek Risk Seviyesi";
         else if (finalScore >= 51) finalStatus = "Şüpheli İlan";
         else if (finalScore >= 31) finalStatus = "Dikkatli İncelenmeli";
         else finalStatus = "Oldukça Güvenli";
