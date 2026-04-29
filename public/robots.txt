@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://piyasa-ai.vercel.app/sitemap.xml
+Sitemap: https://unitai.vercel.app/sitemap.xml
