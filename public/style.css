@@ -171,8 +171,8 @@ select {
 .search-bar {
     display: flex;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     padding: 10px 16px;
     width: 400px;
@@ -181,8 +181,10 @@ select {
 }
 
 .search-bar:focus-within {
-    border-color: rgba(255, 255, 255, 0.15);
-    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    background-color: transparent;
+    box-shadow: none;
+    outline: none;
 }
 
 .search-bar input {
@@ -408,8 +410,8 @@ td {
 }
 
 .scan-input {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--text-muted);
     padding: 12px 16px;
     width: 100%;
@@ -421,9 +423,11 @@ td {
 
 .scan-input:hover,
 .scan-input:focus {
-    border-color: rgba(255, 255, 255, 0.15);
-    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    background-color: transparent;
     color: white;
+    box-shadow: none;
+    outline: none;
 }
 
 .error-msg {
@@ -628,7 +632,7 @@ td {
 
 /* 4. Arama Kutuları ve Inputlar (Kutu Görüntüsü Tamamen Kaldırıldı) */
 .search-bar, .scan-input, select, input[type="text"] {
-    background: rgba(255, 255, 255, 0.03) !important;
+    background: transparent !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
     border: 1px solid rgba(255, 255, 255, 0.05) !important;
@@ -646,9 +650,10 @@ td {
 }
 
 .search-bar:focus-within, .scan-input:focus, input[type="text"]:focus, select:focus {
-    background: rgba(255, 255, 255, 0.04) !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
+    background: transparent !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
     box-shadow: none !important;
+    outline: none !important;
 }
 
 /* 5. Kart Yükselme - Daha Sade ve Oturaklı */
