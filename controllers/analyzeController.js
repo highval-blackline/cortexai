@@ -69,22 +69,15 @@ const analyzeProduct = async (req, res) => {
            - Eğer ilanda "Yurt dışı", "Kayıtsız", "Global" veya "İthalatçı Garantili" ibaresi varsa, bu cihazı "Yurt Dışı" kategorisinde değerlendir.
            - Eğer model bu listede YOKSA, analizi "isValid: false" olarak işaretle.
 
-        2. GÜVEN ÇARPANLARI VE FİLTRELER:
-           - "Param Güvende" ibaresi varsa: Mevcut risk puanından 10 puan düş.
-           - Eğer ilanda "Param Güvende ile gönderim yapmamaktadır" veya benzeri bir uyarı/işaret varsa: Mevcut risk puanına 15-20 puan EKLE (Elden teslimat zorunluluğu riski).
-           - Satıcı "Mağaza" veya "Kurumsal" ise: Mevcut risk puanından 10 puan düş.
+        2. AKILLI RİSK VE GÜVEN TARTIMI (DAHİ SEVİYESİ):
+           - KURUMSAL GÜVEN: Eğer satıcı "15+ yıllık kurumsal mağaza" ise ve yüksek puanlıysa, bu veri "Param Güvende kapalı" veya "Yurt dışı" risklerini DOMİNE eder. Kurumsal dükkanların elden teslimat zorunluluğu bir risk değil, fiziksel varlık kanıtıdır.
+           - RİSK KALİBRASYONU: Yurt dışı/İthalatçı cihazlar piyasa normu ise (Örn: Xiaomi 17 serisi) ve fiyat makul ise risk skoru %15-%20 bandında kalmalıdır. 
+           - %50+ SKORLAR: Sadece "Fiyat uçurumu" veya "Belirsiz bireysel satıcı" durumlarında tetiklenmelidir.
 
-        3. FİYAT VE RİSK DENGESİ:
-           - Fiyat analizi yaparken cihazın kökenine (TR veya Yurt Dışı) göre doğru veriyi baz al.
-           - Eğer cihaz Yurt Dışı ise ve fiyatı Yurt Dışı piyasasının üzerindeyse, "Uçurum Fiyat" uyarısı verme; makul/yüksek olarak değerlendir.
-
-        4. RİSK VE DİL ÜSLUBU:
-           - "Dolandırıcı" veya "Sahtekar" gibi suçlayıcı ifadeler ASLA kullanma.
-           - Bunun yerine "Yüksek Risk", "Piyasa Uyumsuzluğu" veya "Güvenlik Hassasiyeti" terimlerini kullan.
-           - Analizi kişiye değil, ilandaki fiyat ve veri tutarsızlığına odakla.
+        3. RİSK VE DİL ÜSLUBU:
+           - "Dolandırıcı" gibi suçlayıcı ifadelerden kaçın. "Yüksek Risk" veya "Piyasa Uyumsuzluğu" kullan.
+           - Analizi kişiye değil, verideki tutarsızlığa odakla.
            - Risk asla %15'in altına düşmez.
-           - %15 - %30: "Oldukça Güvenli". 
-           - %86 - %100: "Yüksek Risk Seviyesi".
 
         5. ANALİZ NOTU FORMATI (MASTER DEDEKTİF KURALLARI):
            - "Yüzde (%)" ifadelerini ASLA kullanma.
@@ -104,6 +97,7 @@ const analyzeProduct = async (req, res) => {
           "price": "...",
           "origin": "TR" | "YurtDisi",
           "isParamGuvende": true | false,
+          "isCorporate": true | false,
           "marketValue": "...",
           "riskScore": 15,
           "analysisNote": "..."
@@ -173,13 +167,15 @@ const analyzeProduct = async (req, res) => {
 
         let finalScore = Math.max(15, parseInt(analysis.riskScore) || fallbackScore);
         
-        // Param Güvende yoksa ek risk
-        if (analysis.isParamGuvende === false) {
+        // Param Güvende yoksa ek risk (Sadece kurumsal değilse veya şüpheliyse)
+        if (analysis.isParamGuvende === false && analysis.isCorporate !== true) {
             finalScore = Math.min(100, finalScore + 20);
         }
 
         if (isAbnormalDeviation) {
-            finalScore = Math.max(60, finalScore + 40);
+            // Kurumsal satıcılarda uçurum fiyat uyarısını yumuşat
+            let deviationPenalty = (analysis.isCorporate === true) ? 20 : 40;
+            finalScore = Math.max(analysis.isCorporate === true ? 35 : 60, finalScore + deviationPenalty);
             if (finalScore > 100) finalScore = 100;
         }
 
