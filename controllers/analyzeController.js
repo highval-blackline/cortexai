@@ -76,7 +76,7 @@ const analyzeProduct = async (req, res) => {
         5. YASAK: Metin içerisinde hesaplanan risk puanını (Örn: "Risk puanını 15 belirledim") ASLA söyleme. Skor zaten UI'da görünüyor.
         6. FORMAT: "Güvenli Alım İçin Uygulama Adımları:" başlığından önce iki adet satır sonu (\n\n), her maddeden (1., 2., 3.) önce ise birer adet satır sonu (\n) kullan.
 
-        Yanıtı SADECE TEK SATIRLIK JSON olarak ver (Metin alanları içinde asla gerçek satır sonu \n kullanma, gerekirse boşluk kullan):
+        Yanıtı SADECE geçerli bir JSON olarak ver. Metin alanları (analysisNote) içerisinde satır sonları için mutlaka \n karakterini kullan:
         {
           "isValid": true,
           "modelName": "...",
