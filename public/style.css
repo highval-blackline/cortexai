@@ -579,19 +579,20 @@ td {
     }
 
     .sidebar {
-        width: 90% !important;
+        width: 100% !important;
         height: auto !important;
-        border: 1px solid var(--border-light) !important;
+        border: none !important;
+        border-top: 1px solid var(--border-light) !important;
         background-color: var(--bg-panel) !important;
         position: fixed !important;
-        bottom: 15px !important;
+        bottom: 0 !important;
         left: 0 !important;
         right: 0 !important;
-        margin: 0 auto !important;
-        border-radius: 15px !important;
-        padding: 10px 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        padding: 5px 0 !important;
         z-index: 9999 !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3) !important;
     }
 
     .logo,
