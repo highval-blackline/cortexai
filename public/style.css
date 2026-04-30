@@ -1204,7 +1204,7 @@ button:focus, input:focus, select:focus {
 .apple-select-item .check-icon {
     display: none;
     flex: 0 0 auto;
-    color: var(--brand-accent);
+    color: #000000 !important;
 }
 
 .apple-select-item.selected .check-icon {
