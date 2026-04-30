@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!response.ok) throw new Error('Sunucu hatası');
             const data = await response.json();
             frontEndDB = data;
-            console.log("✅ Unit AI: Veritabanı senkronize edildi.");
+            console.log("✅ Cortex AI: Veritabanı senkronize edildi.");
             
             // Arama kutularını tetikle (Sadece sayfa açılışında otomatik açılmasını engelledik)
             /*
@@ -303,7 +303,7 @@ async function fetchGlobalStats() {
             // Sağ taraftaki Canlı Radar Tablosu
             if (tableBody) {
                 let riskText = item.riskScore >= 90 ? "Dolandırıcı Riski!" : (item.riskScore >= 40 ? "Şüpheli İlan" : "Güvenli / Uygun");
-                let shortReason = item.reason ? (item.reason.length > 30 ? item.reason.substring(0,30) + '...' : item.reason) : "Unit AI Analizi...";
+                let shortReason = item.reason ? (item.reason.length > 30 ? item.reason.substring(0,30) + '...' : item.reason) : "Cortex AI Analizi...";
                 tableBody.innerHTML += `
                     <tr onclick="showImage('${item.imageUrl}')" style="cursor:pointer;" class="feed-item">
                         <td>${item.model}</td>
@@ -485,7 +485,7 @@ async function startAnalysis() {
         const scoreBox = document.getElementById('scoreResult');
         scoreBox.innerText = "%" + data.riskScore + " Risk";
         scoreBox.style.color = data.riskScore >= 90 ? 'var(--risk-high)' : (data.riskScore >= 40 ? 'var(--risk-med)' : 'var(--risk-low)');
-        document.getElementById('keywordResult').innerHTML = `<div style="font-size: 14px; line-height: 1.6; color: #e0e0e0; padding: 5px; white-space: pre-wrap;">${(data.analysisNote || data.reason || "Unit AI tespiti başarıyla tamamlandı.").trim()}</div>`;
+        document.getElementById('keywordResult').innerHTML = `<div style="font-size: 14px; line-height: 1.6; color: #e0e0e0; padding: 5px; white-space: pre-wrap;">${(data.analysisNote || data.reason || "Cortex AI tespiti başarıyla tamamlandı.").trim()}</div>`;
 
         const decisionBox = document.getElementById('aiDecision');
         if (data.riskScore >= 90) {
@@ -746,7 +746,7 @@ function deleteAlarm(modelName) {
 
 async function sendFeedback(isCorrect) {
     const feedbackBox = document.getElementById('communityFeedback');
-    feedbackBox.innerHTML = '<p style="font-size: 13px; color: var(--risk-low);"><i class="fa-solid fa-circle-check"></i> Geri bildiriminiz için teşekkürler! Unit AI veri tabanına işlendi.</p>';
+    feedbackBox.innerHTML = '<p style="font-size: 13px; color: var(--risk-low);"><i class="fa-solid fa-circle-check"></i> Geri bildiriminiz için teşekkürler! Cortex AI veri tabanına işlendi.</p>';
     
     if (isCorrect && window.lastAnalyzedScore >= 75) {
         try {
@@ -867,7 +867,7 @@ async function loadSharedAnalysis(id) {
 
         if (result.success) {
             const data = result.data;
-            document.getElementById('scannedUrl').innerText = "Paylaşılan Unit AI Bağlantısı";
+            document.getElementById('scannedUrl').innerText = "Paylaşılan Cortex AI Bağlantısı";
             
             const scoreBox = document.getElementById('scoreResult');
             scoreBox.innerText = "%" + data.riskScore + " Risk";
@@ -904,7 +904,7 @@ function copyShareUrl() {
     copyText.select();
     copyText.setSelectionRange(0, 99999); 
     navigator.clipboard.writeText(copyText.value).then(() => {
-        alert("Unit AI analiz linki başarıyla kopyalandı! İstediğiniz yere yapıştırabilirsiniz.");
+        alert("Cortex AI analiz linki başarıyla kopyalandı! İstediğiniz yere yapıştırabilirsiniz.");
     });
 }
 

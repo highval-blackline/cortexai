@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://unitai.vercel.app/sitemap.xml
+Sitemap: https://cortexailab.vercel.app/sitemap.xml
