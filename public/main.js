@@ -337,8 +337,11 @@ function runGlobalScan() {
     const icon = document.getElementById('scanIcon'); 
     const btn = icon.closest('.btn-outline');
 
-    btn.classList.add('clicked-effect');
-    setTimeout(() => btn.classList.remove('clicked-effect'), 150);
+    // Tarama başlar: Buton siyaha döner
+    btn.style.background = '#000000';
+    btn.style.color = '#ffffff';
+    btn.style.borderColor = '#000000';
+    btn.disabled = true;
 
     icon.style.display = 'none';
     
@@ -347,14 +350,18 @@ function runGlobalScan() {
     const spinnerSvg = tempDiv.firstChild;
     btn.insertBefore(spinnerSvg, icon);
 
-    // MATEMATİK: Süre tam 2000ms (2 saniye).
-    // CSS'teki dönüş 1 saniye (2 tur atacak), kuyruk 2 saniye (1 tur atacak).
-    // Her ikisi de tam bu milisaniyede "0" noktasına dönüp kusursuzca kaybolacak.
     setTimeout(() => { 
         const activeSpinner = document.getElementById('geminiSvg');
         if (activeSpinner) activeSpinner.remove();
         icon.style.display = 'inline-block';
-        alert('Ağ taraması tamamlandı, sistem güncel!'); 
+
+        // Tarama biter: Buton beyaza döner
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+        btn.disabled = false;
+
+        showAlert('Ağ taraması tamamlandı, sistem güncel!');
     }, 2000); 
 }
 
