@@ -1114,8 +1114,8 @@ button:focus, input:focus, select:focus {
     justify-content: space-between;
     gap: 12px;
     border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(20, 20, 20, 0.72);
+    border: 1px solid var(--border-focus);
+    background: var(--bg-absolute);
     color: var(--text-main);
     font-size: 14px;
     font-weight: 500;
@@ -1127,8 +1127,8 @@ button:focus, input:focus, select:focus {
 }
 
 .apple-select-btn:hover {
-    background: rgba(28, 28, 28, 0.88);
-    border-color: rgba(255, 255, 255, 0.14);
+    background: var(--bg-panel-hover);
+    border-color: var(--border-focus);
 }
 
 .apple-select-btn.active {
@@ -1391,7 +1391,8 @@ select.apple-select-hidden {
     cursor: pointer;
     transition: var(--standard-transition);
     font-size: 16px;
-    margin-right: 10px;
+    margin-right: 2px;
+    margin-left: 5px;
 }
 
 .theme-switch:hover {
