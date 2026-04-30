@@ -601,32 +601,27 @@ td {
     }
 
     .nav-menu {
-    display: flex !important;
-    justify-content: center !important; /* Tüm buton grubunu matematiksel merkeze alır */
-    align-items: center !important;
-    width: 100% !important; /* Ekranın tamamını kullanır */
+    display: flex;
+    justify-content: space-between;
+    width: 95%;
     margin: 0 auto !important;
-    padding: 0 5px !important; /* Kenarlardan çok hafif pay bırakır */
-    box-sizing: border-box !important;
 }
 
-.nav-item {
-    flex: 1 !important; /* En önemli kısım: 5 butona da ekranı zorla eşit paylaştırır */
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 4px !important; /* Boşluğu biraz daralttık ki yazılar sığsın */
-    font-size: 10px !important; /* Yazı boyutunu 1 tık küçülttük taşma yapmaması için */
-    padding: 8px 2px !important;
-    text-align: center !important;
-    min-width: 0 !important; /* Yazıların kutuyu sağa itmesini engeller */
-}
+    .nav-item {
+        flex-direction: column;
+        gap: 6px;
+        font-size: 11px;
+        padding: 8px;
+        margin-bottom: 0;
+        text-align: center;
+        justify-content: center;
+        border-radius: 8px;
+    }
 
-.nav-item i {
-    font-size: 18px !important;
-    margin: 0 !important;
-}
+    .nav-item i {
+        font-size: 18px;
+        margin: 0;
+    }
 
     .header {
         padding: 0 15px;
