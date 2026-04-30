@@ -128,7 +128,7 @@ ANALİZ KURALLARI (KRİTİK):
    - İlanda "yurtdışı", "önce havale", "acil nakit", "el elden", "açıklamayı oku" gibi şüpheli ibareler risk skorunu artırır.
    - Satıcı "kılcal çizik", "ekran değişimi", "kasa vuruğu" gibi şeffaf kusur detayları vermişse, bu durum dürüstlük göstergesi kabul edilmeli, düşük fiyatın nedeni netleştiği için risk skoru normalize edilmelidir.
 5. GÜVENCE SİSTEMLERİ: "Param Güvende" gibi sistemlerin varlığı finansal riski düşürür; bu durumda analiz notunda sadece kargo kontrolü ve fiziki inceleme tavsiye edilmelidir.
-6. ANALİZ NOTU (analysisNote): Raporun profesyonel, çelişkisiz ve net olmalıdır. Kullanıcıya fiyatın neden riskli veya güvenli olduğunu teknik verilere dayanarak (Örn: "Cortex AI'nın %30 altında olması şüphelidir") açıkla.
+6. ANALİZ NOTU (analysisNote): Analizlerini emoji, başlık veya liste kullanmadan, tek bir akıcı paragraf halinde yap. İlandaki fiyatı mutlaka belirt ve piyasa aralığıyla kıyasla. Satıcının kurumsal geçmişini güven zemini olarak kullan. Param Güvende sisteminin yokluğunu risk değil, kurumsal bir tercih olarak gösterip fiziki mağaza teyidi gibi rasyonel stratejiler sun. Kullanıcıyı korkutmadan, veriye dayalı güven telkin et.
 7. GEÇERSİZ GÖRSEL: Eğer görsel bir telefon ilanı değilse, "isValid": false dönmeli ve "analysisNote" kısmına "Lütfen geçerli bir telefon ilanı fotoğrafı yükleyin." yazmalısın.
 
 JSON ŞABLONU (Birebir uyulmalıdır):
