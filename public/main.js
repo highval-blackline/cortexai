@@ -603,7 +603,7 @@ function populateTable() {
         { model: "iPhone 15 Pro Max", price: "32.000 TL", aiValue: "62.000 TL", risk: "Yüksek Risk", riskClass: "background: var(--risk-high); color: white; font-weight: 600;" },
         { model: "POCO X6 Pro", price: "16.500 TL", aiValue: "19.500 TL", risk: "Fırsat", riskClass: "background: var(--risk-low); color: white; font-weight: 600;" },
         { model: "Samsung Galaxy S24 Ultra", price: "55.000 TL", aiValue: "55.000 TL", risk: "Piyasa Fiyatı", riskClass: "background: #0071E3; color: white; font-weight: 600;" },
-        { model: "iPad Air M2", price: "32.000 TL", aiValue: "28.000 TL", risk: "Pahalı", riskClass: "background: var(--risk-med); color: white; font-weight: 600;" }
+        { model: "Xiaomi 14 Ultra", price: "58.000 TL", aiValue: "52.000 TL", risk: "Pahalı", riskClass: "background: var(--risk-med); color: white; font-weight: 600;" }
     ];
 
     tableBody.innerHTML = ""; 
