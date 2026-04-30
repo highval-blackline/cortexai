@@ -1342,6 +1342,11 @@ select.apple-select-hidden {
     border-color: #000000 !important;
 }
 
+[data-theme='light'] #alarmModal > div {
+    background: #ffffff !important;
+    border-color: #d2d2d7 !important;
+}
+
 [data-theme='light'] .ai-scanner-box { background: #ffffff !important; border-color: #d2d2d7 !important; }
 [data-theme='light'] .ai-scanner-box h3 { color: #000000 !important; }
 [data-theme='light'] .ai-scanner-box p { color: #6e6e73 !important; }
