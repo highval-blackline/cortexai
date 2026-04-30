@@ -601,13 +601,14 @@ td {
     }
 
     .nav-menu {
-        display: flex;
-        flex-direction: row;
-        justify-content: center !important;
-        gap: 15px;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 100%;
+    margin: 0 auto !important;
+    padding: 0 10px !important;
+    box-sizing: border-box;
+}
 
     .nav-item {
         flex-direction: column;
@@ -1510,4 +1511,4 @@ select.apple-select-hidden {
 }
 
 
-
+
