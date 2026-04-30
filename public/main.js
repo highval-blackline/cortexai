@@ -183,11 +183,22 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("googleButtonContainer"),
                     { theme: "filled_black", size: "large", type: "standard" }
                 );
-                // Buton render olduktan sonra yavaşça görünür yap (Flash önleme)
+                // iframe TAM yüklenene kadar gizli tut, hazır olunca göster
+                const pollInterval = setInterval(() => {
+                    const container = document.getElementById("googleButtonContainer");
+                    if (!container) { clearInterval(pollInterval); return; }
+                    const iframe = container.querySelector('iframe');
+                    if (iframe && iframe.offsetHeight > 30) {
+                        container.style.opacity = '1';
+                        clearInterval(pollInterval);
+                    }
+                }, 100);
+                // 5 saniye sonra hâlâ görünmediyse zorla göster (fallback)
                 setTimeout(() => {
+                    clearInterval(pollInterval);
                     const container = document.getElementById("googleButtonContainer");
                     if (container) container.style.opacity = '1';
-                }, 200);
+                }, 5000);
                 google.accounts.id.prompt(); // Sağ üstteki popup'ı SADECE bunlara çıkar
             }
         }, 800); // Sistemin tam yüklenmesi için ufak bir bekleme süresi
