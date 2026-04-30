@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const urlParams = new URLSearchParams(window.location.search);
     const sharedId = urlParams.get('id');
     if (sharedId) {
-        // Sahtekarlık Analizi sekmesine geç
+        // Sahtekarlık Tespiti sekmesine geç
         const fraudTab = document.querySelector('.nav-item[onclick*="fraud"]');
         if (fraudTab) switchTab('fraud', fraudTab);
         loadSharedAnalysis(sharedId);
@@ -382,7 +382,7 @@ function updateFileName() {
 
     if (input.files && input.files.length > 0) {
         if (input.files.length > 3) {
-            alert("Yapay zeka analizi için en fazla 3 fotoğraf seçebilirsiniz!");
+            alert("Yapay zeka tespiti için en fazla 3 fotoğraf seçebilirsiniz!");
             input.value = "";
             display.innerText = "📸 1-3 Arası Fotoğraf Seç (Tüm Detaylar)";
             display.style.color = "var(--text-muted)";
@@ -418,7 +418,7 @@ async function startAnalysis() {
     box.innerHTML = `
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0;">
             <div style="width: 36px; height: 36px; border: 2px solid rgba(255, 255, 255, 0.08); border-top: 2px solid #ffffff; border-radius: 50%; animation: spinApple 0.8s linear infinite; margin-bottom: 24px; filter: drop-shadow(0 0 6px rgba(255,255,255,0.2));"></div>
-            <h3 style="color: white; font-weight: 500; font-size: 15px; letter-spacing: 0.5px; animation: pulseApple 2s infinite;">Yapay Zeka Analiz Ediyor...</h3>
+            <h3 style="color: white; font-weight: 500; font-size: 15px; letter-spacing: 0.5px; animation: pulseApple 2s infinite;">Yapay Zeka Tespit Ediyor...</h3>
             <p style="color: rgba(255, 255, 255, 0.5); font-size: 13px; margin-top: 8px;">${filesToProcess.length > 0 ? filesToProcess.length + ' fotoğraf işleniyor ve birleştiriliyor...' : 'Link indiriliyor...'}</p>
         </div>
     `;
@@ -478,7 +478,7 @@ async function startAnalysis() {
         const scoreBox = document.getElementById('scoreResult');
         scoreBox.innerText = "%" + data.riskScore + " Risk";
         scoreBox.style.color = data.riskScore >= 90 ? 'var(--risk-high)' : (data.riskScore >= 40 ? 'var(--risk-med)' : 'var(--risk-low)');
-        document.getElementById('keywordResult').innerHTML = `<div style="font-size: 14px; line-height: 1.6; color: #e0e0e0; padding: 5px; white-space: pre-wrap;">${(data.analysisNote || data.reason || "Unit AI analizi başarıyla tamamlandı.").trim()}</div>`;
+        document.getElementById('keywordResult').innerHTML = `<div style="font-size: 14px; line-height: 1.6; color: #e0e0e0; padding: 5px; white-space: pre-wrap;">${(data.analysisNote || data.reason || "Unit AI tespiti başarıyla tamamlandı.").trim()}</div>`;
 
         const decisionBox = document.getElementById('aiDecision');
         if (data.riskScore >= 90) {
