@@ -146,8 +146,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    searchInput.addEventListener('focus', () => { renderDropdown(searchInput.value); dropdownList.style.display = 'block'; dropdownList.style.maxHeight = '255px'; });
-    searchInput.addEventListener('input', (e) => { hiddenSelect.value = ""; renderDropdown(e.target.value); dropdownList.style.display = 'block'; dropdownList.style.maxHeight = '255px'; });
+    searchInput.addEventListener('focus', () => { renderDropdown(searchInput.value); dropdownList.style.display = 'block'; dropdownList.style.maxHeight = '300px'; });
+    searchInput.addEventListener('input', (e) => { hiddenSelect.value = ""; renderDropdown(e.target.value); dropdownList.style.display = 'block'; dropdownList.style.maxHeight = '300px'; });
     document.addEventListener('click', (e) => {
         if (!searchInput.contains(e.target) && !dropdownList.contains(e.target)) {
             dropdownList.style.display = 'none';
@@ -354,6 +354,11 @@ function runGlobalScan() {
 
         // Tarama biter: class kaldırılır, orijinal hale döner
         btn.classList.remove('scanning');
+        
+        // Önemli: Geçmişten kalma inline !important stillerini KESİN temizle
+        btn.style.removeProperty('background');
+        btn.style.removeProperty('color');
+        btn.style.removeProperty('border-color');
         
         // Mobil Repaint Trick (Bazı mobil tarayıcılarda stilin güncellenmesini zorlar)
         btn.style.display = 'none';
