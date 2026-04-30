@@ -597,11 +597,13 @@ td {
         right: 0 !important;
         top: auto !important;
         width: 100% !important;
+        max-width: 100vw !important;
         height: auto !important;
-        min-height: 120px !important;
+        min-height: 110px !important;
         min-width: unset !important;
         margin: 0 !important;
         padding: 0 0 env(safe-area-inset-bottom, 0) 0 !important;
+        transform: none !important;
         border-radius: 0 !important;
         border: none !important;
         border-top: 1px solid rgba(255,255,255,0.08) !important;
@@ -614,6 +616,7 @@ td {
         align-items: stretch !important;
         box-shadow: 0 -4px 20px rgba(0,0,0,0.6) !important;
         box-sizing: border-box !important;
+        overflow-x: hidden !important;
     }
 
     /* Logo gizli */
@@ -625,14 +628,16 @@ td {
     /* Üst Satır: Kullanıcı Bölümü */
     #userSection {
         width: 100% !important;
+        max-width: 100vw !important;
         height: 55px !important;
-        padding: 0 10px !important;
+        padding: 0 5px !important;
         margin: 0 !important;
         border-bottom: 1px solid rgba(255,255,255,0.06) !important;
         box-sizing: border-box !important;
         flex-shrink: 0 !important;
         display: flex !important;
         align-items: center !important;
+        overflow: hidden !important;
     }
 
     /* Google login butonu mobilede tam genişlik */
@@ -647,8 +652,10 @@ td {
         align-items: center !important;
         width: 100% !important;
         height: 100% !important;
-        gap: 10px !important;
+        gap: 6px !important;
         padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
     }
 
     /* Giriş yapılmışsa profil fotoğrafı (EN SOLDA) */
@@ -677,24 +684,29 @@ td {
     #userSection > div > button.logout-btn {
         flex-shrink: 0 !important;
         margin-left: auto !important;
-        margin-right: 5px !important;
+        margin-right: 0 !important;
         position: static !important;
+        width: 32px !important;
+        height: 32px !important;
     }
 
     /* Alt Satır: Navigasyon */
     .nav-menu {
         display: flex !important;
         flex-direction: row !important;
-        justify-content: space-around !important;
+        justify-content: space-between !important;
         align-items: center !important;
         width: 100% !important;
-        height: 65px !important;
-        padding: 0 !important;
+        max-width: 100vw !important;
+        height: 60px !important;
+        padding: 0 2px !important;
         margin: 0 !important;
         list-style: none !important;
         background: transparent !important;
         border: none !important;
         flex: 1 !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
     }
 
     .nav-menu li {
