@@ -690,21 +690,7 @@ td {
 
     /* Google login butonu mobilede tam genişlik */
     #googleButtonContainer {
-        width: 250px !important;
-        height: 44px !important;
-        margin: 0 auto !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        background: #555558 !important; /* İstediğiniz kalkan grisi tonu */
-        border-radius: 4px !important;
-        overflow: hidden !important;
-    }
-
-    #googleButtonContainer iframe {
-        /* Beyaz butonu griye boyarken logoyu renkli tutmak için blend mode */
-        mix-blend-mode: multiply !important;
-        opacity: 0.9 !important;
+        width: 100% !important;
     }
 
     /* JS tarafından oluşturulan wrapper div (img, text, button içerir) */
@@ -1575,7 +1561,6 @@ select.apple-select-hidden {
     background: #ffffff !important;
     border-color: #d2d2d7 !important;
 }
-
 
 [data-theme='light'] .ai-scanner-box { background: #ffffff !important; border-color: #d2d2d7 !important; }
 [data-theme='light'] .ai-scanner-box h3 { color: #000000 !important; }
