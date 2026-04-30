@@ -579,7 +579,7 @@ td {
     }
 
     .sidebar {
-        width: 100%;
+        width: 100% !important;
         height: auto;
         border-right: none;
         border-top: 1px solid var(--border-light);
@@ -587,9 +587,12 @@ td {
         padding: 10px 0;
         background-color: var(--bg-panel);
         position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        margin: 0 !important;
+        border-radius: 20px 20px 0 0 !important;
+        z-index: 9999 !important;
     }
 
     .logo,
