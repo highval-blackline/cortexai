@@ -1457,4 +1457,14 @@ select.apple-select-hidden {
     border: 1px solid #d2d2d7 !important;
 }
 
+/* Light Mode Price Display and Alarm Icon */
+[data-theme='light'] #priceDisplay {
+    color: #000000 !important;
+}
+
+[data-theme='light'] #priceDisplay i.fa-bell {
+    color: #000000 !important;
+}
+
+
 
