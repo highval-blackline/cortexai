@@ -672,8 +672,15 @@ async function saveAlarm() {
 
 async function loadMyAlarms() {
     const alarmList = document.getElementById('alarmList');
+    const emptyStateHTML = `
+        <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+            <i class="fa-solid fa-bell-slash" style="font-size: 40px; margin-bottom: 15px; display: block;"></i>
+            Henüz aktif bir alarmın bulunmuyor.
+        </div>
+    `;
+
     if (!window.currentUserEmail) {
-        alarmList.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Alarmlarınızı görmek için lütfen giriş yapınız.</div>';
+        alarmList.innerHTML = emptyStateHTML;
         return;
     }
 
@@ -692,10 +699,11 @@ async function loadMyAlarms() {
     </div>
 `).join('');
         } else {
-            alarmList.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Henüz bir alarm kurmadınız.</div>';
+            alarmList.innerHTML = emptyStateHTML;
         }
     } catch (error) {
         console.error("Alarmlar yüklenirken hata oluştu:", error);
+        alarmList.innerHTML = emptyStateHTML;
     }
 }
 
