@@ -25,7 +25,7 @@
 }
 
 /* Force global text color for light mode to catch rogue elements */
-[data-theme='light'] *, 
+[data-theme='light'] *:not(.badge):not(.info-warning):not(.stat-value):not(.badge-risk-high):not(.badge-risk-med):not(.badge-risk-low), 
 [data-theme='light'] .sidebar span, 
 [data-theme='light'] .sidebar div,
 [data-theme='light'] .logo,
@@ -35,11 +35,20 @@
 [data-theme='light'] .panel-title,
 [data-theme='light'] h1, 
 [data-theme='light'] h2, 
-[data-theme='light'] h3, 
-[data-theme='light'] p,
-[data-theme='light'] i:not(.fa-satellite-dish) {
+[data-theme='light'] h3:not(#alarmModal h3), 
+[data-theme='light'] p:not(.info-warning),
+[data-theme='light'] i:not(.fa-satellite-dish):not(.fa-bell) {
     color: var(--text-main) !important;
 }
+
+[data-theme='light'] #fraudCount { color: var(--risk-high) !important; }
+[data-theme='light'] .feed-item div[style*="color: var(--risk-high)"],
+[data-theme='light'] .feed-item div[style*="color: #C92A2A"] { color: var(--risk-high) !important; }
+[data-theme='light'] .feed-item div[style*="color: var(--risk-med)"],
+[data-theme='light'] .feed-item div[style*="color: #D97706"] { color: var(--risk-med) !important; }
+[data-theme='light'] .feed-item div[style*="color: var(--risk-low)"],
+[data-theme='light'] .feed-item div[style*="color: #248A3D"] { color: var(--risk-low) !important; }
+
 
 [data-theme='light'] .text-muted,
 [data-theme='light'] .page-subtitle,
@@ -1317,6 +1326,37 @@ select.apple-select-hidden {
     background: rgba(0, 0, 0, 0.05) !important;
 }
 
-[data-theme='light'] .apple-select-item.selected {
-    background: rgba(0, 0, 0, 0.08) !important;
-}
+[data-theme='light'] .nav-item { color: #86868b !important; }
+[data-theme='light'] .nav-item i { color: #86868b !important; }
+[data-theme='light'] .nav-item:hover,
+[data-theme='light'] .nav-item.active { color: #000000 !important; background: rgba(0, 0, 0, 0.05) !important; }
+[data-theme='light'] .nav-item.active i,
+[data-theme='light'] .nav-item:hover i { color: #000000 !important; }
+
+[data-theme='light'] #alarmModal h3 { color: #000000 !important; }
+[data-theme='light'] #alarmModal h3 i { color: var(--brand-accent) !important; }
+[data-theme='light'] #alarmModal p,
+[data-theme='light'] #alarmModal label { color: #4b4b4b !important; }
+
+[data-theme='light'] .ai-scanner-box { background: #ffffff !important; border-color: #d2d2d7 !important; }
+[data-theme='light'] .ai-scanner-box h3 { color: #000000 !important; }
+[data-theme='light'] .ai-scanner-box p { color: #6e6e73 !important; }
+[data-theme='light'] .info-warning { 
+    background: rgba(255, 187, 51, 0.1) !important; 
+    color: var(--risk-med) !important; 
+    border: 1px solid rgba(255, 187, 51, 0.2) !important;
+}
+[data-theme='light'] .info-warning b { color: var(--risk-med) !important; }
+
+[data-theme='light'] .search-bar:focus-within {
+    border-color: transparent !important;
+    background-color: #e8e8ed !important;
+}
+
+[data-theme='light'] #wizardSection .btn-outline[onclick*="calculateWizardPrice"] {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border-color: #000000 !important;
+}
+
+
