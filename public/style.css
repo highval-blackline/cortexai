@@ -689,11 +689,8 @@ td {
     }
 
     /* Google login butonu mobilede tam genişlik */
-    #googleButtonContainer, #googleButtonContainer * {
+    #googleButtonContainer {
         width: 100% !important;
-        outline: none !important;
-        box-shadow: none !important;
-        -webkit-tap-highlight-color: transparent !important;
     }
 
     /* JS tarafından oluşturulan wrapper div (img, text, button içerir) */
@@ -1135,7 +1132,7 @@ div.feed-item > :last-child {
 }
 
 /* Basıldığında çıkan çerçeveleri yok eder */
-button:focus, input:focus, select:focus, textarea:focus, div:focus, a:focus, iframe:focus {
+button:focus, input:focus, select:focus {
     outline: none !important;
     box-shadow: none !important;
 }
