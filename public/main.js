@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
                 google.accounts.id.renderButton(
                     document.getElementById("googleButtonContainer"),
-                    { theme: "filled_black", size: "large", type: "standard" }
+                    { theme: "filled_black", size: "large", type: "standard", width: "280", shape: "pill" }
                 );
                 google.accounts.id.prompt(); // Sağ üstteki popup'ı SADECE bunlara çıkar
             }
