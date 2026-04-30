@@ -1431,8 +1431,15 @@ select.apple-select-hidden {
 [data-theme='light'] #analysisResult .result-grid div > p {
     color: #4b4b4b !important;
     font-weight: 500 !important;
+}/* Analysis Button Theme Logic */
+#analysisBtn {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-weight: bold !important;
 }
 
-
-
+[data-theme='light'] #analysisBtn {
+    background: #000000 !important;
+    color: #ffffff !important;
+}
 
