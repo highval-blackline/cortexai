@@ -305,9 +305,23 @@ select {
     border-color: #000000 !important;
 }
 
-[data-theme='light'] .btn-outline.scanning:hover {
-    background: #000000 !important;
-    color: #ffffff !important;
+@media (max-width: 768px) {
+    .theme-switch {
+        margin-left: -5px !important; /* Mobilde biraz daha sola */
+    }
+    
+    /* Mobilde tarama durumu renklerini garantiye alalım */
+    .btn-outline.scanning {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border-color: #ffffff !important;
+    }
+    
+    [data-theme='light'] .btn-outline.scanning {
+        background: #000000 !important;
+        color: #ffffff !important;
+        border-color: #000000 !important;
+    }
 }
 
 .content-area {
@@ -1319,7 +1333,7 @@ button:focus, input:focus, select:focus {
 #wizardDropdownList, 
 #headerDropdownList, 
 .apple-select-menu {
-    max-height: 240px !important;
+    max-height: 480px !important;
     overflow-y: auto !important;
     overscroll-behavior: contain !important; /* Mouse tekerleğinin arkadaki ana sayfayı kaydırmasını engeller */
     transform: translateZ(0) !important; /* Scroll donma bug'ının kesin ve donanımsal çözümü */
