@@ -62,25 +62,6 @@
     animation: none !important;
 }
 
-/* Google Sign-In butonundaki mavi outline'ı kaldır */
-#googleButtonContainer,
-#googleButtonContainer *,
-#googleButtonContainer iframe {
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-user-select: none !important;
-    user-select: none !important;
-    -webkit-focus-ring-color: transparent !important;
-}
-
-#googleButtonContainer {
-    overflow: hidden !important;
-    /* Kenarlardaki mavi parlamaları fiziksel olarak kırp */
-    clip-path: inset(0px 1px 1px 0px); 
-}
-
 /* Explicitly kill feed-item, layout, and input transitions during switch */
 html.theme-switching .feed-item,
 html.theme-switching .feed-item *,
