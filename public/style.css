@@ -602,12 +602,9 @@ td {
 
     .nav-menu {
     display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-    width: 100%;
+    justify-content: space-between;
+    width: 95%;
     margin: 0 auto !important;
-    padding: 0 10px !important;
-    box-sizing: border-box;
 }
 
     .nav-item {
