@@ -183,6 +183,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("googleButtonContainer"),
                     { theme: "filled_black", size: "large", type: "standard" }
                 );
+                // Buton render olduktan sonra yavaşça görünür yap (Flash önleme)
+                setTimeout(() => {
+                    const container = document.getElementById("googleButtonContainer");
+                    if (container) container.style.opacity = '1';
+                }, 200);
                 google.accounts.id.prompt(); // Sağ üstteki popup'ı SADECE bunlara çıkar
             }
         }, 800); // Sistemin tam yüklenmesi için ufak bir bekleme süresi
