@@ -336,11 +336,18 @@ function switchTab(tabId, element) {
 function runGlobalScan() {
     const icon = document.getElementById('scanIcon'); 
     const btn = icon.closest('.btn-outline');
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
 
-    // Tarama başlar: Buton siyaha döner
-    btn.style.background = '#000000';
-    btn.style.color = '#ffffff';
-    btn.style.borderColor = '#000000';
+    // Tarama başlar: Buton renge göre değişir
+    if (currentTheme === 'dark') {
+        btn.style.background = '#ffffff';
+        btn.style.color = '#000000';
+        btn.style.borderColor = '#ffffff';
+    } else {
+        btn.style.background = '#000000';
+        btn.style.color = '#ffffff';
+        btn.style.borderColor = '#000000';
+    }
     btn.disabled = true;
 
     icon.style.display = 'none';
@@ -355,7 +362,7 @@ function runGlobalScan() {
         if (activeSpinner) activeSpinner.remove();
         icon.style.display = 'inline-block';
 
-        // Tarama biter: Buton beyaza döner
+        // Tarama biter: Buton orijinal haline döner
         btn.style.background = '';
         btn.style.color = '';
         btn.style.borderColor = '';
