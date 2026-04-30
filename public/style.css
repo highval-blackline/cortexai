@@ -622,25 +622,25 @@ td {
         margin: 0 !important;
     }
 
-    /* Çıkış Butonu (En Solda) */
+    /* Çıkış Butonu (En Sağda) */
     #userSection > div > button.logout-btn {
         position: absolute !important;
-        left: 15px !important;
+        right: 15px !important;
         margin: 0 !important;
     }
 
-    /* Kullanıcı Adı ve Durum (Sağda, Resmin Solunda) */
+    /* Kullanıcı Adı ve Durum (Solda, Resmin Sağında) */
     #userSection > div > div {
         position: absolute !important;
-        right: 60px !important; /* Resmin hemen solunda */
-        text-align: right !important;
-        align-items: flex-end !important;
+        left: 60px !important; /* Resmin hemen sağında */
+        text-align: left !important;
+        align-items: flex-start !important;
     }
 
-    /* Profil Resmi (En Sağda) */
+    /* Profil Resmi (En Solda) */
     #userSection > div > img {
         position: absolute !important;
-        right: 15px !important;
+        left: 15px !important;
         margin: 0 !important;
     }
 
