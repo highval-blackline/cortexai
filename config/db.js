@@ -8,7 +8,13 @@ async function connectDB() {
     try {
         const uri = (process.env.MONGO_URI || "").trim();
         if (!uri) throw new Error("MONGO_URI tanimlanmamis.");
-        client = new MongoClient(uri);
+
+        // Burayı güncelledik: Bağlantı ayarlarını ekledik
+        client = new MongoClient(uri, {
+    connectTimeoutMS: 60000, // 1 dakikaya çıkardık, beklesin gerekirse
+    socketTimeoutMS: 60000,
+    family: 4
+});
         await client.connect();
         const db = client.db('CortexAI');
         dbInstance.db = db;
