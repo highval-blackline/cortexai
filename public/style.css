@@ -1358,4 +1358,81 @@ select.apple-select-hidden {
     border-color: #000000 !important;
 }
 
+/* Light Mode Radar Price Fix */
+[data-theme='light'] #tableBody td[style*="var(--brand-accent)"] {
+    color: #000000 !important;
+}
+
+/* Light Mode Analysis Report Processor Logo */
+[data-theme='light'] #analysisResult h3 i.fa-microchip {
+    color: #000000 !important;
+}
+
+/* Light Mode Analysis Note Readability */
+[data-theme='light'] #keywordResult div {
+    color: #000000 !important;
+}
+
+/* Light Mode AI Advice Text */
+[data-theme='light'] #aiDecision div,
+[data-theme='light'] #aiDecision div b,
+[data-theme='light'] #aiDecision strong {
+    color: #000000 !important;
+}
+
+/* Light Mode Risk Score & Subtext */
+[data-theme='light'] #scoreResult + p,
+[data-theme='light'] #keywordResult + p {
+    color: #4b4b4b !important;
+}
+
+/* Light Mode Community Feedback & Share Box Labels */
+[data-theme='light'] #communityFeedback p,
+[data-theme='light'] #shareBox p {
+    color: #4b4b4b !important;
+    font-weight: 500 !important;
+}
+
+/* Light Mode Share Box 'Kopyala' Button */
+[data-theme='light'] #shareBox button {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border-color: #000000 !important;
+}
+
+/* Light Mode AI Spinner Fix */
+[data-theme='light'] #dropZone div[style*="animation: spinApple"] {
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    border-top-color: #000000 !important;
+}
+
+[data-theme='light'] #dropZone h3[style*="animation: pulseApple"] {
+    color: #000000 !important;
+}
+
+[data-theme='light'] #dropZone p[style*="color: rgba(255, 255, 255, 0.5)"] {
+    color: #4b4b4b !important;
+}
+
+/* Light Mode Feedback Button Vibrance Fix */
+[data-theme='light'] #communityFeedback button[onclick*="sendFeedback(true)"] {
+    color: var(--risk-low) !important;
+    border-color: var(--risk-low) !important;
+    background: transparent !important;
+}
+[data-theme='light'] #communityFeedback button[onclick*="sendFeedback(false)"] {
+    color: var(--risk-high) !important;
+    border-color: var(--risk-high) !important;
+    background: transparent !important;
+}
+
+/* Light Mode Fraud Report Label Hierarchy */
+[data-theme='light'] #analysisResult .result-grid div > div:first-child,
+[data-theme='light'] #analysisResult .result-grid div > p {
+    color: #4b4b4b !important;
+    font-weight: 500 !important;
+}
+
+
+
 
