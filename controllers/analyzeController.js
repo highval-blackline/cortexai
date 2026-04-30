@@ -38,21 +38,57 @@ const analyzeProduct = async (req, res) => {
         let initialModel = req.body.title || req.body.model || "Bilinmeyen Cihaz";
         let initialPrice = req.body.price || "0";
         let imageUrl = req.body.imageUrl || "";
+        let publicId = ""; 
         let fileBuffer = null;
         let mimeType = null;
 
-        // Görsel Yükleme (Opsiyonel)
+        // 1. Görsel Verisini Hazırla (Yükleme veya URL)
         if (req.files && req.files.length > 0) {
             const file = req.files[0];
             fileBuffer = file.buffer;
             mimeType = file.mimetype;
+        } else if (imageUrl && imageUrl.startsWith('http')) {
+            try {
+                const imgResp = await fetch(imageUrl);
+                const arrayBuffer = await imgResp.arrayBuffer();
+                fileBuffer = Buffer.from(arrayBuffer);
+                mimeType = imgResp.headers.get('content-type') || "image/jpeg";
+            } catch (err) {
+                console.error("URL Resim Çekme Hatası:", err);
+            }
+        }
 
+        if (!fileBuffer) throw new Error("Görsel verisi bulunamadı.");
+
+        // 2. KATMAN: Ön Onay ve Filtreleme (Upload Öncesi)
+        // Gemini API'ye base64 formatında göndererek telefon ilanı olup olmadığını soruyoruz
+        const filterModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const filterPrompt = "Bu görsel bir telefon ilanına mı ait? Sadece 'EVET' veya 'HAYIR' cevabı ver.";
+        const filterParts = [
+            { text: filterPrompt },
+            { inlineData: { data: fileBuffer.toString("base64"), mimeType: mimeType || "image/jpeg" } }
+        ];
+
+        const filterResult = await filterModel.generateContent(filterParts);
+        const filterResponse = await filterResult.response;
+        const filterAnswer = filterResponse.text().trim().toUpperCase();
+
+        if (!filterAnswer.includes("EVET")) {
+            return res.status(200).json({ 
+                success: false, 
+                error: "Yüklediğiniz görsel bir telefon ilanına ait görünmüyor. Lütfen geçerli bir ilan fotoğrafı yükleyin." 
+            });
+        }
+
+        // 3. KATMAN: Şartlı Yükleme (Onay Sonrası)
+        if (req.files && req.files.length > 0) {
             try {
                 const result = await new Promise((resolve, reject) => {
                     const stream = cloudinary.uploader.upload_stream({ folder: "piyasa_ai" }, (err, res) => err ? reject(err) : resolve(res));
-                    stream.end(file.buffer);
+                    stream.end(fileBuffer);
                 });
                 imageUrl = result.secure_url;
+                publicId = result.public_id;
             } catch (err) {
                 console.error("Cloudinary Hatası:", err);
             }
@@ -95,18 +131,6 @@ JSON ŞABLONU (Birebir uyulmalıdır):
   "analysisNote": "Detaylı profesyonel rapor..."
 }`;
 
-        // URL'den Resim Çekme (Eğer dosya yoksa)
-        if (!fileBuffer && imageUrl && imageUrl.startsWith('http')) {
-            try {
-                const imgResp = await fetch(imageUrl);
-                const arrayBuffer = await imgResp.arrayBuffer();
-                fileBuffer = Buffer.from(arrayBuffer);
-                mimeType = imgResp.headers.get('content-type') || "image/jpeg";
-            } catch (err) {
-                console.error("URL Resim Çekme Hatası:", err);
-            }
-        }
-
         const aiParts = [{ text: prompt }];
         if (fileBuffer) {
             aiParts.push({ inlineData: { data: fileBuffer.toString("base64"), mimeType: mimeType || "image/jpeg" } });
@@ -117,7 +141,6 @@ JSON ŞABLONU (Birebir uyulmalıdır):
             const result = await model.generateContent(aiParts);
             const response = await result.response;
             
-            // Yanıt bloklandı mı kontrolü
             if (response.promptFeedback && response.promptFeedback.blockReason) {
                 throw new Error(`Yapay zeka içeriği engelledi: ${response.promptFeedback.blockReason}`);
             }
@@ -128,15 +151,10 @@ JSON ŞABLONU (Birebir uyulmalıdır):
             throw new Error("Görsel doğrulanırken bir sorun oluştu. Lütfen net bir ilan fotoğrafı yükleyin.");
         }
 
-        // JSON Temizleme: Literal satır sonlarını ve kontrol karakterlerini temizle
-        let sanitizedText = responseText
-            .replace(/[\u0000-\u001F\u007F-\u009F]/g, "") // Görünmez kontrol karakterlerini sil
-            .trim();
-
+        let sanitizedText = responseText.replace(/[\u0000-\u001F\u007F-\u009F]/g, "").trim();
         const jsonMatch = sanitizedText.match(/\{[\s\S]*\}/);
         let cleanJson = jsonMatch ? jsonMatch[0] : sanitizedText;
 
-        // Eksik kapanış parantezi kontrolü (Basit onarım)
         if (cleanJson.startsWith("{") && !cleanJson.endsWith("}")) {
             cleanJson += "}";
         }
@@ -145,55 +163,38 @@ JSON ŞABLONU (Birebir uyulmalıdır):
         try {
             analysis = JSON.parse(cleanJson);
         } catch (e) {
-            console.error("JSON Parse Hatası. Ham Yanıt:", responseText);
-            // Daha agresif temizlik dene: Çift tırnaklar içindeki satır sonlarını temizle
             try {
                 const veryCleanJson = cleanJson.replace(/\n/g, " ").replace(/\r/g, " ");
                 analysis = JSON.parse(veryCleanJson);
             } catch (e2) {
-                analysis = { isValid: false, analysisNote: `Veri ayrıştırma hatası: AI yanıtı geçersiz JSON. Yanıt: ${responseText.substring(0, 100)}` };
+                analysis = { isValid: false, analysisNote: "Veri ayrıştırma hatası." };
             }
         }
 
         if (!analysis.isValid) return res.status(200).json({ success: false, error: analysis.analysisNote });
 
-        // Mantıksal Model Eşleştirme (Gelişmiş)
         let finalModelName = (analysis.modelName || initialModel).trim();
         let dbEntry = phoneDB[finalModelName];
 
         if (!dbEntry) {
             const detectedLower = finalModelName.toLowerCase();
-            const matchingKey = Object.keys(phoneDB).find(key => {
-                const keyLower = key.toLowerCase();
-                // "POCO X5 Pro / X5" anahtarı "POCO X5 Pro"yu içermeli
-                return keyLower.includes(detectedLower);
-            });
-            
+            const matchingKey = Object.keys(phoneDB).find(key => key.toLowerCase().includes(detectedLower));
             if (matchingKey) {
                 dbEntry = phoneDB[matchingKey];
-                finalModelName = matchingKey; // Veritabanı anahtarına normalize et
+                finalModelName = matchingKey;
             }
         }
 
         if (!dbEntry) return res.status(200).json({ success: false, error: "Bu model henüz veritabanımızda yer almıyor." });
 
-        // Fiyat ve Market Verisi
         const categoryKey = analysis.origin === "YurtDisi" ? "YurtDisi_IkinciEl" : "TR_IkinciEl";
         const marketValueStr = dbEntry[categoryKey] || dbEntry.TR_IkinciEl || Object.values(dbEntry)[0];
 
-        // AI zaten akıllı bir skor üretiyor, biz sadece kurumsal güvene göre ufak bir kalibrasyon yapalım
         let finalScore = parseInt(analysis.riskScore) || 20;
-        
-        // Eğer AI kurumsal olduğunu görmüşse ama skoru çok yüksekse (hata payı), kurumsal güvende puanı kır.
-        if (analysis.isCorporate && finalScore > 40) {
-            finalScore = 35; 
-        }
-
+        if (analysis.isCorporate && finalScore > 40) finalScore = 35; 
         if (finalScore > 100) finalScore = 100;
 
-        let finalNote = (analysis.analysisNote || "")
-            .replace(/isValid|%/g, "")
-            .split('\n').map(line => line.trim()).join('\n').trim();
+        let finalNote = (analysis.analysisNote || "").replace(/isValid|%/g, "").split('\n').map(line => line.trim()).join('\n').trim();
 
         const statusMap = [
             { limit: 39, label: "Güvenli" },
@@ -210,6 +211,7 @@ JSON ŞABLONU (Birebir uyulmalıdır):
             status: finalStatus,
             reason: finalNote,
             imageUrl,
+            publicId,
             time: new Date().toISOString()
         };
 
@@ -218,6 +220,9 @@ JSON ŞABLONU (Birebir uyulmalıdır):
             const statsUpdate = { $inc: { globalAnalyses: 1 } };
             if (finalScore > 80) statsUpdate.$inc.globalFrauds = 1;
             await db.collection('stats').updateOne({ id: 'global' }, statsUpdate, { upsert: true });
+            
+            // 4. KATMAN: Otomatik Temizlik (Upload Sonrası)
+            await cleanupOldAssets(db);
         }
 
         res.json({
@@ -237,6 +242,39 @@ JSON ŞABLONU (Birebir uyulmalıdır):
         res.json({ success: false, error: error.message.includes("Görsel") ? error.message : "Teknik bir aksaklık oluştu, lütfen tekrar deneyin." });
     }
 };
+
+/**
+ * Otomatik Temizlik Mekanizması
+ * Toplam görsel sayısı 50'yi aşıyorsa, en eski olanları siler.
+ */
+async function cleanupOldAssets(db) {
+    try {
+        const count = await db.collection('feed').countDocuments();
+        if (count > 50) {
+            const oldEntries = await db.collection('feed')
+                .find()
+                .sort({ time: 1 }) // En eskiler önce
+                .limit(count - 50)
+                .toArray();
+
+            for (const entry of oldEntries) {
+                // Cloudinary'den sil
+                if (entry.publicId) {
+                    try {
+                        await cloudinary.uploader.destroy(entry.publicId);
+                    } catch (err) {
+                        console.error("Cloudinary Asset Silme Hatası:", err);
+                    }
+                }
+                // MongoDB'den sil
+                await db.collection('feed').deleteOne({ _id: entry._id });
+            }
+            console.log(`✅ ${oldEntries.length} eski kayıt temizlendi.`);
+        }
+    } catch (err) {
+        console.error("Temizlik Mekanizması Hatası:", err);
+    }
+}
 
 const getAnalysisById = async (req, res) => {
     try {
