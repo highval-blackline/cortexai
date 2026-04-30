@@ -62,6 +62,15 @@
     animation: none !important;
 }
 
+/* Google Sign-In butonundaki mavi outline'ı kaldır */
+#googleButtonContainer,
+#googleButtonContainer iframe,
+#googleButtonContainer div {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
 /* Explicitly kill feed-item, layout, and input transitions during switch */
 html.theme-switching .feed-item,
 html.theme-switching .feed-item *,
