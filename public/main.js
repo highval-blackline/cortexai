@@ -1,7 +1,7 @@
 // --- THEME MANAGEMENT ENGINE ---
 function toggleAppTheme() {
     const html = document.documentElement;
-    html.classList.add('no-transition');
+    html.classList.add('theme-switching');
     
     const currentTheme = html.getAttribute('data-theme') || 'dark';
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
@@ -17,7 +17,7 @@ function toggleAppTheme() {
 
     // Force reflow and remove class
     window.getComputedStyle(html).opacity;
-    html.classList.remove('no-transition');
+    html.classList.remove('theme-switching');
 }
 
 // Vercel tetikleme satırı
