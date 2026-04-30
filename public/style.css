@@ -601,38 +601,23 @@ td {
     }
 
     .nav-menu {
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: space-evenly !important; /* Ensures perfect symmetry on both ends */
-        align-items: center !important;
-        gap: 0 !important; /* Gaps handled by space-evenly */
+        display: flex;
+        flex-direction: row;
+        justify-content: center !important;
+        gap: 15px;
         padding: 0 !important;
         margin: 0 !important;
-        width: 100% !important;
-        list-style: none !important;
-    }
-
-    .nav-menu li {
-        display: block !important;
-        flex: 1 !important; /* Each item takes equal space */
-        max-width: 20% !important; /* 5 items, max 20% each */
-        margin: 0 !important;
-        padding: 0 !important;
     }
 
     .nav-item {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 4px !important;
-        font-size: 10px !important; /* Slightly smaller for mobile fit */
-        padding: 8px 2px !important;
-        margin: 0 !important;
-        text-align: center !important;
-        white-space: nowrap !important;
-        width: 100% !important;
-        border-radius: 0 !important;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 11px;
+        padding: 8px;
+        margin-bottom: 0;
+        text-align: center;
+        justify-content: center;
+        border-radius: 8px;
     }
 
     .nav-item i {
