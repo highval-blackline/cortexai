@@ -1490,7 +1490,8 @@ select.apple-select-hidden {
 }
 
 [data-theme='light'] #scanButton:hover,
-[data-theme='light'] #scanButton:active {
+[data-theme='light'] #scanButton:active,
+[data-theme='light'] .theme-switch:hover {
     background: #ffffff !important;
     color: #000000 !important;
     border-color: #d2d2d7 !important;
