@@ -64,11 +64,14 @@
 
 /* Google Sign-In butonundaki mavi outline'ı kaldır */
 #googleButtonContainer,
-#googleButtonContainer iframe,
-#googleButtonContainer div {
+#googleButtonContainer *,
+#googleButtonContainer iframe {
     outline: none !important;
     border: none !important;
     box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
 }
 
 /* Explicitly kill feed-item, layout, and input transitions during switch */
