@@ -1426,8 +1426,8 @@ select.apple-select-hidden {
     cursor: pointer;
     transition: var(--standard-transition);
     font-size: 16px;
-    margin-right: 2px;
-    margin-left: 5px;
+    margin-right: 5px;
+    margin-left: 2px;
 }
 
 .theme-switch:hover {
