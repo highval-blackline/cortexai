@@ -1456,7 +1456,7 @@ select.apple-select-hidden {
     background: transparent !important;
     outline: none !important;
     box-shadow: none !important;
-    transform: scale(0.95);
+    transform: none !important;
 }
 
 /* Light Mode Specific Overrides */
