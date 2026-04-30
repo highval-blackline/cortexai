@@ -49,7 +49,7 @@
 </head>
 
 <body>
-    <div id="customAlertBox" style="display: none; position: fixed; top: 20px; left: calc(50% + 130px); transform: translateX(-50%); background: rgba(30, 30, 30, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px 24px; border-radius: 30px; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-size: 13px; font-weight: 500; align-items: center; gap: 10px; text-align: center; max-width: 90%; animation: slideDownAlert 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
+    <div id="customAlertBox" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(30, 30, 30, 0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 14px 28px; border-radius: 30px; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-size: 13px; font-weight: 500; align-items: center; gap: 10px; text-align: center; max-width: 85vw; white-space: nowrap; animation: slideDownAlert 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
         <i class="fa-solid fa-circle-info" style="color: var(--brand-accent);"></i>
         <span id="customAlertText">Mesaj</span>
     </div>
@@ -279,7 +279,7 @@
                         </div>
                     </div>
 
-                                        <button class="btn-outline" style="width: 100%; padding: 12px; font-size: 15px; background: black; color: white; font-weight: bold;" onclick="calculateWizardPrice()">Fiyatı Hesapla</button>
+                                        <button class="btn-outline wizard-calculate-btn" onclick="calculateWizardPrice()">Fiyatı Hesapla</button>
 
                     <div id="wizardResult" style="display: none; margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-light);">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
