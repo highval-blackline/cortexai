@@ -318,14 +318,44 @@ async function fetchGlobalStats() {
 
             // Sağ taraftaki Canlı Radar Tablosu
             if (tableBody) {
-                let riskText = item.riskScore >= 90 ? "Dolandırıcı Riski!" : (item.riskScore >= 40 ? "Şüpheli İlan" : "Güvenli / Uygun");
-                let shortReason = item.reason ? (item.reason.length > 30 ? item.reason.substring(0,30) + '...' : item.reason) : "Cortex AI Analizi...";
+                // Yeni Mantık: Fiyat vs Piyasa Değeri Karşılaştırması
+                const currentPrice = parseInt(item.price.replace(/\D/g, ''));
+                const marketValue = item.marketValue ? parseInt(item.marketValue.replace(/\D/g, '')) : 0;
+                
+                let resultText = "Analiz Ediliyor";
+                let badgeColor = "var(--border-focus)";
+
+                if (marketValue > 0) {
+                    const diff = ((currentPrice - marketValue) / marketValue) * 100;
+
+                    if (item.riskScore >= 70 && diff < -20) {
+                        resultText = "Yüksek Risk";
+                        badgeColor = "var(--risk-high)";
+                    } else if (item.riskScore < 30 && diff < -5) {
+                        resultText = "Fırsat";
+                        badgeColor = "var(--risk-low)";
+                    } else if (Math.abs(diff) <= 5) {
+                        resultText = "Piyasa Fiyatı";
+                        badgeColor = "#0071E3"; // Mavi
+                    } else if (diff > 5) {
+                        resultText = "Pahalı";
+                        badgeColor = "var(--risk-med)";
+                    } else {
+                        // Diğer durumlar için risk skoruna göre default
+                        resultText = item.riskScore >= 40 ? "Şüpheli" : "Normal";
+                        badgeColor = item.riskScore >= 40 ? "var(--risk-med)" : "var(--border-focus)";
+                    }
+                } else {
+                    resultText = item.riskScore >= 40 ? "Şüpheli" : "Güvenli";
+                    badgeColor = item.riskScore >= 40 ? "var(--risk-med)" : "var(--risk-low)";
+                }
+
                 tableBody.innerHTML += `
                     <tr onclick="showImage('${item.imageUrl}')" style="cursor:pointer;" class="feed-item">
                         <td>${item.model}</td>
                         <td style="color: var(--brand-accent); font-weight: 600;">${item.price}</td>
                         <td style="font-size: 13px;">${item.marketValue || 'Veri Yok'}</td>
-                        <td><span class="badge" style="background: ${borderColor}; color: white; padding: 4px 8px; border-radius: 4px;">${item.status || riskText}</span></td>
+                        <td><span class="badge" style="background: ${badgeColor}; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;">${resultText}</span></td>
                     </tr>`;
             }
         });
@@ -569,22 +599,22 @@ function resetAnalysis() {
 // Canlı Radar için örnek ilan çekme fonksiyonu
 function populateTable() {
     const tableBody = document.getElementById('tableBody');
-    // Hayali bir "pazar taraması" verisi (Koyu renkler ve bembeyaz yazılar)
     const sampleData = [
-        { model: "iPhone 15 Pro Max", price: "32.000 TL", aiValue: "40.000 TL", risk: "Dolandırıcı Riski!", riskClass: "background: #C92A2A; color: white; font-weight: 600;" },
-        { model: "POCO X6 Pro", price: "18.500 TL", aiValue: "19.000 TL", risk: "Uygun Fiyat", riskClass: "background: #248A3D; color: white; font-weight: 600;" },
-        { model: "Samsung Galaxy S24 Ultra", price: "55.000 TL", aiValue: "62.000 TL", risk: "Şüpheli İlan (%60 Risk)", riskClass: "background: #D97706; color: white; font-weight: 600;" }
+        { model: "iPhone 15 Pro Max", price: "32.000 TL", aiValue: "62.000 TL", risk: "Yüksek Risk", riskClass: "background: var(--risk-high); color: white; font-weight: 600;" },
+        { model: "POCO X6 Pro", price: "16.500 TL", aiValue: "19.500 TL", risk: "Fırsat", riskClass: "background: var(--risk-low); color: white; font-weight: 600;" },
+        { model: "Samsung Galaxy S24 Ultra", price: "55.000 TL", aiValue: "55.000 TL", risk: "Piyasa Fiyatı", riskClass: "background: #0071E3; color: white; font-weight: 600;" },
+        { model: "iPad Air M2", price: "32.000 TL", aiValue: "28.000 TL", risk: "Pahalı", riskClass: "background: var(--risk-med); color: white; font-weight: 600;" }
     ];
 
-    tableBody.innerHTML = ""; // "Sistem bekliyor" yazısını siler
+    tableBody.innerHTML = ""; 
 
     sampleData.forEach(item => {
         let row = `
-            <tr>
+            <tr class="feed-item">
                 <td>${item.model}</td>
-                <td>${item.price}</td>
+                <td style="color: var(--brand-accent); font-weight: 600;">${item.price}</td>
                 <td style="font-weight: 600;">${item.aiValue}</td>
-                <td><span class="badge" style="${item.riskClass}">${item.risk}</span></td>
+                <td><span class="badge" style="${item.riskClass} padding: 4px 8px; border-radius: 4px;">${item.risk}</span></td>
             </tr>
         `;
         tableBody.innerHTML += row;
