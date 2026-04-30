@@ -1426,12 +1426,12 @@ select.apple-select-hidden {
 
 /* --- THEME SWITCH STYLES --- */
 .theme-switch {
-    background: transparent;
+    background: var(--bg-panel);
     border: 1px solid var(--border-focus);
     color: var(--text-main);
     width: 40px;
     height: 40px;
-    border-radius: 8px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1442,11 +1442,12 @@ select.apple-select-hidden {
     margin-left: 2px;
 }
 
-.theme-switch:hover,
-.theme-switch:active {
-    background: transparent !important;
-    transform: none !important;
+.theme-switch:hover {
+    background: var(--bg-panel-hover);
+    transform: scale(1.05);
 }
+
+.theme-switch:active,
 .theme-switch:focus,
 .theme-switch:focus-visible {
     background: transparent !important;
@@ -1490,18 +1491,6 @@ select.apple-select-hidden {
     background: #ffffff !important;
     color: #000000 !important;
     border-color: #d2d2d7 !important;
-}
-
-[data-theme='light'] .theme-switch {
-    background: #ffffff !important;
-    border: 1px solid #d2d2d7 !important;
-    color: #000000 !important;
-}
-
-[data-theme='light'] .theme-switch:hover,
-[data-theme='light'] .theme-switch:active {
-    background: #ffffff !important;
-    transform: none !important;
 }
 
 [data-theme='light'] .sidebar .logo {
