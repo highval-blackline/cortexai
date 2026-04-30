@@ -354,6 +354,11 @@ function runGlobalScan() {
 
         // Tarama biter: class kaldırılır, orijinal hale döner
         btn.classList.remove('scanning');
+        
+        // Mobil Repaint Trick (Bazı mobil tarayıcılarda stilin güncellenmesini zorlar)
+        btn.style.display = 'none';
+        btn.offsetHeight;
+        btn.style.display = 'inline-block';
 
         alert('Ağ taraması tamamlandı, sistem güncel!');
     }, 2000); 
