@@ -589,27 +589,28 @@ td {
         left: 0 !important;
         right: 0 !important;
         width: 100% !important;
-        height: auto !important; /* Let it expand for all content */
+        height: auto !important;
         margin: 0 !important;
-        padding: 5px 0 0 0 !important;
+        padding: 0 !important;
         border-radius: 0 !important;
         border: none !important;
         border-top: 1px solid var(--border-light) !important;
         background-color: var(--bg-panel) !important;
-        z-index: 9999 !important;
+        z-index: 99999 !important;
         display: flex !important;
-        flex-direction: column !important; /* Stack elements vertically */
-        box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.4) !important;
+        flex-direction: column !important;
+        box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.5) !important;
     }
 
     #userSection {
         display: block !important;
-        width: 100vw !important;
+        width: 100% !important;
         height: 55px !important;
         padding: 0 !important;
         margin: 0 !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
         position: relative !important;
+        left: 0 !important;
     }
 
     #userSection > div {
