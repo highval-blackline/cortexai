@@ -54,6 +54,12 @@
     color: var(--text-muted) !important;
 }
 
+.no-transition, .no-transition * {
+    transition: none !important;
+    animation: none !important;
+}
+
+
 * {
     margin: 0;
     padding: 0;

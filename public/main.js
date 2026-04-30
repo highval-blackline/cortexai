@@ -1,6 +1,8 @@
 // --- THEME MANAGEMENT ENGINE ---
 function toggleAppTheme() {
     const html = document.documentElement;
+    html.classList.add('no-transition');
+    
     const currentTheme = html.getAttribute('data-theme') || 'dark';
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
     
@@ -12,6 +14,10 @@ function toggleAppTheme() {
     if (icon) {
         icon.className = newTheme === 'light' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     }
+
+    // Force reflow and remove class
+    window.getComputedStyle(html).opacity;
+    html.classList.remove('no-transition');
 }
 
 // Vercel tetikleme satırı
