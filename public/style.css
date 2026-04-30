@@ -599,22 +599,21 @@ td {
         width: auto !important;
         max-width: calc(100vw - 16px) !important;
         height: auto !important;
-        min-height: 110px !important;
+        min-height: 130px !important;
         min-width: unset !important;
         margin: 0 !important;
         padding: 0 0 env(safe-area-inset-bottom, 0) 0 !important;
         transform: none !important;
         border-radius: 20px !important;
-        border: none !important;
-        border-top: 1px solid rgba(255,255,255,0.08) !important;
-        background: rgba(13,13,13,0.95) !important;
-        backdrop-filter: blur(24px) saturate(180%) !important;
-        -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+        border: 1px solid rgba(255,255,255,0.10) !important;
+        background: rgba(13,13,13,0.45) !important;
+        backdrop-filter: blur(32px) saturate(200%) !important;
+        -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
         z-index: 99999 !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: stretch !important;
-        box-shadow: 0 -4px 20px rgba(0,0,0,0.6) !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08) !important;
         box-sizing: border-box !important;
         overflow-x: hidden !important;
     }
@@ -629,10 +628,10 @@ td {
     #userSection {
         width: 100% !important;
         max-width: 100vw !important;
-        height: 55px !important;
-        padding: 0 5px !important;
+        height: 60px !important;
+        padding: 0 10px !important;
         margin: 0 !important;
-        border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+        border-bottom: none !important;
         box-sizing: border-box !important;
         flex-shrink: 0 !important;
         display: flex !important;
