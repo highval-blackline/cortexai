@@ -9,10 +9,10 @@ async function connectDB() {
         const uri = (process.env.MONGO_URI || "").trim();
         if (!uri) throw new Error("MONGO_URI tanimlanmamis.");
 
-        // Burayı güncelledik: Bağlantı ayarlarını ekledik
-        client = new MongoClient(uri, {
-    connectTimeoutMS: 60000, // 1 dakikaya çıkardık, beklesin gerekirse
-    socketTimeoutMS: 60000,
+        // db.js
+client = new MongoClient(uri, {
+    connectTimeoutMS: 10000, // 10 saniyeye düşürdük
+    socketTimeoutMS: 10000,  // 10 saniyeye düşürdük
     family: 4
 });
         await client.connect();
