@@ -183,6 +183,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
     fetchGlobalStats();
     setInterval(fetchGlobalStats, 5000);
+
+    // Enter key listener for Fraud Analysis
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const fraudTab = document.getElementById('fraud');
+            if (fraudTab && fraudTab.classList.contains('active')) {
+                const activeEl = document.activeElement;
+                // If focus is on global search or other tab inputs, don't trigger fraud analysis
+                if (activeEl.id === 'headerSearchInput' || activeEl.id === 'modelSearchInput' || activeEl.id === 'wizardModelInput' || activeEl.id === 'alarmPriceInput') {
+                    return;
+                }
+                startAnalysis();
+            }
+        }
+    });
 });
 
 function calculatePrice() {
