@@ -585,7 +585,7 @@ td {
 
     .sidebar {
         position: fixed !important;
-        bottom: 0 !important;
+        bottom: -2px !important; /* Birkaç piksel daha aşağı çekerek tam sıfırlama sağlıyoruz */
         left: 0 !important;
         right: 0 !important;
         width: 100% !important;
