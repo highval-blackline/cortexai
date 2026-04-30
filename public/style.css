@@ -601,21 +601,36 @@ td {
     }
 
     .nav-menu {
-    display: flex;
-    justify-content: space-between;
-    width: 95%;
-    margin: 0 auto !important;
-}
+        display: flex !important;
+        flex-direction: row !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        list-style: none !important;
+        justify-content: center !important;
+    }
+
+    .nav-menu li {
+        flex: 1 !important; /* Her buton ekranın tam 5'te 1'ini kaplar */
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
 
     .nav-item {
-        flex-direction: column;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
         gap: 6px;
-        font-size: 11px;
-        padding: 8px;
-        margin-bottom: 0;
-        text-align: center;
-        justify-content: center;
-        border-radius: 8px;
+        font-size: 10px !important; /* Yazıların sığması için hafif küçültüldü */
+        padding: 10px 0 !important;
+        margin: 0 !important;
+        text-align: center !important;
+        width: 100% !important;
+        border-radius: 0 !important;
+        white-space: nowrap !important;
     }
 
     .nav-item i {
