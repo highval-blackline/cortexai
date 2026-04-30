@@ -62,13 +62,17 @@
     animation: none !important;
 }
 
-/* Explicitly kill feed-item and layout transitions during switch */
+/* Explicitly kill feed-item, layout, and input transitions during switch */
 html.theme-switching .feed-item,
 html.theme-switching .feed-item *,
 html.theme-switching .stat-card,
 html.theme-switching .panel,
 html.theme-switching .sidebar,
-html.theme-switching .header {
+html.theme-switching .header,
+html.theme-switching input,
+html.theme-switching textarea,
+html.theme-switching select,
+html.theme-switching .search-bar {
     transition: none !important;
 }
 
