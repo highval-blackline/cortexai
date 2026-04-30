@@ -15,9 +15,10 @@ function toggleAppTheme() {
         icon.className = newTheme === 'light' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     }
 
-    // Force reflow and remove class
-    window.getComputedStyle(html).opacity;
-    html.classList.remove('theme-switching');
+    // Give the browser a moment to apply styles without transitions
+    setTimeout(() => {
+        html.classList.remove('theme-switching');
+    }, 20);
 }
 
 // Vercel tetikleme satırı

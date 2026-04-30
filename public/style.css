@@ -62,6 +62,16 @@
     animation: none !important;
 }
 
+/* Explicitly kill feed-item and layout transitions during switch */
+html.theme-switching .feed-item,
+html.theme-switching .feed-item *,
+html.theme-switching .stat-card,
+html.theme-switching .panel,
+html.theme-switching .sidebar,
+html.theme-switching .header {
+    transition: none !important;
+}
+
 
 
 * {
