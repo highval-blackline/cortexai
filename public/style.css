@@ -539,6 +539,10 @@ td {
     border-bottom: none;
 }
 
+#modelDropdownList, #headerDropdownList {
+    max-height: 480px !important;
+}
+
 .feed-item:hover {
     background-color: var(--bg-panel-hover) !important;
 }

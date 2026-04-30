@@ -340,13 +340,13 @@ function runGlobalScan() {
 
     // Tarama başlar: Buton renge göre değişir
     if (currentTheme === 'dark') {
-        btn.style.background = '#ffffff';
-        btn.style.color = '#000000';
-        btn.style.borderColor = '#ffffff';
+        btn.style.setProperty('background', '#ffffff', 'important');
+        btn.style.setProperty('color', '#000000', 'important');
+        btn.style.setProperty('border-color', '#ffffff', 'important');
     } else {
-        btn.style.background = '#000000';
-        btn.style.color = '#ffffff';
-        btn.style.borderColor = '#000000';
+        btn.style.setProperty('background', '#000000', 'important');
+        btn.style.setProperty('color', '#ffffff', 'important');
+        btn.style.setProperty('border-color', '#000000', 'important');
     }
     btn.disabled = true;
 
@@ -362,13 +362,13 @@ function runGlobalScan() {
         if (activeSpinner) activeSpinner.remove();
         icon.style.display = 'inline-block';
 
-        // Tarama biter: Buton orijinal haline döner
-        btn.style.background = '';
-        btn.style.color = '';
-        btn.style.borderColor = '';
+        // Tarama biter: Buton orijinal haline döner (Inline stilleri temizle)
+        btn.style.removeProperty('background');
+        btn.style.removeProperty('color');
+        btn.style.removeProperty('border-color');
         btn.disabled = false;
 
-        showAlert('Ağ taraması tamamlandı, sistem güncel!');
+        alert('Ağ taraması tamamlandı, sistem güncel!');
     }, 2000); 
 }
 
