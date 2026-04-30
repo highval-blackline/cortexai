@@ -286,23 +286,25 @@ select {
     color: var(--bg-absolute);
 }
 
+#scanButton:hover,
+#scanButton:active {
+    background: transparent !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-focus) !important;
+    transform: none !important;
+}
+
 /* Ağı Tara tarama esnasında ters renk */
 .btn-outline.scanning {
-    background: #ffffff !important;
-    color: #000000 !important;
-    border-color: #ffffff !important;
     pointer-events: none;
 }
 
 .btn-outline.scanning:hover {
-    background: #ffffff !important;
-    color: #000000 !important;
+    pointer-events: none;
 }
 
 [data-theme='light'] .btn-outline.scanning {
-    background: #000000 !important;
-    color: #ffffff !important;
-    border-color: #000000 !important;
+    pointer-events: none;
 }
 
 @media (max-width: 768px) {
@@ -312,15 +314,11 @@ select {
     
     /* Mobilde tarama durumu renklerini garantiye alalım */
     .btn-outline.scanning {
-        background: #ffffff !important;
-        color: #000000 !important;
-        border-color: #ffffff !important;
+        pointer-events: none;
     }
     
     [data-theme='light'] .btn-outline.scanning {
-        background: #000000 !important;
-        color: #ffffff !important;
-        border-color: #000000 !important;
+        pointer-events: none;
     }
 }
 
@@ -1486,6 +1484,13 @@ select.apple-select-hidden {
 [data-theme='light'] .btn-outline:hover {
     background: #000000 !important;
     color: #ffffff !important;
+}
+
+[data-theme='light'] #scanButton:hover,
+[data-theme='light'] #scanButton:active {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-color: #d2d2d7 !important;
 }
 
 [data-theme='light'] .sidebar .logo {
