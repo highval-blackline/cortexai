@@ -146,8 +146,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    searchInput.addEventListener('focus', () => { renderDropdown(searchInput.value); dropdownList.style.display = 'block'; });
-    searchInput.addEventListener('input', (e) => { hiddenSelect.value = ""; renderDropdown(e.target.value); dropdownList.style.display = 'block'; });
+    searchInput.addEventListener('focus', () => { renderDropdown(searchInput.value); dropdownList.style.display = 'block'; dropdownList.style.maxHeight = '480px'; });
+    searchInput.addEventListener('input', (e) => { hiddenSelect.value = ""; renderDropdown(e.target.value); dropdownList.style.display = 'block'; dropdownList.style.maxHeight = '480px'; });
     document.addEventListener('click', (e) => {
         if (!searchInput.contains(e.target) && !dropdownList.contains(e.target)) {
             dropdownList.style.display = 'none';
@@ -336,19 +336,9 @@ function switchTab(tabId, element) {
 function runGlobalScan() {
     const icon = document.getElementById('scanIcon'); 
     const btn = icon.closest('.btn-outline');
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
 
-    // Tarama başlar: Buton renge göre değişir
-    if (currentTheme === 'dark') {
-        btn.style.setProperty('background', '#ffffff', 'important');
-        btn.style.setProperty('color', '#000000', 'important');
-        btn.style.setProperty('border-color', '#ffffff', 'important');
-    } else {
-        btn.style.setProperty('background', '#000000', 'important');
-        btn.style.setProperty('color', '#ffffff', 'important');
-        btn.style.setProperty('border-color', '#000000', 'important');
-    }
-    btn.disabled = true;
+    // Tarama başlar: CSS class ile renk değişir
+    btn.classList.add('scanning');
 
     icon.style.display = 'none';
     
@@ -362,11 +352,8 @@ function runGlobalScan() {
         if (activeSpinner) activeSpinner.remove();
         icon.style.display = 'inline-block';
 
-        // Tarama biter: Buton orijinal haline döner (Inline stilleri temizle)
-        btn.style.removeProperty('background');
-        btn.style.removeProperty('color');
-        btn.style.removeProperty('border-color');
-        btn.disabled = false;
+        // Tarama biter: class kaldırılır, orijinal hale döner
+        btn.classList.remove('scanning');
 
         alert('Ağ taraması tamamlandı, sistem güncel!');
     }, 2000); 

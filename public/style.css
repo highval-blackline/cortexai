@@ -286,6 +286,30 @@ select {
     color: var(--bg-absolute);
 }
 
+/* Ağı Tara tarama esnasında ters renk */
+.btn-outline.scanning {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-color: #ffffff !important;
+    pointer-events: none;
+}
+
+.btn-outline.scanning:hover {
+    background: #ffffff !important;
+    color: #000000 !important;
+}
+
+[data-theme='light'] .btn-outline.scanning {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border-color: #000000 !important;
+}
+
+[data-theme='light'] .btn-outline.scanning:hover {
+    background: #000000 !important;
+    color: #ffffff !important;
+}
+
 .content-area {
     padding: 30px;
     overflow-y: auto;
@@ -337,6 +361,13 @@ select {
     min-width: 200px;
     position: relative;
     overflow: visible !important;
+    transform: none !important;
+}
+
+.stat-card:hover,
+.stat-card:active,
+.stat-card:focus {
+    transform: none !important;
 }
 
 .stat-header {
