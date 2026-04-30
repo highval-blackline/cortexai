@@ -62,27 +62,23 @@
     animation: none !important;
 }
 
-/* Google Sign-In butonundaki mavi outline'ı kesin olarak yok etme (Kırpma Yöntemi) */
-#googleButtonContainer {
-    position: relative;
-    overflow: hidden !important;
-    border-radius: 4px; /* Butonun köşeleriyle uyumlu */
-}
-
+/* Google Sign-In butonundaki mavi outline'ı kaldır */
+#googleButtonContainer,
+#googleButtonContainer *,
 #googleButtonContainer iframe {
     outline: none !important;
     border: none !important;
     box-shadow: none !important;
-    /* Kenarları 2px dışarı iterek mavi çizgiyi kadraj dışında bırakıyoruz */
-    margin: -2px !important;
-    width: calc(100% + 4px) !important;
-    height: calc(100% + 4px) !important;
     -webkit-tap-highlight-color: transparent !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-focus-ring-color: transparent !important;
 }
 
-#googleButtonContainer:focus-within {
-    outline: none !important;
-    box-shadow: none !important;
+#googleButtonContainer {
+    overflow: hidden !important;
+    /* Kenarlardaki mavi parlamaları fiziksel olarak kırp */
+    clip-path: inset(0px 1px 1px 0px); 
 }
 
 /* Explicitly kill feed-item, layout, and input transitions during switch */

@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
                 google.accounts.id.renderButton(
                     document.getElementById("googleButtonContainer"),
-                    { theme: "filled_black", size: "large", type: "standard" }
+                    { theme: "filled_black", size: "large", type: "standard", width: "250" }
                 );
                 // iframe TAM yüklenene kadar gizli tut, hazır olunca göster
                 const pollInterval = setInterval(() => {
