@@ -25,7 +25,6 @@
 }
 
 /* Force global text color for light mode to catch rogue elements */
-[data-theme='light'] *:not(.badge):not(.info-warning):not(.stat-value):not(.badge-risk-high):not(.badge-risk-med):not(.badge-risk-low), 
 [data-theme='light'] .sidebar span, 
 [data-theme='light'] .sidebar div,
 [data-theme='light'] .logo,
@@ -36,8 +35,7 @@
 [data-theme='light'] h1, 
 [data-theme='light'] h2, 
 [data-theme='light'] h3:not(#alarmModal h3), 
-[data-theme='light'] p:not(.info-warning),
-[data-theme='light'] i:not(.fa-satellite-dish):not(.fa-bell) {
+[data-theme='light'] p:not(.info-warning) {
     color: var(--text-main) !important;
 }
 
@@ -1296,7 +1294,7 @@ select.apple-select-hidden {
 [data-theme='light'] .search-bar, 
 [data-theme='light'] .scan-input, 
 [data-theme='light'] select, 
-[data-theme='light'] input[type="text"] {
+[data-theme='light'] input[type="text"]:not(.search-bar input) {
     background: rgba(255, 255, 255, 0.8) !important;
     border-color: rgba(0, 0, 0, 0.08) !important;
     color: #1d1d1f !important;
@@ -1304,6 +1302,7 @@ select.apple-select-hidden {
 
 [data-theme='light'] .search-bar input {
     color: #1d1d1f !important;
+    background: transparent !important;
 }
 
 [data-theme='light'] #customAlertBox {
