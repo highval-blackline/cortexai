@@ -691,10 +691,17 @@ td {
     /* Google login butonu mobilede tam genişlik */
     #googleButtonContainer {
         width: 250px !important;
+        height: 44px !important; /* Kesin yükseklik: Zıplamayı önler */
         margin: 0 auto !important;
         display: flex !important;
         justify-content: center !important;
-        min-height: 44px !important;
+        align-items: center !important;
+        overflow: hidden !important;
+    }
+
+    #googleButtonContainer iframe {
+        /* Kalkan ikonu grisi tonuna yaklaştırmak için filtre */
+        filter: grayscale(1) brightness(1.3) opacity(0.9) !important;
     }
 
     /* JS tarafından oluşturulan wrapper div (img, text, button içerir) */
