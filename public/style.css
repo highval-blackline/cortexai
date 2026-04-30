@@ -1333,9 +1333,14 @@ select.apple-select-hidden {
 [data-theme='light'] .nav-item:hover i { color: #000000 !important; }
 
 [data-theme='light'] #alarmModal h3 { color: #000000 !important; }
-[data-theme='light'] #alarmModal h3 i { color: var(--brand-accent) !important; }
+[data-theme='light'] #alarmModal h3 i { color: #000000 !important; }
 [data-theme='light'] #alarmModal p,
 [data-theme='light'] #alarmModal label { color: #4b4b4b !important; }
+[data-theme='light'] #alarmModal button[onclick="saveAlarm()"] {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border-color: #000000 !important;
+}
 
 [data-theme='light'] .ai-scanner-box { background: #ffffff !important; border-color: #d2d2d7 !important; }
 [data-theme='light'] .ai-scanner-box h3 { color: #000000 !important; }
