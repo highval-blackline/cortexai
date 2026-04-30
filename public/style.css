@@ -1442,4 +1442,19 @@ select.apple-select-hidden {
     background: #000000 !important;
     color: #ffffff !important;
 }
+
+/* Scanned Source Visibility in Light Mode */
+[data-theme='light'] #scannedUrl {
+    color: #000000 !important;
+}
+
+/* Analysis Card Borders Visibility */
+#analysisResult .result-grid > div {
+    border: 1px solid #333333 !important;
+}
+
+[data-theme='light'] #analysisResult .result-grid > div {
+    border: 1px solid #d2d2d7 !important;
+}
+
 
