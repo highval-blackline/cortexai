@@ -146,8 +146,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    searchInput.addEventListener('focus', () => { renderDropdown(searchInput.value); dropdownList.style.display = 'block'; dropdownList.style.maxHeight = '480px'; });
-    searchInput.addEventListener('input', (e) => { hiddenSelect.value = ""; renderDropdown(e.target.value); dropdownList.style.display = 'block'; dropdownList.style.maxHeight = '480px'; });
+    searchInput.addEventListener('focus', () => { renderDropdown(searchInput.value); dropdownList.style.display = 'block'; dropdownList.style.maxHeight = '255px'; });
+    searchInput.addEventListener('input', (e) => { hiddenSelect.value = ""; renderDropdown(e.target.value); dropdownList.style.display = 'block'; dropdownList.style.maxHeight = '255px'; });
     document.addEventListener('click', (e) => {
         if (!searchInput.contains(e.target) && !dropdownList.contains(e.target)) {
             dropdownList.style.display = 'none';

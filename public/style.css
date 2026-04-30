@@ -585,7 +585,7 @@ td {
 }
 
 #modelDropdownList, #headerDropdownList {
-    max-height: 250px !important;
+    max-height: 255px !important;
 }
 
 .feed-item:hover {
@@ -1215,7 +1215,7 @@ button:focus, input:focus, select:focus {
     backdrop-filter: blur(22px) saturate(180%);
     -webkit-backdrop-filter: blur(22px) saturate(180%);
     box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
-    max-height: 250px;
+    max-height: 255px;
     overflow-y: auto;
 }
 
@@ -1333,7 +1333,7 @@ button:focus, input:focus, select:focus {
 #wizardDropdownList, 
 #headerDropdownList, 
 .apple-select-menu {
-    max-height: 250px !important;
+    max-height: 255px !important;
     overflow-y: auto !important;
     overscroll-behavior: contain !important; /* Mouse tekerleğinin arkadaki ana sayfayı kaydırmasını engeller */
     transform: translateZ(0) !important; /* Scroll donma bug'ının kesin ve donanımsal çözümü */
