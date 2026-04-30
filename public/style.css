@@ -623,17 +623,15 @@ td {
 
     /* Üst Satır: Kullanıcı Bölümü */
     #userSection {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: center !important;
         width: 100% !important;
         height: 55px !important;
-        padding: 0 16px !important;
+        padding: 0 10px !important;
         margin: 0 !important;
         border-bottom: 1px solid rgba(255,255,255,0.06) !important;
         box-sizing: border-box !important;
-        gap: 10px !important;
         flex-shrink: 0 !important;
+        display: flex !important;
+        align-items: center !important;
     }
 
     /* Google login butonu mobilede tam genişlik */
@@ -641,44 +639,44 @@ td {
         width: 100% !important;
     }
 
-    /* Giriş yapılmışsa profil fotoğrafı */
-    #userSection img {
+    /* JS tarafından oluşturulan wrapper div (img, text, button içerir) */
+    #userSection > div:not(#googleButtonContainer) {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        width: 100% !important;
+        height: 100% !important;
+        gap: 10px !important;
+        padding: 0 !important;
+    }
+
+    /* Giriş yapılmışsa profil fotoğrafı (EN SOLDA) */
+    #userSection > div > img {
         width: 32px !important;
         height: 32px !important;
         border-radius: 50% !important;
         flex-shrink: 0 !important;
         object-fit: cover !important;
+        position: static !important;
+        margin: 0 !important;
     }
 
-    /* Kullanıcı adı + durum sarmalayıcısı */
-    #userSection > div:not(#googleButtonContainer) {
+    /* Kullanıcı adı + durum sarmalayıcısı (ORTADA) */
+    #userSection > div > div {
         display: flex !important;
         flex-direction: column !important;
         justify-content: center !important;
         flex: 1 !important;
         min-width: 0 !important;
         overflow: hidden !important;
-        position: static !important;
+        text-align: left !important;
     }
 
-    #userSection .user-name {
-        font-size: 12px !important;
-        font-weight: 600 !important;
-        color: var(--text-main) !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-    }
-
-    #userSection .user-status {
-        font-size: 10px !important;
-        color: var(--text-muted) !important;
-    }
-
-    /* Çıkış butonu sağ kenarda */
-    #userSection .logout-btn {
+    /* Çıkış butonu (EN SAĞDA) */
+    #userSection > div > button.logout-btn {
         flex-shrink: 0 !important;
         margin-left: auto !important;
+        margin-right: 5px !important;
         position: static !important;
     }
 
