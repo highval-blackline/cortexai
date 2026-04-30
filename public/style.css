@@ -1445,7 +1445,8 @@ select.apple-select-hidden {
 }
 
 .theme-switch:hover {
-    background: var(--bg-panel-hover);
+    background: #ffffff !important;
+    color: #000000 !important;
     transform: scale(1.05);
 }
 
@@ -1596,6 +1597,11 @@ select.apple-select-hidden {
 /* Light Mode Analysis Note Readability */
 [data-theme='light'] #keywordResult div {
     color: #000000 !important;
+}
+
+[data-theme='light'] .theme-switch:hover {
+    background: #000000 !important;
+    color: #ffffff !important;
 }
 
 /* Light Mode AI Advice Text */
