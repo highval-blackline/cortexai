@@ -583,12 +583,13 @@ td {
         overflow-x: hidden !important;
     }
 
+    /* Ana içerik, iki satırlı alt bara yer açsın */
     .main-content {
         height: 100dvh !important;
-        padding-bottom: 65px !important; /* Adjusted to match bar height */
+        padding-bottom: 120px !important;
     }
 
-    /* ==== MOBİL SIDEBAR: Sadece Alt Navigasyon Barı ==== */
+    /* ==== MOBİL SIDEBAR: İki Satırlı Alt Bar ==== */
     .sidebar {
         position: fixed !important;
         bottom: 0 !important;
@@ -596,33 +597,92 @@ td {
         right: 0 !important;
         top: auto !important;
         width: 100vw !important;
-        height: 65px !important;
+        height: 120px !important;
         min-width: unset !important;
         margin: 0 !important;
         padding: 0 !important;
         border-radius: 0 !important;
         border: none !important;
-        border-top: 1px solid rgba(255,255,255,0.07) !important;
-        background: rgba(13,13,13,0.92) !important;
+        border-top: 1px solid rgba(255,255,255,0.08) !important;
+        background: rgba(13,13,13,0.95) !important;
         backdrop-filter: blur(24px) saturate(180%) !important;
         -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
         z-index: 99999 !important;
         display: flex !important;
-        flex-direction: row !important;
+        flex-direction: column !important;
         align-items: stretch !important;
-        justify-content: stretch !important;
         box-shadow: 0 -4px 20px rgba(0,0,0,0.6) !important;
         box-sizing: border-box !important;
     }
 
-    /* Logo ve kullanıcı bölümü mobilede tamamen gizlenir */
+    /* Logo gizli */
     .sidebar .logo,
-    .sidebar #userSection,
     .sidebar .system-status {
         display: none !important;
     }
 
-    /* Navigasyon Menüsü: tüm alanı kaplar */
+    /* Üst Satır: Kullanıcı Bölümü */
+    #userSection {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        width: 100% !important;
+        height: 55px !important;
+        padding: 0 16px !important;
+        margin: 0 !important;
+        border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+        box-sizing: border-box !important;
+        gap: 10px !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Google login butonu mobilede tam genişlik */
+    #googleButtonContainer {
+        width: 100% !important;
+    }
+
+    /* Giriş yapılmışsa profil fotoğrafı */
+    #userSection img {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 50% !important;
+        flex-shrink: 0 !important;
+        object-fit: cover !important;
+    }
+
+    /* Kullanıcı adı + durum sarmalayıcısı */
+    #userSection > div:not(#googleButtonContainer) {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        flex: 1 !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        position: static !important;
+    }
+
+    #userSection .user-name {
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        color: var(--text-main) !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    #userSection .user-status {
+        font-size: 10px !important;
+        color: var(--text-muted) !important;
+    }
+
+    /* Çıkış butonu sağ kenarda */
+    #userSection .logout-btn {
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
+        position: static !important;
+    }
+
+    /* Alt Satır: Navigasyon */
     .nav-menu {
         display: flex !important;
         flex-direction: row !important;
@@ -656,8 +716,7 @@ td {
         gap: 5px !important;
         font-size: 10px !important;
         font-weight: 500 !important;
-        letter-spacing: 0.2px !important;
-        padding: 8px 4px !important;
+        padding: 6px 4px !important;
         margin: 0 !important;
         text-align: center !important;
         border-radius: 10px !important;
@@ -669,11 +728,11 @@ td {
     }
 
     .nav-item.active {
-        color: var(--text-main) !important;
+        color: white !important;
     }
 
     .nav-item i {
-        font-size: 19px !important;
+        font-size: 18px !important;
         margin: 0 !important;
     }
 
@@ -681,15 +740,6 @@ td {
         display: block !important;
         font-size: 9.5px !important;
         line-height: 1 !important;
-    }
-
-    /* Aktif item için üst çizgi göstergesi */
-    .nav-item.active i {
-        color: white !important;
-    }
-
-    .system-status {
-        display: none !important;
     }
 
     .header {
