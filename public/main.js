@@ -183,8 +183,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
                 google.accounts.id.renderButton(
                     document.getElementById("googleButtonContainer"),
-                    { theme: "filled_black", size: "large", type: "standard", width: "100%" }
+                    { theme: "filled_black", size: "large", type: "standard", width: "220" }
                 );
+                
+                // KESİN ÇÖZÜM: Buton içindeki yazı ve logo tam yüklenmeden gösterme (titremeyi engeller)
+                const showButtonIfReady = setInterval(() => {
+                    const btn = document.getElementById("googleButtonContainer");
+                    if (!btn) { clearInterval(showButtonIfReady); return; }
+                    const iframe = btn.querySelector('iframe');
+                    if (iframe && iframe.offsetHeight > 30) {
+                        btn.style.opacity = '1';
+                        clearInterval(showButtonIfReady);
+                    }
+                }, 50);
+                
                 google.accounts.id.prompt(); 
             }
         }, 800); 

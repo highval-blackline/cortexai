@@ -1118,10 +1118,13 @@ div.feed-item > :last-child {
     }
 }
 
-/* Google Button Container */
+/* Google Button Container - Sabit boyutlar titremeyi engeller */
 #googleButtonContainer {
-    width: 100%;
+    width: 220px !important;
+    height: 44px !important;
     margin-bottom: 12px;
+    transition: opacity 0.3s ease;
+    overflow: hidden;
 }
 
 
