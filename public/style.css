@@ -1142,7 +1142,6 @@ div.feed-item > :last-child {
 
 .apple-style-btn:hover {
     background: #f5f5f7 !important;
-    transform: translateY(-1px);
 }
 
 [data-theme='light'] .apple-style-btn,
