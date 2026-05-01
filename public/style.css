@@ -1118,34 +1118,10 @@ div.feed-item > :last-child {
     }
 }
 
-/* --- GOOGLE LOGIN BUTONU (TAM SIYAH / BEYAZ YAZI) --- */
+/* Google Button Container */
 #googleButtonContainer {
-    background: #000000 !important;
-    border-radius: 8px !important;
-    overflow: hidden !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    height: 44px !important;
-    transition: all 0.2s ease !important;
-    margin-bottom: 12px;
     width: 100%;
-    position: relative;
-}
-
-#googleButtonContainer:hover {
-    filter: brightness(1.2);
-}
-
-/* Google'ın kendi butonunun tam siyah görünmesi için efektleri temizliyoruz */
-#googleButtonContainer iframe {
-    opacity: 1 !important;
-    filter: none !important;
-    mix-blend-mode: normal !important;
-}
-
-[data-theme='light'] #googleButtonContainer {
-    background: #000000 !important;
+    margin-bottom: 12px;
 }
 
 

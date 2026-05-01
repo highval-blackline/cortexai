@@ -185,25 +185,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("googleButtonContainer"),
                     { theme: "filled_black", size: "large", type: "standard", width: "100%" }
                 );
-                // iframe TAM yüklenene kadar gizli tut, hazır olunca göster
-                const pollInterval = setInterval(() => {
-                    const container = document.getElementById("googleButtonContainer");
-                    if (!container) { clearInterval(pollInterval); return; }
-                    const iframe = container.querySelector('iframe');
-                    if (iframe && iframe.offsetHeight > 30) {
-                        container.style.opacity = '1';
-                        clearInterval(pollInterval);
-                    }
-                }, 100);
-                // 5 saniye sonra hâlâ görünmediyse zorla göster (fallback)
-                setTimeout(() => {
-                    clearInterval(pollInterval);
-                    const container = document.getElementById("googleButtonContainer");
-                    if (container) container.style.opacity = '1';
-                }, 5000);
-                google.accounts.id.prompt(); // Sağ üstteki popup'ı SADECE bunlara çıkar
+                google.accounts.id.prompt(); 
             }
-        }, 800); // Sistemin tam yüklenmesi için ufak bir bekleme süresi
+        }, 800); 
     }
 
     fetchGlobalStats();
