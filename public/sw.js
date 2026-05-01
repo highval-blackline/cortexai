@@ -3,5 +3,5 @@ self.addEventListener('install', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // PWA şartını sağlamak için boş bir fetch dinleyicisi yeterli
+  // PWA kurulum şartını sağlamak için boş bir fetch dinleyicisi yeterli
 });
