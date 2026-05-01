@@ -1128,6 +1128,16 @@ div.feed-item > :last-child {
     margin-bottom: 12px;
     transition: opacity 0.3s ease;
     overflow: hidden;
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+#googleButtonContainer iframe,
+#googleButtonContainer * {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent !important;
 }
 
 
