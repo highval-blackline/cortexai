@@ -1123,35 +1123,42 @@ div.feed-item > :last-child {
     width: 220px !important;
     height: 44px !important;
     margin-bottom: 12px;
-    background: #000000 !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.8) !important; /* Siyah modda beyaz buton */
+    color: #000000 !important; /* Siyah modda siyah yazı */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
     border-radius: 8px !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     gap: 10px;
     font-size: 15px;
-    font-weight: 500;
+    font-weight: 600;
     transition: all 0.2s ease !important;
     outline: none !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
     -webkit-tap-highlight-color: transparent !important;
     cursor: pointer;
 }
 
 .apple-style-btn:hover {
-    background: #1a1a1a !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
     transform: translateY(-1px);
+}
+
+[data-theme='light'] .apple-style-btn {
+    background: rgba(0, 0, 0, 0.8) !important; /* Beyaz modda siyah buton */
+    color: #ffffff !important; /* Beyaz modda beyaz yazı */
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme='light'] .apple-style-btn:hover {
+    background: rgba(0, 0, 0, 0.95) !important;
 }
 
 .apple-style-btn:active {
     transform: scale(0.98);
-}
-
-[data-theme='light'] .apple-style-btn {
-    background: #000000 !important;
 }
 
 
