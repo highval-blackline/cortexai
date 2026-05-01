@@ -679,14 +679,14 @@ td {
     #userSection {
         width: 100% !important;
         max-width: 100vw !important;
-        height: 60px !important;
-        padding: 0 10px !important;
+        height: 75px !important;
+        padding: 20px 10px 0 10px !important; /* Üstten 20px boşluk vererek aşağı ittik */
         margin: 0 !important;
         border-bottom: none !important;
         box-sizing: border-box !important;
         flex-shrink: 0 !important;
         display: flex !important;
-        align-items: center !important;
+        align-items: flex-start !important; /* Üstten padding'in çalışması için flex-start yaptık */
         overflow: hidden !important;
     }
 
@@ -696,7 +696,7 @@ td {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        margin-top: 10px !important;
+        margin: 0 !important; /* Padding zaten üstten itiyor */
     }
 
     /* JS tarafından oluşturulan wrapper div (img, text, button içerir) */
