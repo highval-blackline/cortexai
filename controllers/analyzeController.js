@@ -126,6 +126,8 @@ ANALİZ KURALLARI (KRİTİK):
 3. HESAP YAŞI ETKİSİ: Satıcı hesabı yeniyse (0-6 ay) ve fiyat piyasanın çok altındaysa, risk skoru direkt %80-%100 aralığına çekilmelidir.
 4. METİN ANALİZİ (NLP): 
    - İlanda "yurtdışı", "önce havale", "acil nakit", "el elden", "açıklamayı oku" gibi şüpheli ibareler risk skorunu artırır.
+   - Görseldeki ilan detaylarından (Garanti, Durumu vb.) cihazın orijinini ve durumunu çok iyi oku. Durumu "Sıfır" veya "Kapalı Kutu" ise condition "Sifir", kullanılmışsa "IkinciEl" olmalıdır.
+   - Menşei "Yurtdışı" ise origin "YurtDisi", "Türkiye Garantili" ise "TR" olmalıdır.
    - Satıcı "kılcal çizik", "ekran değişimi", "kasa vuruğu" gibi şeffaf kusur detayları vermişse, bu durum dürüstlük göstergesi kabul edilmeli, düşük fiyatın nedeni netleştiği için risk skoru normalize edilmelidir.
 5. GÜVENCE SİSTEMLERİ: "Param Güvende" gibi sistemlerin varlığı finansal riski düşürür; bu durumda analiz notunda sadece kargo kontrolü ve fiziki inceleme tavsiye edilmelidir.
 6. ANALİZ NOTU (analysisNote): Analizlerini emoji, başlık veya liste kullanmadan, tek bir akıcı paragraf halinde yap. İlandaki 33.499 TL fiyatın bizim sistemimizdeki 20.000 TL ortalamasına göre daha yukarıda olduğunu dürüstçe belirt; ancak bu farkı satıcının 4 yıllık kurumsal geçmişi ve cihazın temizliğiyle ilişkilendirerek açıkla. Param Güvende sisteminin kapalı olmasını bir risk faktörü olarak değil, mağazanın kendi kurumsal satış politikası olarak tanımla. Kullanıcıya, satıcının uzun süreli sistem geçmişine güvenerek internet üzerinden de işlem yapabileceğini, ancak imkanı varsa mağazayı ziyaret ederek cihazı fiziksel olarak teyit etmesinin alışveriş sürecini tam güvence altına alacağını en sade dille anlat.
@@ -137,6 +139,7 @@ JSON ŞABLONU (Birebir uyulmalıdır):
   "modelName": "Ürün Adı",
   "price": "İlan Fiyatı",
   "origin": "TR" | "YurtDisi",
+  "condition": "Sifir" | "IkinciEl",
   "isParamGuvende": true | false,
   "isCorporate": true | false,
   "yearsInSystem": 0,
@@ -200,7 +203,9 @@ JSON ŞABLONU (Birebir uyulmalıdır):
 
         if (!dbEntry) return res.status(200).json({ success: false, error: "Bu model henüz veritabanımızda yer almıyor." });
 
-        const categoryKey = analysis.origin === "YurtDisi" ? "YurtDisi_IkinciEl" : "TR_IkinciEl";
+        const originKey = analysis.origin === "YurtDisi" ? "YurtDisi" : "TR";
+        const conditionKey = analysis.condition === "Sifir" ? "Sifir" : "IkinciEl";
+        const categoryKey = `${originKey}_${conditionKey}`;
         const marketValueStr = dbEntry[categoryKey] || dbEntry.TR_IkinciEl || Object.values(dbEntry)[0];
 
         let finalScore = parseInt(analysis.riskScore) || 20;
