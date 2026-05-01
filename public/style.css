@@ -1155,13 +1155,7 @@ div.feed-item > :last-child {
     background: #1a1a1a !important;
 }
 
-.apple-style-btn:active {
-    background: #e0e0e2 !important; /* Tıklama anında hafif renk değişimi yeterli */
-}
 
-[data-theme='light'] .apple-style-btn:active {
-    background: #1a1a1a !important;
-}
 
 
 
