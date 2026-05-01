@@ -175,13 +175,15 @@ document.addEventListener("DOMContentLoaded", function () {
         // YENİ EKLENEN KISIM: Sadece giriş YAPMAMIŞ kişilere Google Login göster
         setTimeout(() => {
             if (window.google) {
+                // KRİTİK: 'deleted_client' hatası alıyorsanız, Google Cloud Console'dan yeni bir OAuth istemcisi oluşturup
+                // aşağıdaki client_id değerini onunla değiştirmeniz gerekir.
                 google.accounts.id.initialize({
-                    client_id: "82134490516-mutql7flfklfrtu02a5h9luf1vakpue8.apps.googleusercontent.com",
+                    client_id: "617648300128-0aku01blab4rps7ud44g359uq5b259vj.apps.googleusercontent.com",
                     callback: handleCredentialResponse
                 });
                 google.accounts.id.renderButton(
                     document.getElementById("googleButtonContainer"),
-                    { theme: "filled_black", size: "large", type: "standard" }
+                    { theme: "filled_black", size: "large", type: "standard", width: "100%" }
                 );
                 // iframe TAM yüklenene kadar gizli tut, hazır olunca göster
                 const pollInterval = setInterval(() => {

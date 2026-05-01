@@ -26,7 +26,7 @@
 
 /* Force global text color for light mode to catch rogue elements */
 [data-theme='light'] .sidebar span, 
-[data-theme='light'] .sidebar div,
+[data-theme='light'] .sidebar div:not(#googleButtonContainer),
 [data-theme='light'] .logo,
 [data-theme='light'] .page-title,
 [data-theme='light'] .page-subtitle,
@@ -691,6 +691,7 @@ td {
     }
 
     /* Google login butonu mobilede tam genişlik */
+    /* Google login butonu mobilede tam genişlik */
     #googleButtonContainer {
         width: 100% !important;
     }
@@ -1099,13 +1100,43 @@ div.feed-item > :last-child {
 
     /* Chrome/Android: Scrollbar'ı overlay modundan çıkar, gerçek yer kaplasın */
     .table-scroll-wrapper::-webkit-scrollbar {
+        width: 12px !important;
+        height: 12px !important;
+        display: block !important;
+    }
+    
+    .table-scroll-wrapper::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.02) !important;
+        border-radius: 10px !important;
+    }
+    
+    .table-scroll-wrapper::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.15) !important;
+        border: 3px solid transparent !important;
+        background-clip: padding-box !important;
+        border-radius: 10px !important;
+    }
+}
+
+    /* Scroll wrapper: Yatay kaydırma burada gerçekleşiyor */
+    .table-scroll-wrapper {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-bottom: 36px !important; /* Scrollbar bu boşluğa oturacak */
+    }
+
+    /* Chrome/Android: Scrollbar'ı overlay modundan çıkar, gerçek yer kaplasın */
+    .table-scroll-wrapper::-webkit-scrollbar {
+        width: 6px !important;
         height: 6px !important;
         background: transparent !important;
     }
+    
     .table-scroll-wrapper::-webkit-scrollbar-track {
         background: rgba(255, 255, 255, 0.03) !important;
         border-radius: 3px !important;
     }
+    
     .table-scroll-wrapper::-webkit-scrollbar-thumb {
         background: var(--border-focus) !important;
         border-radius: 3px !important;
@@ -1117,6 +1148,51 @@ div.feed-item > :last-child {
         margin-bottom: 0 !important;
     }
 }
+
+/* --- GOOGLE LOGIN BUTONU PREMIUM GRI TASARIM --- */
+#googleButtonContainer {
+    background: var(--text-muted) !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    height: 44px !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    margin-bottom: 12px;
+    width: 100%;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+#googleButtonContainer:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Iframe içindeki butonu grileştirmek için opacity kullanıyoruz */
+/* Filled_black temasında metin beyazdır. Biz sadece arkaplanı grileştiriyoruz. */
+#googleButtonContainer iframe {
+    opacity: 0.75 !important;
+    filter: contrast(1.1) brightness(1.1) !important;
+    transition: opacity 0.3s ease !important;
+}
+
+#googleButtonContainer:hover iframe {
+    opacity: 0.9 !important;
+}
+
+[data-theme='light'] #googleButtonContainer {
+    background: #6e6e73 !important; /* Light mode muted gray */
+    border-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme='light'] #googleButtonContainer iframe {
+    opacity: 0.8 !important;
+}
+
 
 /* SİTEYE MOBİL UYGULAMA HAVASI VEREN KRİTİK AYARLAR (ÜSTTEKİ MEDİA QUERY'E TAŞINDI) */
 * {
