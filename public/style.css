@@ -690,10 +690,13 @@ td {
         overflow: hidden !important;
     }
 
-    /* Google login butonu mobilede tam genişlik */
-    /* Google login butonu mobilede tam genişlik */
+    /* Google login butonu mobilde ortalanmış ve hizalı */
     #googleButtonContainer {
         width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        margin-top: 4px !important;
     }
 
     /* JS tarafından oluşturulan wrapper div (img, text, button içerir) */
