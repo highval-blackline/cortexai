@@ -1123,10 +1123,8 @@ div.feed-item > :last-child {
     width: 220px !important;
     height: 44px !important;
     margin-bottom: 12px;
-    background: rgba(255, 255, 255, 0.8) !important; /* Siyah modda beyaz buton */
+    background: #ffffff !important; /* Siyah modda beyaz buton */
     color: #000000 !important; /* Siyah modda siyah yazı */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     border-radius: 8px !important;
     display: flex !important;
@@ -1143,13 +1141,14 @@ div.feed-item > :last-child {
 }
 
 .apple-style-btn:hover {
-    background: rgba(255, 255, 255, 0.95) !important;
+    background: #f5f5f7 !important;
     transform: translateY(-1px);
 }
 
-[data-theme='light'] .apple-style-btn {
+[data-theme='light'] .apple-style-btn,
+[data-theme='light'] .apple-style-btn span {
     background: #000000 !important; /* Beyaz modda tam siyah buton */
-    color: #ffffff !important; /* Beyaz modda beyaz yazı */
+    color: #ffffff !important; /* Beyaz modda KESİN beyaz yazı */
     border-color: rgba(0, 0, 0, 0.1) !important;
 }
 
