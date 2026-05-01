@@ -175,28 +175,37 @@ document.addEventListener("DOMContentLoaded", function () {
         // YENİ EKLENEN KISIM: Sadece giriş YAPMAMIŞ kişilere Google Login göster
         setTimeout(() => {
             if (window.google) {
-                // KRİTİK: 'deleted_client' hatası alıyorsanız, Google Cloud Console'dan yeni bir OAuth istemcisi oluşturup
-                // aşağıdaki client_id değerini onunla değiştirmeniz gerekir.
+                // Özel butonumuz için OAuth2 İstemcisi
+                window.googleClient = google.accounts.oauth2.initTokenClient({
+                    client_id: "617648300128-0aku01blab4rps7ud44g359uq5b259vj.apps.googleusercontent.com",
+                    scope: 'email profile',
+                    callback: async (tokenResponse) => {
+                        if (tokenResponse && tokenResponse.access_token) {
+                            const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${tokenResponse.access_token}` }});
+                            const userInfo = await res.json();
+                            window.currentUserEmail = userInfo.email;
+                            localStorage.setItem('userData', JSON.stringify({ name: userInfo.name, email: userInfo.email, picture: userInfo.picture }));
+                            document.getElementById('userSection').innerHTML = `
+                                <div style="display: flex; align-items: center; gap: 10px; padding: 5px;">
+                                    <img src="${userInfo.picture}" style="width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1);">
+                                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                                        <span style="font-size: 13px; font-weight: 600; color: white;">${userInfo.name}</span>
+                                        <span style="font-size: 10px; color: var(--text-muted);">Aktif Kullanıcı</span>
+                                    </div>
+                                    <button onclick="logout()" class="logout-btn" title="Çıkış Yap">
+                                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                                    </button>
+                                </div>`;
+                            saveUserToDatabase(tokenResponse.access_token);
+                        }
+                    }
+                });
+
+                // Sağ üstte çıkan One Tap penceresi için standart ID sistemi çalışmaya devam etsin
                 google.accounts.id.initialize({
                     client_id: "617648300128-0aku01blab4rps7ud44g359uq5b259vj.apps.googleusercontent.com",
                     callback: handleCredentialResponse
                 });
-                google.accounts.id.renderButton(
-                    document.getElementById("googleButtonContainer"),
-                    { theme: "filled_black", size: "large", type: "standard", width: "220" }
-                );
-                
-                // KESİN ÇÖZÜM: Buton içindeki yazı ve logo tam yüklenmeden gösterme (titremeyi engeller)
-                const showButtonIfReady = setInterval(() => {
-                    const btn = document.getElementById("googleButtonContainer");
-                    if (!btn) { clearInterval(showButtonIfReady); return; }
-                    const iframe = btn.querySelector('iframe');
-                    if (iframe && iframe.offsetHeight > 30) {
-                        btn.style.opacity = '1';
-                        clearInterval(showButtonIfReady);
-                    }
-                }, 50);
-                
                 google.accounts.id.prompt(); 
             }
         }, 800); 
@@ -618,7 +627,17 @@ function populateTable() {
         tableBody.innerHTML += row;
     });
 }
-// Google Girişini Karşılayan Fonksiyon
+
+// Özel butonun tıklanmasıyla tetiklenen fonksiyon
+function triggerGoogleAuth() {
+    if (window.googleClient) {
+        window.googleClient.requestAccessToken();
+    } else {
+        alert("Google bağlantısı kuruluyor, lütfen biraz bekleyip tekrar deneyin.");
+    }
+}
+
+// Google Girişini Karşılayan Fonksiyon (Sadece One Tap için kaldı)
 function handleCredentialResponse(response) {
     // Google'dan gelen şifreli paketi (JWT) parçalayıp kullanıcı bilgilerini alıyoruz
     const responsePayload = decodeJwtResponse(response.credential);

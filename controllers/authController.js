@@ -12,12 +12,29 @@ const googleAuth = async (req, res) => {
     }
 
     try {
-        const ticket = await client.verifyIdToken({
-            idToken: token,
-            audience: googleClientId
-        });
-        const payload = ticket.getPayload();
-        const { email, name, picture } = payload;
+        let email, name, picture;
+
+        if (token.startsWith('ya29.')) {
+            // Access Token doğrulama (Custom buton için)
+            const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const payload = await response.json();
+            if (payload.error) throw new Error('Geçersiz erişim belirteci.');
+            email = payload.email;
+            name = payload.name;
+            picture = payload.picture;
+        } else {
+            // Orijinal ID Token doğrulama (Geriye dönük uyumluluk)
+            const ticket = await client.verifyIdToken({
+                idToken: token,
+                audience: googleClientId
+            });
+            const payload = ticket.getPayload();
+            email = payload.email;
+            name = payload.name;
+            picture = payload.picture;
+        }
 
         const usersCollection = db.collection('users');
         await usersCollection.updateOne(

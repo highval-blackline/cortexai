@@ -691,11 +691,8 @@ td {
     }
 
     /* Google login butonu mobilde ortalanmış ve hizalı */
-    #googleButtonContainer {
+    .apple-style-btn {
         width: 100% !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
         margin: 0 !important; /* Padding zaten üstten itiyor */
     }
 
@@ -1121,24 +1118,42 @@ div.feed-item > :last-child {
     }
 }
 
-/* Google Button Container - Sabit boyutlar titremeyi engeller */
-#googleButtonContainer {
+/* Özel Apple Stili Google Butonu */
+.apple-style-btn {
     width: 220px !important;
     height: 44px !important;
     margin-bottom: 12px;
-    transition: opacity 0.3s ease;
-    overflow: hidden;
+    background: #000000 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.2s ease !important;
     outline: none !important;
-    box-shadow: none !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
     -webkit-tap-highlight-color: transparent !important;
+    cursor: pointer;
 }
 
-#googleButtonContainer iframe,
-#googleButtonContainer * {
-    outline: none !important;
-    box-shadow: none !important;
-    -webkit-tap-highlight-color: transparent !important;
+.apple-style-btn:hover {
+    background: #1a1a1a !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-1px);
 }
+
+.apple-style-btn:active {
+    transform: scale(0.98);
+}
+
+[data-theme='light'] .apple-style-btn {
+    background: #000000 !important;
+}
+
 
 
 
