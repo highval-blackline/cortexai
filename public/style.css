@@ -680,7 +680,7 @@ td {
         width: 100% !important;
         max-width: 100vw !important;
         height: 75px !important;
-        padding: 20px 10px 0 10px !important; /* Üstten 20px boşluk vererek aşağı ittik */
+        padding: 17px 10px 0 10px !important; /* 3px yukarı çektik */
         margin: 0 !important;
         border-bottom: none !important;
         box-sizing: border-box !important;
