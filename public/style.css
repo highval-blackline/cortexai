@@ -1298,7 +1298,7 @@ button:focus, input:focus, select:focus {
 .apple-select-item .check-icon {
     display: none;
     flex: 0 0 auto;
-    color: #000000 !important;
+    color: #ffffff !important;
 }
 
 .apple-select-item.selected .check-icon {
@@ -1590,6 +1590,10 @@ select.apple-select-hidden {
 [data-theme='light'] .apple-select-item:hover,
 [data-theme='light'] .dropdown-item:hover {
     background: rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme='light'] .apple-select-item .check-icon {
+    color: #000000 !important;
 }
 
 [data-theme='light'] .nav-item { color: #86868b !important; }
